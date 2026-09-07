@@ -1,5 +1,7 @@
+```html
 <!DOCTYPE html>
 <html lang="hi">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,324 +9,651 @@
   <title>Question Management - ExamPrepHub</title>
 
   <style>
+    :root {
+      --primary: #6c2bd9;
+      --primary2: #9333ea;
+      --pink: #ec4899;
+      --blue: #2563eb;
+      --green: #16a34a;
+      --red: #dc2626;
+      --dark: #111827;
+      --text: #1e293b;
+      --muted: #64748b;
+      --border: #e2e8f0;
+      --bg: #f4f7fb;
+      --white: #ffffff;
+    }
+
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
-      font-family: Arial, sans-serif;
+    }
+
+    html {
+      scroll-behavior: smooth;
     }
 
     body {
-      background: #f1f5f9;
-      color: #1e293b;
+      font-family: "Segoe UI", Arial, sans-serif;
+      background:
+        radial-gradient(circle at top left, #eee7ff 0, transparent 28%),
+        radial-gradient(circle at top right, #ffe6f3 0, transparent 25%),
+        var(--bg);
+      color: var(--text);
+      min-height: 100vh;
     }
 
     header {
-      background: #0f172a;
+      background: linear-gradient(135deg, #111827, #312e81, #6d28d9);
       color: white;
-      padding: 16px 20px;
+      padding: 18px 20px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 8px 25px rgba(0,0,0,.18);
     }
 
     .header-inner {
-      max-width: 1100px;
+      max-width: 1150px;
       margin: auto;
       display: flex;
-      justify-content: space-between;
       align-items: center;
-      gap: 10px;
+      justify-content: space-between;
+      gap: 15px;
     }
 
     .logo {
       font-size: 21px;
-      font-weight: 800;
+      font-weight: 900;
     }
 
     .badge {
-      background: #16a34a;
-      padding: 7px 12px;
-      border-radius: 20px;
+      background: rgba(255,255,255,.14);
+      border: 1px solid rgba(255,255,255,.25);
+      padding: 8px 14px;
+      border-radius: 30px;
       font-size: 12px;
-      font-weight: bold;
+      font-weight: 800;
     }
 
     main {
-      max-width: 1100px;
+      max-width: 1150px;
       margin: auto;
-      padding: 25px 15px 60px;
+      padding: 30px 16px 70px;
     }
 
     .top-bar {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      gap: 10px;
-      margin-bottom: 20px;
+      gap: 15px;
+      margin-bottom: 22px;
       flex-wrap: wrap;
     }
 
-    .top-bar h1 {
+    .top-title {
+      display: flex;
+      align-items: center;
+      gap: 13px;
+    }
+
+    .title-icon {
+      width: 52px;
+      height: 52px;
+      border-radius: 16px;
+      display: grid;
+      place-items: center;
+      background: linear-gradient(135deg,#6d28d9,#ec4899);
+      color: white;
       font-size: 25px;
+    }
+
+    .top-bar h1 {
+      font-size: 27px;
+      font-weight: 900;
+    }
+
+    .top-bar small {
+      color: var(--muted);
+      display: block;
+      margin-top: 3px;
     }
 
     .btn {
       border: none;
       text-decoration: none;
       cursor: pointer;
-      padding: 11px 17px;
-      border-radius: 8px;
-      font-weight: 700;
+      padding: 12px 18px;
+      border-radius: 12px;
+      font-weight: 800;
       font-size: 14px;
-      display: inline-block;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      transition: .25s ease;
+      box-shadow: 0 5px 15px rgba(0,0,0,.08);
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
     }
 
     .blue {
-      background: #2563eb;
+      background: linear-gradient(135deg,#2563eb,#4f46e5);
       color: white;
     }
 
     .green {
-      background: #16a34a;
+      background: linear-gradient(135deg,#16a34a,#059669);
       color: white;
     }
 
     .red {
-      background: #dc2626;
+      background: linear-gradient(135deg,#dc2626,#e11d48);
       color: white;
     }
 
     .gray {
-      background: #64748b;
+      background: #475569;
       color: white;
     }
 
     .card {
-      background: white;
-      border-radius: 15px;
-      padding: 22px;
-      margin-bottom: 20px;
-      box-shadow: 0 5px 20px rgba(0,0,0,.06);
+      background: rgba(255,255,255,.96);
+      border: 1px solid rgba(226,232,240,.9);
+      border-radius: 22px;
+      padding: 25px;
+      margin-bottom: 22px;
+      box-shadow: 0 12px 40px rgba(30,41,59,.08);
     }
 
-    .card h2 {
-      margin-bottom: 18px;
+    .card-heading {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .heading-icon {
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      display: grid;
+      place-items: center;
+      background: #f1eaff;
       font-size: 20px;
     }
 
+    .card h2 {
+      font-size: 21px;
+      font-weight: 900;
+    }
+
     .test-info {
-      background: #eff6ff;
-      border: 1px solid #bfdbfe;
-      padding: 15px;
-      border-radius: 10px;
-      margin-bottom: 20px;
+      background: linear-gradient(135deg,#eff6ff,#f5f3ff);
+      border: 1px solid #c7d2fe;
+      padding: 19px;
+      border-radius: 16px;
     }
 
     .test-info strong {
-      color: #1d4ed8;
+      color: #4f46e5;
+      font-size: 18px;
     }
+
+    #testDetails {
+      color: #64748b;
+      font-size: 13px;
+    }
+
+    /* FORM */
 
     .form-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 15px;
+      gap: 18px;
     }
 
     .full {
       grid-column: 1 / -1;
     }
 
-    label {
-      display: block;
-      font-weight: 700;
-      margin-bottom: 7px;
-      font-size: 14px;
+    .field {
+      position: relative;
     }
 
-    input,
+    label {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-weight: 800;
+      margin-bottom: 8px;
+      font-size: 14px;
+      color: #334155;
+    }
+
     textarea,
+    input,
     select {
       width: 100%;
-      border: 1px solid #cbd5e1;
-      border-radius: 8px;
-      padding: 11px;
-      font-size: 14px;
+      border: 2px solid #e5e7eb;
+      border-radius: 14px;
+      padding: 14px;
+      font-size: 15px;
       outline: none;
-      background: white;
-    }
-
-    input:focus,
-    textarea:focus,
-    select:focus {
-      border-color: #2563eb;
-      box-shadow: 0 0 0 2px rgba(37,99,235,.1);
+      background: #fff;
+      color: #1e293b;
+      transition: .2s ease;
     }
 
     textarea {
-      min-height: 100px;
+      min-height: 130px;
       resize: vertical;
+      line-height: 1.6;
+    }
+
+    input,
+    select {
+      min-height: 48px;
+    }
+
+    textarea:focus,
+    input:focus,
+    select:focus {
+      border-color: #7c3aed;
+      box-shadow: 0 0 0 4px rgba(124,58,237,.10);
+    }
+
+    /* SUBJECT CHAPTER */
+
+    .category-box {
+      grid-column: 1 / -1;
+      background: linear-gradient(135deg,#fff7ed,#fff1f2);
+      border: 2px solid #fed7aa;
+      padding: 20px;
+      border-radius: 17px;
+    }
+
+    .category-title {
+      font-size: 17px;
+      font-weight: 900;
+      color: #9a3412;
+      margin-bottom: 15px;
+    }
+
+    .category-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+    }
+
+    /* LANGUAGE SECTIONS */
+
+    .language-section {
+      grid-column: 1 / -1;
+      border: 2px solid #e2e8f0;
+      border-radius: 18px;
+      padding: 20px;
+      background: #fff;
+    }
+
+    .language-heading {
+      font-size: 18px;
+      font-weight: 900;
+      padding: 12px 15px;
+      border-radius: 12px;
+      margin-bottom: 17px;
+    }
+
+    .hindi-section {
+      border-color: #fecaca;
+      background: #fffafa;
+    }
+
+    .hindi-section .language-heading {
+      background: #fff1f2;
+      color: #991b1b;
+      border-left: 5px solid #dc2626;
+    }
+
+    .english-section {
+      border-color: #bfdbfe;
+      background: #fafcff;
+    }
+
+    .english-section .language-heading {
+      background: #eff6ff;
+      color: #1d4ed8;
+      border-left: 5px solid #2563eb;
+    }
+
+    /* VERTICAL OPTIONS */
+
+    .options-container {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+    }
+
+    .option-row {
+      display: grid;
+      grid-template-columns: 48px 1fr;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .option-letter {
+      height: 48px;
+      width: 48px;
+      display: grid;
+      place-items: center;
+      border-radius: 12px;
+      background: linear-gradient(135deg,#6d28d9,#9333ea);
+      color: white;
+      font-weight: 900;
+      font-size: 17px;
+    }
+
+    .option-row input {
+      min-height: 48px;
+    }
+
+    .correct-box {
+      grid-column: 1 / -1;
+      background: linear-gradient(135deg,#ecfdf5,#f0fdf4);
+      border: 2px solid #bbf7d0;
+      padding: 20px;
+      border-radius: 17px;
+    }
+
+    .correct-box label {
+      color: #166534;
+    }
+
+    .correct-box select {
+      border-color: #86efac;
     }
 
     .section-title {
       grid-column: 1 / -1;
-      font-size: 17px;
-      font-weight: 800;
-      margin-top: 5px;
-      padding-bottom: 8px;
-      border-bottom: 1px solid #e2e8f0;
-    }
-
-    .option-box {
-      background: #f8fafc;
-      border: 1px solid #e2e8f0;
-      padding: 15px;
-      border-radius: 10px;
-    }
-
-    .option-title {
-      font-weight: 800;
-      margin-bottom: 8px;
-      color: #334155;
-    }
-
-    .correct-box {
-      background: #f0fdf4;
-      border: 1px solid #bbf7d0;
-      padding: 15px;
-      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 18px;
+      font-weight: 900;
+      margin-top: 10px;
+      padding: 13px 15px;
+      border-radius: 13px;
+      background: linear-gradient(90deg,#f5f3ff,#fff1f8);
+      color: #5b21b6;
+      border-left: 5px solid #7c3aed;
     }
 
     .form-buttons {
       display: flex;
-      gap: 10px;
+      gap: 12px;
       flex-wrap: wrap;
-      margin-top: 5px;
+      margin-top: 8px;
+    }
+
+    #saveBtn {
+      min-width: 190px;
+      padding: 15px 24px;
+      font-size: 15px;
+      border-radius: 14px;
+    }
+
+    #saveBtn:disabled {
+      opacity: .65;
+      cursor: not-allowed;
     }
 
     .message {
-      padding: 13px;
-      border-radius: 9px;
-      margin-bottom: 15px;
+      padding: 15px 18px;
+      border-radius: 14px;
+      margin-bottom: 18px;
       display: none;
-      font-weight: 600;
+      font-weight: 800;
     }
 
     .success {
       background: #dcfce7;
       color: #166534;
+      border: 1px solid #86efac;
     }
 
     .error {
       background: #fee2e2;
       color: #991b1b;
+      border: 1px solid #fca5a5;
     }
+
+    /* QUESTION LIST */
 
     .question-item {
       border: 1px solid #e2e8f0;
-      border-radius: 12px;
-      padding: 18px;
-      margin-bottom: 15px;
-      background: #fff;
+      border-radius: 18px;
+      padding: 21px;
+      margin-bottom: 17px;
+      background: linear-gradient(145deg,#fff,#fafbff);
     }
 
     .question-header {
       display: flex;
       justify-content: space-between;
       gap: 10px;
-      align-items: flex-start;
-      margin-bottom: 12px;
+      align-items: center;
+      margin-bottom: 14px;
     }
 
     .question-number {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 58px;
+      padding: 7px 12px;
+      border-radius: 30px;
+      background: linear-gradient(135deg,#6d28d9,#ec4899);
+      color: white;
+      font-size: 14px;
+      font-weight: 900;
+    }
+
+    .question-category {
+      background: #f1f5f9;
+      padding: 8px 12px;
+      border-radius: 10px;
+      font-size: 12px;
+      color: #475569;
       font-weight: 800;
-      color: #2563eb;
-      font-size: 17px;
     }
 
     .question-text {
-      line-height: 1.6;
-      margin-bottom: 10px;
+      line-height: 1.7;
+      margin-bottom: 14px;
+      background: #f8fafc;
+      padding: 15px;
+      border-radius: 13px;
+      border-left: 4px solid #7c3aed;
       white-space: pre-line;
+    }
+
+    .display-language {
+      margin-bottom: 15px;
+    }
+
+    .display-language-title {
+      font-weight: 900;
+      margin-bottom: 7px;
     }
 
     .options-list {
       display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 8px;
-      margin: 10px 0;
+      grid-template-columns: 1fr;
+      gap: 9px;
+      margin: 12px 0;
     }
 
     .option {
-      background: #f8fafc;
-      padding: 9px;
-      border-radius: 7px;
+      background: white;
+      border: 1px solid #e2e8f0;
+      padding: 12px;
+      border-radius: 11px;
       font-size: 14px;
     }
 
+    .option strong {
+      color: #6d28d9;
+      margin-right: 5px;
+    }
+
     .answer {
-      background: #dcfce7;
+      background: linear-gradient(135deg,#dcfce7,#ecfdf5);
       color: #166534;
-      padding: 9px;
-      border-radius: 7px;
+      border: 1px solid #86efac;
+      padding: 11px 13px;
+      border-radius: 11px;
       margin-top: 10px;
-      font-weight: 700;
+      font-weight: 900;
     }
 
     .explanation {
-      background: #f8fafc;
-      padding: 12px;
-      border-radius: 8px;
+      background: #fff7ed;
+      border: 1px solid #fed7aa;
+      padding: 13px;
+      border-radius: 11px;
       margin-top: 10px;
-      line-height: 1.6;
+      line-height: 1.65;
       white-space: pre-line;
     }
 
     .question-actions {
       display: flex;
-      gap: 8px;
-      margin-top: 14px;
+      gap: 9px;
+      margin-top: 15px;
       flex-wrap: wrap;
     }
 
     .small-btn {
-      padding: 8px 12px;
+      padding: 9px 14px;
       border: none;
-      border-radius: 7px;
+      border-radius: 10px;
       cursor: pointer;
-      font-weight: 700;
+      font-weight: 800;
       font-size: 13px;
     }
 
     .empty {
       text-align: center;
-      padding: 30px;
+      padding: 45px 20px;
       color: #64748b;
+      background: #f8fafc;
+      border: 2px dashed #cbd5e1;
+      border-radius: 15px;
     }
 
     #pageLoading {
       background: white;
-      padding: 30px;
+      padding: 45px 20px;
       text-align: center;
-      border-radius: 15px;
+      border-radius: 20px;
+      font-weight: 800;
+      color: #64748b;
     }
 
     #mainContent {
       display: none;
     }
 
-    @media (max-width: 700px) {
+    @media (max-width:760px) {
+
+      header {
+        padding: 15px;
+      }
+
+      .header-inner {
+        align-items: flex-start;
+      }
+
+      main {
+        padding: 20px 11px 50px;
+      }
+
+      .top-title {
+        width: 100%;
+      }
+
+      .top-bar h1 {
+        font-size: 22px;
+      }
+
+      .top-bar > div:last-child {
+        width: 100%;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+      }
+
+      .top-bar .btn {
+        width: 100%;
+      }
+
+      .card {
+        padding: 18px 14px;
+        border-radius: 17px;
+      }
+
       .form-grid {
         grid-template-columns: 1fr;
       }
 
-      .full {
-        grid-column: auto;
-      }
-
-      .options-list {
+      .category-grid {
         grid-template-columns: 1fr;
       }
 
-      .top-bar h1 {
-        font-size: 21px;
+      .full,
+      .section-title,
+      .correct-box,
+      .language-section,
+      .category-box {
+        grid-column: auto;
+      }
+
+      .option-row {
+        grid-template-columns: 42px 1fr;
+      }
+
+      .option-letter {
+        width: 42px;
+        height: 42px;
+      }
+
+      .form-buttons {
+        display: grid;
+        grid-template-columns: 1fr;
+      }
+
+      #saveBtn {
+        width: 100%;
+      }
+    }
+
+    @media (max-width:420px) {
+
+      .header-inner {
+        flex-direction: column;
+      }
+
+      .top-bar > div:last-child {
+        grid-template-columns: 1fr;
+      }
+
+      input,
+      textarea,
+      select {
+        font-size: 14px;
       }
     }
   </style>
@@ -335,7 +664,7 @@
 <header>
   <div class="header-inner">
     <div class="logo">🏆 ExamPrepHub</div>
-    <div class="badge">ADMIN • QUESTIONS</div>
+    <div class="badge">ADMIN • QUESTION MANAGER</div>
   </div>
 </header>
 
@@ -348,30 +677,51 @@
   <div id="mainContent">
 
     <div class="top-bar">
-      <h1>❓ Question Management</h1>
+
+      <div class="top-title">
+        <div class="title-icon">❓</div>
+
+        <div>
+          <h1>Question Management</h1>
+          <small>Create, edit and manage your test questions</small>
+        </div>
+      </div>
 
       <div>
         <a href="/admin.html" class="btn gray">← Admin Panel</a>
         <a href="/admin-tests.html" class="btn blue">📝 Tests</a>
       </div>
+
     </div>
 
     <div id="message" class="message"></div>
 
-    <!-- TEST INFORMATION -->
+    <!-- SELECTED TEST -->
+
     <div class="card">
+
+      <div class="card-heading">
+        <div class="heading-icon">🎯</div>
+        <h2>Selected Test</h2>
+      </div>
+
       <div class="test-info">
-        Selected Test:
         <strong id="testName">Loading...</strong>
         <br>
         <span id="testDetails"></span>
       </div>
+
     </div>
 
-    <!-- ADD QUESTION -->
+
+    <!-- QUESTION FORM -->
+
     <div class="card">
 
-      <h2 id="formTitle">➕ Add New Question</h2>
+      <div class="card-heading">
+        <div class="heading-icon">✨</div>
+        <h2 id="formTitle">Add New Question</h2>
+      </div>
 
       <form id="questionForm">
 
@@ -379,150 +729,235 @@
 
         <div class="form-grid">
 
-          <!-- HINDI QUESTION -->
-          <div>
-            <label>🇮🇳 Question Hindi</label>
+          <!-- SUBJECT + CHAPTER -->
 
-            <textarea
-              id="questionHindi"
-              placeholder="प्रश्न हिंदी में लिखें..."
-              required
-            ></textarea>
+          <div class="category-box">
+
+            <div class="category-title">
+              📚 Subject & Chapter
+            </div>
+
+            <div class="category-grid">
+
+              <div class="field">
+
+                <label>📖 Subject / विषय</label>
+
+                <select id="subject" required>
+                  <option value="">-- Select Subject --</option>
+                </select>
+
+              </div>
+
+              <div class="field">
+
+                <label>📑 Chapter / अध्याय</label>
+
+                <select id="chapter" required>
+                  <option value="">-- Select Chapter --</option>
+                </select>
+
+              </div>
+
+            </div>
+
           </div>
+
+
+          <!-- HINDI QUESTION -->
+
+          <div class="language-section hindi-section">
+
+            <div class="language-heading">
+              🇮🇳 Hindi Question / हिंदी प्रश्न
+            </div>
+
+            <div class="field">
+
+              <label>Question</label>
+
+              <textarea
+                id="questionHindi"
+                placeholder="यहाँ प्रश्न हिंदी में लिखें..."
+                required
+              ></textarea>
+
+            </div>
+
+            <br>
+
+            <label>Options / विकल्प</label>
+
+            <div class="options-container">
+
+              <div class="option-row">
+                <div class="option-letter">A</div>
+                <input
+                  type="text"
+                  id="hi0"
+                  placeholder="Hindi Option A"
+                  required
+                >
+              </div>
+
+              <div class="option-row">
+                <div class="option-letter">B</div>
+                <input
+                  type="text"
+                  id="hi1"
+                  placeholder="Hindi Option B"
+                  required
+                >
+              </div>
+
+              <div class="option-row">
+                <div class="option-letter">C</div>
+                <input
+                  type="text"
+                  id="hi2"
+                  placeholder="Hindi Option C"
+                  required
+                >
+              </div>
+
+              <div class="option-row">
+                <div class="option-letter">D</div>
+                <input
+                  type="text"
+                  id="hi3"
+                  placeholder="Hindi Option D"
+                  required
+                >
+              </div>
+
+            </div>
+
+          </div>
+
 
           <!-- ENGLISH QUESTION -->
-          <div>
-            <label>🇬🇧 Question English</label>
 
-            <textarea
-              id="questionEnglish"
-              placeholder="Write question in English..."
-            ></textarea>
+          <div class="language-section english-section">
+
+            <div class="language-heading">
+              🇬🇧 English Question / अंग्रेजी प्रश्न
+            </div>
+
+            <div class="field">
+
+              <label>Question</label>
+
+              <textarea
+                id="questionEnglish"
+                placeholder="Write the question in English..."
+              ></textarea>
+
+            </div>
+
+            <br>
+
+            <label>Options / विकल्प</label>
+
+            <div class="options-container">
+
+              <div class="option-row">
+                <div class="option-letter">A</div>
+                <input
+                  type="text"
+                  id="en0"
+                  placeholder="English Option A"
+                >
+              </div>
+
+              <div class="option-row">
+                <div class="option-letter">B</div>
+                <input
+                  type="text"
+                  id="en1"
+                  placeholder="English Option B"
+                >
+              </div>
+
+              <div class="option-row">
+                <div class="option-letter">C</div>
+                <input
+                  type="text"
+                  id="en2"
+                  placeholder="English Option C"
+                >
+              </div>
+
+              <div class="option-row">
+                <div class="option-letter">D</div>
+                <input
+                  type="text"
+                  id="en3"
+                  placeholder="English Option D"
+                >
+              </div>
+
+            </div>
+
           </div>
 
-          <div class="section-title">
-            🅰️ Options / विकल्प
-          </div>
-
-          <!-- OPTION A -->
-          <div class="option-box">
-            <div class="option-title">Option A</div>
-
-            <input
-              type="text"
-              id="hi0"
-              placeholder="Hindi option A"
-              required
-            >
-
-            <br><br>
-
-            <input
-              type="text"
-              id="en0"
-              placeholder="English option A"
-            >
-          </div>
-
-          <!-- OPTION B -->
-          <div class="option-box">
-            <div class="option-title">Option B</div>
-
-            <input
-              type="text"
-              id="hi1"
-              placeholder="Hindi option B"
-              required
-            >
-
-            <br><br>
-
-            <input
-              type="text"
-              id="en1"
-              placeholder="English option B"
-            >
-          </div>
-
-          <!-- OPTION C -->
-          <div class="option-box">
-            <div class="option-title">Option C</div>
-
-            <input
-              type="text"
-              id="hi2"
-              placeholder="Hindi option C"
-              required
-            >
-
-            <br><br>
-
-            <input
-              type="text"
-              id="en2"
-              placeholder="English option C"
-            >
-          </div>
-
-          <!-- OPTION D -->
-          <div class="option-box">
-            <div class="option-title">Option D</div>
-
-            <input
-              type="text"
-              id="hi3"
-              placeholder="Hindi option D"
-              required
-            >
-
-            <br><br>
-
-            <input
-              type="text"
-              id="en3"
-              placeholder="English option D"
-            >
-          </div>
 
           <!-- CORRECT ANSWER -->
+
           <div class="correct-box">
 
-            <label>✅ Correct Answer</label>
+            <label>
+              ✅ Correct Answer / सही उत्तर
+            </label>
 
             <select id="correctAnswer" required>
-              <option value="">-- Select Correct Option --</option>
-              <option value="0">A</option>
-              <option value="1">B</option>
-              <option value="2">C</option>
-              <option value="3">D</option>
+
+              <option value="">
+                -- Select Correct Option --
+              </option>
+
+              <option value="0">🅰️ Option A</option>
+              <option value="1">🅱️ Option B</option>
+              <option value="2">🅲️ Option C</option>
+              <option value="3">🅳️ Option D</option>
+
             </select>
 
           </div>
 
+
           <!-- EXPLANATION -->
+
           <div class="section-title">
             💡 Explanation / व्याख्या
           </div>
 
-          <div>
+
+          <div class="field">
+
             <label>🇮🇳 Hindi Explanation</label>
 
             <textarea
               id="explanationHindi"
-              placeholder="हिंदी में explanation लिखें..."
+              placeholder="सही उत्तर की हिंदी में explanation लिखें..."
             ></textarea>
+
           </div>
 
-          <div>
+
+          <div class="field">
+
             <label>🇬🇧 English Explanation</label>
 
             <textarea
               id="explanationEnglish"
-              placeholder="Write explanation in English..."
+              placeholder="Write the explanation in English..."
             ></textarea>
+
           </div>
 
+
           <!-- BUTTONS -->
+
           <div class="full form-buttons">
 
             <button
@@ -540,7 +975,7 @@
               style="display:none;"
               onclick="resetForm()"
             >
-              Cancel Edit
+              ↩️ Cancel Edit
             </button>
 
           </div>
@@ -551,10 +986,15 @@
 
     </div>
 
+
     <!-- QUESTIONS LIST -->
+
     <div class="card">
 
-      <h2>📚 Questions List</h2>
+      <div class="card-heading">
+        <div class="heading-icon">📚</div>
+        <h2>Questions List</h2>
+      </div>
 
       <div id="questionsList">
         🔄 Loading questions...
@@ -572,6 +1012,79 @@
 let testId = null;
 let currentTest = null;
 let questions = [];
+
+
+/* =========================================
+   SUBJECT + CHAPTER DATA
+========================================= */
+
+const subjectChapters = {
+
+  "General Studies": [
+    "Indian History",
+    "Indian Geography",
+    "Indian Polity",
+    "Indian Economy",
+    "General Science",
+    "Current Affairs",
+    "Environment",
+    "General Knowledge"
+  ],
+
+  "General Hindi": [
+    "Hindi Grammar",
+    "Vocabulary",
+    "Synonyms",
+    "Antonyms",
+    "Sandhi",
+    "Samas",
+    "Alankar",
+    "Idioms & Proverbs"
+  ],
+
+  "General Intelligence": [
+    "Analogy",
+    "Classification",
+    "Series",
+    "Coding-Decoding",
+    "Blood Relation",
+    "Direction Test",
+    "Venn Diagram",
+    "Logical Reasoning"
+  ],
+
+  "General Science": [
+    "Physics",
+    "Chemistry",
+    "Biology",
+    "Human Body",
+    "Environment"
+  ],
+
+  "Mathematics": [
+    "Number System",
+    "Percentage",
+    "Profit & Loss",
+    "Ratio & Proportion",
+    "Average",
+    "Time & Work",
+    "Time & Distance",
+    "Simple Interest",
+    "Compound Interest"
+  ],
+
+  "Current Affairs": [
+    "National",
+    "International",
+    "Uttar Pradesh",
+    "Sports",
+    "Awards",
+    "Appointments",
+    "Important Days",
+    "Government Schemes"
+  ]
+
+};
 
 
 /* =========================================
@@ -605,10 +1118,90 @@ function showMessage(text, type = "success") {
 
 function getTestId() {
 
-  const params = new URLSearchParams(window.location.search);
+  const params =
+    new URLSearchParams(window.location.search);
 
   return params.get("test");
 }
+
+
+/* =========================================
+   LOAD SUBJECTS
+========================================= */
+
+function loadSubjects(selectedSubject = "") {
+
+  const subject =
+    document.getElementById("subject");
+
+  subject.innerHTML =
+    `<option value="">-- Select Subject --</option>`;
+
+  Object.keys(subjectChapters).forEach(name => {
+
+    const option =
+      document.createElement("option");
+
+    option.value = name;
+    option.textContent = name;
+
+    if (name === selectedSubject) {
+      option.selected = true;
+    }
+
+    subject.appendChild(option);
+
+  });
+
+  loadChapters(selectedSubject);
+}
+
+
+/* =========================================
+   LOAD CHAPTERS
+========================================= */
+
+function loadChapters(selectedSubject = "", selectedChapter = "") {
+
+  const chapter =
+    document.getElementById("chapter");
+
+  chapter.innerHTML =
+    `<option value="">-- Select Chapter --</option>`;
+
+  const chapters =
+    subjectChapters[selectedSubject] || [];
+
+  chapters.forEach(name => {
+
+    const option =
+      document.createElement("option");
+
+    option.value = name;
+    option.textContent = name;
+
+    if (name === selectedChapter) {
+      option.selected = true;
+    }
+
+    chapter.appendChild(option);
+
+  });
+
+}
+
+
+/* =========================================
+   SUBJECT CHANGE
+========================================= */
+
+document
+  .getElementById("subject")
+  .addEventListener("change", function() {
+
+    loadChapters(this.value);
+
+  });
 
 
 /* =========================================
@@ -631,8 +1224,8 @@ async function checkAdmin() {
     if (!response.ok || !data.success) {
 
       window.location.href = "/login.html";
-
       return;
+
     }
 
     const user = data.user;
@@ -643,13 +1236,15 @@ async function checkAdmin() {
         <div style="
           background:#fee2e2;
           color:#991b1b;
-          padding:20px;
-          border-radius:12px;
-          font-weight:700;
+          padding:25px;
+          border-radius:15px;
+          font-weight:800;
         ">
-          ❌ Access Denied<br><br>
+          ❌ Access Denied
+          <br><br>
           केवल Admin इस page को access कर सकता है।
           <br><br>
+
           <a href="/dashboard.html" class="btn blue">
             Go to Dashboard
           </a>
@@ -659,9 +1254,7 @@ async function checkAdmin() {
       return;
     }
 
-
     testId = getTestId();
-
 
     if (!testId) {
 
@@ -669,14 +1262,18 @@ async function checkAdmin() {
         <div style="
           background:#fee2e2;
           color:#991b1b;
-          padding:20px;
-          border-radius:12px;
+          padding:25px;
+          border-radius:15px;
+          font-weight:800;
         ">
           ❌ Test ID नहीं मिला।
           <br><br>
+
           पहले Admin Panel → Test Management से
           test select करें।
+
           <br><br>
+
           <a href="/admin-tests.html" class="btn blue">
             Go to Tests
           </a>
@@ -686,11 +1283,13 @@ async function checkAdmin() {
       return;
     }
 
+    document.getElementById("pageLoading").style.display =
+      "none";
 
-    document.getElementById("pageLoading").style.display = "none";
+    document.getElementById("mainContent").style.display =
+      "block";
 
-    document.getElementById("mainContent").style.display = "block";
-
+    loadSubjects();
 
     await loadTest();
 
@@ -704,8 +1303,9 @@ async function checkAdmin() {
       <div style="
         background:#fee2e2;
         color:#991b1b;
-        padding:20px;
-        border-radius:12px;
+        padding:25px;
+        border-radius:15px;
+        font-weight:800;
       ">
         ❌ Server से connection नहीं हो पाया।
       </div>
@@ -738,15 +1338,15 @@ async function loadTest() {
       throw new Error(
         data.message || "Unable to load tests"
       );
-    }
 
+    }
 
     const tests = data.tests || [];
 
     currentTest = tests.find(
-      test => String(test._id) === String(testId)
+      test =>
+        String(test._id) === String(testId)
     );
-
 
     if (!currentTest) {
 
@@ -756,20 +1356,36 @@ async function loadTest() {
       return;
     }
 
-
     document.getElementById("testName").textContent =
       currentTest.name || "Unnamed Test";
-
 
     document.getElementById("testDetails").textContent =
       [
         currentTest.exam,
-        currentTest.batch,
-        currentTest.subject,
-        currentTest.chapter
+        currentTest.batch
       ]
-      .filter(Boolean)
-      .join(" • ");
+        .filter(Boolean)
+        .join(" • ");
+
+
+    /* Existing test subject/chapter */
+
+    const existingSubject =
+      currentTest.subject || "";
+
+    const existingChapter =
+      currentTest.chapter || "";
+
+    if (existingSubject) {
+
+      loadSubjects(existingSubject);
+
+      loadChapters(
+        existingSubject,
+        existingChapter
+      );
+
+    }
 
   } catch (error) {
 
@@ -777,7 +1393,6 @@ async function loadTest() {
 
     document.getElementById("testName").textContent =
       "Unable to load test";
-
   }
 
 }
@@ -792,16 +1407,10 @@ async function loadQuestions() {
   const list =
     document.getElementById("questionsList");
 
-  list.innerHTML = "🔄 Loading questions...";
-
+  list.innerHTML =
+    "🔄 Loading questions...";
 
   try {
-
-    /*
-      IMPORTANT:
-      आपके routes/questions.js के अनुसार
-      यही सही API है।
-    */
 
     const response = await fetch(
       `/api/questions/admin/test/${testId}`,
@@ -810,18 +1419,13 @@ async function loadQuestions() {
       }
     );
 
-
-    /*
-      JSON आने से पहले response check
-    */
-
     const contentType =
       response.headers.get("content-type") || "";
 
-
     if (!contentType.includes("application/json")) {
 
-      const text = await response.text();
+      const text =
+        await response.text();
 
       console.error(
         "Server returned non-JSON:",
@@ -833,32 +1437,34 @@ async function loadQuestions() {
       );
     }
 
-
-    const data = await response.json();
-
+    const data =
+      await response.json();
 
     if (!response.ok || !data.success) {
 
       throw new Error(
-        data.message || "Unable to load questions"
+        data.message ||
+        "Unable to load questions"
       );
     }
 
-
-    questions = data.questions || [];
+    questions =
+      data.questions || [];
 
     renderQuestions();
 
   } catch (error) {
 
-    console.error("Load Questions Error:", error);
+    console.error(
+      "Load Questions Error:",
+      error
+    );
 
     list.innerHTML = `
       <div class="empty" style="color:#b91c1c;">
         ❌ ${escapeHtml(error.message)}
       </div>
     `;
-
   }
 
 }
@@ -873,101 +1479,105 @@ function renderQuestions() {
   const list =
     document.getElementById("questionsList");
 
-
   if (!questions.length) {
 
     list.innerHTML = `
       <div class="empty">
+
         📭 अभी इस Test में कोई Question नहीं है।
+
         <br><br>
+
         ऊपर से पहला Question Add करें।
+
       </div>
     `;
 
     return;
   }
 
-
-  list.innerHTML = questions.map(
-    (q, index) => {
+  list.innerHTML =
+    questions.map((q, index) => {
 
       const hindiQuestion =
-        q.questionHindi || q.question || "";
+        q.questionHindi ||
+        q.question ||
+        "";
 
       const englishQuestion =
-        q.questionEnglish || "";
-
+        q.questionEnglish ||
+        "";
 
       const hiOptions =
         Array.isArray(q.optionsHindi)
           ? q.optionsHindi
           : [];
 
-
       const enOptions =
         Array.isArray(q.optionsEnglish)
           ? q.optionsEnglish
           : [];
-
 
       const oldOptions =
         Array.isArray(q.options)
           ? q.options
           : [];
 
+      const subject =
+        q.subject ||
+        currentTest?.subject ||
+        "";
 
-      let optionHtml = "";
+      const chapter =
+        q.chapter ||
+        currentTest?.chapter ||
+        "";
 
+      let hindiOptionsHtml = "";
+
+      let englishOptionsHtml = "";
 
       for (let i = 0; i < 4; i++) {
 
         const hi =
-          hiOptions[i] || "";
+          hiOptions[i] ||
+          oldOptions[i] ||
+          "";
 
         const en =
-          enOptions[i] || "";
+          enOptions[i] ||
+          "";
 
-        const old =
-          oldOptions[i] || "";
-
-
-        optionHtml += `
+        hindiOptionsHtml += `
           <div class="option">
-
             <strong>
               ${String.fromCharCode(65 + i)}.
             </strong>
+            ${escapeHtml(hi)}
+          </div>
+        `;
 
-            ${escapeHtml(hi || old)}
-
-            ${
-              en
-                ? `<br>
-                   <small>
-                     ${escapeHtml(en)}
-                   </small>`
-                : ""
-            }
-
+        englishOptionsHtml += `
+          <div class="option">
+            <strong>
+              ${String.fromCharCode(65 + i)}.
+            </strong>
+            ${escapeHtml(en)}
           </div>
         `;
       }
 
-
       const correct =
         Number(q.correctAnswer);
-
 
       const explanationHindi =
         q.explanationHindi ||
         q.explanation ||
         "";
 
-
       const explanationEnglish =
         q.explanationEnglish ||
         "";
-
 
       return `
 
@@ -979,20 +1589,39 @@ function renderQuestions() {
               Q${index + 1}
             </div>
 
+            <div class="question-category">
+              📚 ${escapeHtml(subject)}
+              ${chapter ? " • " + escapeHtml(chapter) : ""}
+            </div>
+
           </div>
 
 
           <div class="question-text">
 
-            <strong>🇮🇳 Hindi:</strong><br>
-            ${escapeHtml(hindiQuestion)}
+            <div class="display-language">
+
+              <div class="display-language-title">
+                🇮🇳 Hindi Question
+              </div>
+
+              ${escapeHtml(hindiQuestion)}
+
+            </div>
+
 
             ${
               englishQuestion
                 ? `
-                  <br><br>
-                  <strong>🇬🇧 English:</strong><br>
-                  ${escapeHtml(englishQuestion)}
+                  <div class="display-language">
+
+                    <div class="display-language-title">
+                      🇬🇧 English Question
+                    </div>
+
+                    ${escapeHtml(englishQuestion)}
+
+                  </div>
                 `
                 : ""
             }
@@ -1000,17 +1629,30 @@ function renderQuestions() {
           </div>
 
 
+          <strong>🇮🇳 Hindi Options</strong>
+
           <div class="options-list">
-
-            ${optionHtml}
-
+            ${hindiOptionsHtml}
           </div>
+
+
+          ${
+            englishQuestion
+              ? `
+                <strong>🇬🇧 English Options</strong>
+
+                <div class="options-list">
+                  ${englishOptionsHtml}
+                </div>
+              `
+              : ""
+          }
 
 
           <div class="answer">
 
             ✅ Correct Answer:
-            ${String.fromCharCode(65 + correct)}
+            Option ${String.fromCharCode(65 + correct)}
 
           </div>
 
@@ -1019,8 +1661,15 @@ function renderQuestions() {
             explanationHindi
               ? `
                 <div class="explanation">
-                  <strong>🇮🇳 Hindi Explanation:</strong><br>
+
+                  <strong>
+                    🇮🇳 Hindi Explanation:
+                  </strong>
+
+                  <br>
+
                   ${escapeHtml(explanationHindi)}
+
                 </div>
               `
               : ""
@@ -1031,8 +1680,15 @@ function renderQuestions() {
             explanationEnglish
               ? `
                 <div class="explanation">
-                  <strong>🇬🇧 English Explanation:</strong><br>
+
+                  <strong>
+                    🇬🇧 English Explanation:
+                  </strong>
+
+                  <br>
+
                   ${escapeHtml(explanationEnglish)}
+
                 </div>
               `
               : ""
@@ -1061,8 +1717,7 @@ function renderQuestions() {
 
       `;
 
-    }
-  ).join("");
+    }).join("");
 
 }
 
@@ -1079,7 +1734,6 @@ document
 
       event.preventDefault();
 
-
       if (!testId) {
 
         showMessage(
@@ -1089,6 +1743,20 @@ document
 
         return;
       }
+
+
+      const subject =
+        document
+          .getElementById("subject")
+          .value
+          .trim();
+
+
+      const chapter =
+        document
+          .getElementById("chapter")
+          .value
+          .trim();
 
 
       const questionHindi =
@@ -1106,23 +1774,29 @@ document
 
 
       const hiOptions = [
+
         document.getElementById("hi0").value.trim(),
         document.getElementById("hi1").value.trim(),
         document.getElementById("hi2").value.trim(),
         document.getElementById("hi3").value.trim()
+
       ];
 
 
       const enOptions = [
+
         document.getElementById("en0").value.trim(),
         document.getElementById("en1").value.trim(),
         document.getElementById("en2").value.trim(),
         document.getElementById("en3").value.trim()
+
       ];
 
 
       const correctAnswer =
-        document.getElementById("correctAnswer").value;
+        document
+          .getElementById("correctAnswer")
+          .value;
 
 
       const explanationHindi =
@@ -1137,6 +1811,28 @@ document
           .getElementById("explanationEnglish")
           .value
           .trim();
+
+
+      if (!subject) {
+
+        showMessage(
+          "❌ Subject select करें।",
+          "error"
+        );
+
+        return;
+      }
+
+
+      if (!chapter) {
+
+        showMessage(
+          "❌ Chapter select करें।",
+          "error"
+        );
+
+        return;
+      }
 
 
       if (!questionHindi) {
@@ -1165,6 +1861,22 @@ document
       }
 
 
+      if (
+        questionEnglish &&
+        enOptions.some(
+          option => !option
+        )
+      ) {
+
+        showMessage(
+          "❌ English Question दिया है, इसलिए चारों English Options भरें।",
+          "error"
+        );
+
+        return;
+      }
+
+
       if (correctAnswer === "") {
 
         showMessage(
@@ -1177,7 +1889,7 @@ document
 
 
       /*
-        पुराने backend के लिए combined values
+        Old fields are also sent for backward compatibility.
       */
 
       const combinedQuestion =
@@ -1205,13 +1917,36 @@ document
 
         testId,
 
-        question: combinedQuestion,
+        subject,
+        chapter,
 
-        options: combinedOptions,
+        /* New bilingual fields */
 
-        correctAnswer: Number(correctAnswer),
+        questionHindi,
+        questionEnglish,
 
-        explanation: combinedExplanation
+        optionsHindi:
+          hiOptions,
+
+        optionsEnglish:
+          enOptions,
+
+        explanationHindi,
+        explanationEnglish,
+
+        /* Old fields for compatibility */
+
+        question:
+          combinedQuestion,
+
+        options:
+          combinedOptions,
+
+        correctAnswer:
+          Number(correctAnswer),
+
+        explanation:
+          combinedExplanation
 
       };
 
@@ -1252,29 +1987,37 @@ document
 
       try {
 
-        const response = await fetch(
-          url,
-          {
-            method,
+        const response =
+          await fetch(
+            url,
+            {
+              method,
 
-            headers: {
-              "Content-Type":
-                "application/json"
-            },
+              headers: {
+                "Content-Type":
+                  "application/json"
+              },
 
-            credentials: "include",
+              credentials:
+                "include",
 
-            body: JSON.stringify(payload)
+              body:
+                JSON.stringify(payload)
 
-          }
-        );
+            }
+          );
 
 
         const contentType =
-          response.headers.get("content-type") || "";
+          response.headers
+            .get("content-type") || "";
 
 
-        if (!contentType.includes("application/json")) {
+        if (
+          !contentType.includes(
+            "application/json"
+          )
+        ) {
 
           const text =
             await response.text();
@@ -1294,7 +2037,10 @@ document
           await response.json();
 
 
-        if (!response.ok || !data.success) {
+        if (
+          !response.ok ||
+          !data.success
+        ) {
 
           throw new Error(
             data.message ||
@@ -1313,6 +2059,7 @@ document
         resetForm();
 
         await loadQuestions();
+
 
       } catch (error) {
 
@@ -1350,7 +2097,8 @@ function editQuestion(id) {
   const q =
     questions.find(
       item =>
-        String(item._id) === String(id)
+        String(item._id) ===
+        String(id)
     );
 
 
@@ -1368,6 +2116,26 @@ function editQuestion(id) {
   document
     .getElementById("questionId")
     .value = q._id;
+
+
+  const subject =
+    q.subject ||
+    currentTest?.subject ||
+    "";
+
+
+  const chapter =
+    q.chapter ||
+    currentTest?.chapter ||
+    "";
+
+
+  loadSubjects(subject);
+
+  loadChapters(
+    subject,
+    chapter
+  );
 
 
   document
@@ -1405,15 +2173,20 @@ function editQuestion(id) {
 
   for (let i = 0; i < 4; i++) {
 
-    document.getElementById(`hi${i}`).value =
-      hiOptions[i] ||
-      oldOptions[i] ||
-      "";
+    document
+      .getElementById(`hi${i}`)
+      .value =
+        hiOptions[i] ||
+        oldOptions[i] ||
+        "";
 
 
-    document.getElementById(`en${i}`).value =
-      enOptions[i] ||
-      "";
+    document
+      .getElementById(`en${i}`)
+      .value =
+        enOptions[i] ||
+        "";
+
   }
 
 
@@ -1453,7 +2226,7 @@ function editQuestion(id) {
   document
     .getElementById("cancelBtn")
     .style.display =
-      "inline-block";
+      "inline-flex";
 
 
   window.scrollTo({
@@ -1475,26 +2248,33 @@ async function deleteQuestion(id) {
       "क्या आप इस Question को delete करना चाहते हैं?"
     )
   ) {
+
     return;
   }
 
 
   try {
 
-    const response = await fetch(
-      `/api/questions/${id}`,
-      {
-        method: "DELETE",
-        credentials: "include"
-      }
-    );
+    const response =
+      await fetch(
+        `/api/questions/${id}`,
+        {
+          method: "DELETE",
+          credentials: "include"
+        }
+      );
 
 
     const contentType =
-      response.headers.get("content-type") || "";
+      response.headers
+        .get("content-type") || "";
 
 
-    if (!contentType.includes("application/json")) {
+    if (
+      !contentType.includes(
+        "application/json"
+      )
+    ) {
 
       const text =
         await response.text();
@@ -1514,7 +2294,10 @@ async function deleteQuestion(id) {
       await response.json();
 
 
-    if (!response.ok || !data.success) {
+    if (
+      !response.ok ||
+      !data.success
+    ) {
 
       throw new Error(
         data.message ||
@@ -1529,6 +2312,7 @@ async function deleteQuestion(id) {
 
 
     await loadQuestions();
+
 
   } catch (error) {
 
@@ -1560,10 +2344,13 @@ function resetForm() {
     .value = "";
 
 
+  loadSubjects();
+
+
   document
     .getElementById("formTitle")
     .textContent =
-      "➕ Add New Question";
+      "✨ Add New Question";
 
 
   document
@@ -1586,9 +2373,14 @@ function resetForm() {
 
 function escapeHtml(value) {
 
-  if (value === null || value === undefined) {
+  if (
+    value === null ||
+    value === undefined
+  ) {
+
     return "";
   }
+
 
   return String(value)
     .replace(/&/g, "&amp;")
@@ -1610,3 +2402,4 @@ checkAdmin();
 
 </body>
 </html>
+```
