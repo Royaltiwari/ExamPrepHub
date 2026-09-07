@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Dashboard - ExamPrepHub</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+    }
+
+    body {
+      min-height: 100vh;
+      background: #f1f5f9;
+      color: #1e293b;
+    }
+
+    /* =========================
+       HEADER
+    ========================= */
+
+    header {
+      background: #2563eb;
+      color: white;
+      padding: 16px 20px;
+      box-shadow: 0 3px 12px rgba(0, 0, 0, 0.12);
+    }
+
+    .header-inner {
+      max-width: 1100px;
+      margin: auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .logo {
+      font-size: 22px;
+      font-weight: 800;
+    }
+
+    .logout-btn {
+      border: 1px solid rgba(255, 255, 255, 0.7);
+      background: transparent;
+      color: white;
+      padding: 9px 15px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    .logout-btn:hover {
+      background: white;
+      color: #2563eb;
+    }
+
+    /* =========================
+       MAIN
+    ========================= */
+
+    main {
+      max-width: 1100px;
+      margin: auto;
+      padding: 25px 20px 50px;
+    }
+
+    .welcome-card {
+      background: white;
+      padding: 25px;
+      border-radius: 16px;
+      box-shadow: 0 5px 20px rgba(0, 0, 0, 0.06);
+      margin-bottom: 25px;
+    }
+
+    .welcome-card h1 {
+      font-size: 26px;
+      margin-bottom: 8px;
+    }
+
+    .welcome-card p {
+      color: #64748b;
+    }
+
+    /* =========================
+       STATS
+    ========================= */
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 18px;
+      margin-bottom: 30px;
+    }
+
+    .stat-card {
+      background: white;
+      padding: 22px;
+      border-radius: 14px;
+      text-align: center;
+      box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+    }
+
+    .stat-icon {
+      font-size: 28px;
+      margin-bottom: 8px;
+    }
+
+    .stat-number {
+      font-size: 25px;
+      font-weight: 800;
+      color: #2563eb;
+    }
+
+    .stat-title {
+      color: #64748b;
+      font-size: 14px;
+      margin-top: 5px;
+    }
+
+    /* =========================
+       TEST SECTION
+    ========================= */
+
+    .section-title {
+      font-size: 22px;
+      margin-bottom: 18px;
+    }
+
+    #testsContainer {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+    }
+
+    .test-card {
+      background: white;
+      padding: 20px;
+      border-radius: 14px;
+      box-shadow: 0 5px 20px rgba(0, 0, 0, 0.06);
+      transition: transform 0.2s;
+    }
+
+    .test-card:hover {
+      transform: translateY(-3px);
+    }
+
+    .test-card h3 {
+      font-size: 18px;
+      margin-bottom: 10px;
+    }
+
+    .test-exam {
+      display: inline-block;
+      background: #dbeafe;
+      color: #1d4ed8;
+      padding: 5px 9px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 700;
+      margin-bottom: 12px;
+    }
+
+    .test-info {
+      color: #64748b;
+      font-size: 14px;
+      line-height: 1.8;
+      margin-bottom: 15px;
+    }
+
+    .start-btn {
+      display: block;
+      width: 100%;
+      padding: 11px;
+      border: none;
+      border-radius: 8px;
+      background: #2563eb;
+      color: white;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .start-btn:hover {
+      background: #1d4ed8;
+    }
+
+    /* =========================
+       EMPTY / ERROR
+    ========================= */
+
+    .message-box {
+      background: white;
+      padding: 25px;
+      border-radius: 12px;
+      text-align: center;
+      color: #64748b;
+      grid-column: 1 / -1;
+    }
+
+    .error {
+      color: #b91c1c;
+    }
+
+    /* =========================
+       RESPONSIVE
+    ========================= */
+
+    @media (max-width: 800px) {
+      #testsContainer {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 600px) {
+      .header-inner {
+        align-items: flex-start;
+      }
+
+      .logo {
+        font-size: 18px;
+      }
+
+      .stats {
+        grid-template-columns: 1fr;
+      }
+
+      #testsContainer {
+        grid-template-columns: 1fr;
+      }
+
+      .welcome-card h1 {
+        font-size: 22px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- =========================
+       HEADER
+  ========================== -->
+
+  <header>
+    <div class="header-inner">
+
+      <div class="logo">
+        🏆 ExamPrepHub
+      </div>
+
+      <button class="logout-btn" id="logoutBtn">
+        Logout
+      </button>
+
+    </div>
+  </header>
+
+
+  <!-- =========================
+       MAIN
+  ========================== -->
+
+  <main>
+
+    <!-- Welcome -->
+
+    <section class="welcome-card">
+
+      <h1>
+        Welcome, <span id="userName">Student</span> 👋
+      </h1>
+
+      <p>
+        Prepare better with free mock tests and practice exams.
+      </p>
+
+    </section>
+
+
+    <!-- Stats -->
+
+    <section class="stats">
+
+      <div class="stat-card">
+
+        <div class="stat-icon">
+          📝
+        </div>
+
+        <div class="stat-number" id="testCount">
+          0
+        </div>
+
+        <div class="stat-title">
+          Available Tests
+        </div>
+
+      </div>
+
+
+      <div class="stat-card">
+
+        <div class="stat-icon">
+          📊
+        </div>
+
+        <div class="stat-number" id="resultCount">
+          0
+        </div>
+
+        <div class="stat-title">
+          My Results
+        </div>
+
+      </div>
+
+
+      <div class="stat-card">
+
+        <div class="stat-icon">
+          🎯
+        </div>
+
+        <div class="stat-number">
+          Free
+        </div>
+
+        <div class="stat-title">
+          Learning Platform
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- Tests -->
+
+    <section>
+
+      <h2 class="section-title">
+        Available Mock Tests
+      </h2>
+
+      <div id="testsContainer">
+
+        <div class="message-box">
+          Loading tests...
+        </div>
+
+      </div>
+
+    </section>
+
+  </main>
+
+
+  <!-- =========================
+       JAVASCRIPT
+  ========================== -->
+
+  <script>
+
+    const userName = document.getElementById("userName");
+    const testCount = document.getElementById("testCount");
+    const resultCount = document.getElementById("resultCount");
+    const testsContainer = document.getElementById("testsContainer");
+    const logoutBtn = document.getElementById("logoutBtn");
+
+
+    // =====================================
+    // LOAD CURRENT USER
+    // =====================================
+
+    async function loadUser() {
+
+      try {
+
+        const response = await fetch("/api/auth/me", {
+          credentials: "include"
+        });
+
+        const data = await response.json();
+
+        if (!response.ok || !data.success) {
+          window.location.href = "/login.html";
+          return;
+        }
+
+        userName.textContent = data.user.name || "Student";
+
+      } catch (error) {
+
+        console.error("User Error:", error);
+
+        window.location.href = "/login.html";
+      }
+    }
+
+
+    // =====================================
+    // LOAD TESTS
+    // =====================================
+
+    async function loadTests() {
+
+      try {
+
+        const response = await fetch("/api/tests");
+
+        const data = await response.json();
+
+        if (!response.ok || !data.success) {
+          throw new Error(data.message || "Unable to load tests");
+        }
+
+        const tests = data.tests || [];
+
+        testCount.textContent = tests.length;
+
+        if (tests.length === 0) {
+
+          testsContainer.innerHTML = `
+            <div class="message-box">
+              अभी कोई visible test उपलब्ध नहीं है।
+            </div>
+          `;
+
+          return;
+        }
+
+
+        testsContainer.innerHTML = tests.map(test => `
+
+          <div class="test-card">
+
+            <span class="test-exam">
+              ${escapeHtml(test.exam || "Exam")}
+            </span>
+
+            <h3>
+              ${escapeHtml(test.name || "Mock Test")}
+            </h3>
+
+            <div class="test-info">
+
+              📚 Subject:
+              ${escapeHtml(test.subject || "General")}
+
+              <br>
+
+              ⏱️ Duration:
+              ${Number(test.duration) || 0} Minutes
+
+              <br>
+
+              ❓ Questions:
+              ${Number(test.totalQuestions) || 0}
+
+            </div>
+
+            <button
+              class="start-btn"
+              onclick="startTest('${test._id}')"
+            >
+              Start Test
+            </button>
+
+          </div>
+
+        `).join("");
+
+      } catch (error) {
+
+        console.error("Tests Error:", error);
+
+        testsContainer.innerHTML = `
+          <div class="message-box error">
+            Tests load नहीं हो पाए।
+            <br>
+            कृपया server और MongoDB connection check करें।
+          </div>
+        `;
+      }
+    }
+
+
+    // =====================================
+    // LOAD MY RESULTS
+    // =====================================
+
+    async function loadResults() {
+
+      try {
+
+        const response = await fetch("/api/results", {
+          credentials: "include"
+        });
+
+        const data = await response.json();
+
+        if (response.ok && data.success) {
+          resultCount.textContent =
+            (data.results || []).length;
+        }
+
+      } catch (error) {
+
+        console.error("Results Error:", error);
+
+      }
+    }
+
+
+    // =====================================
+    // START TEST
+    // =====================================
+
+    function startTest(testId) {
+
+      window.location.href =
+        "/test.html?id=" + encodeURIComponent(testId);
+
+    }
+
+
+    // =====================================
+    // LOGOUT
+    // =====================================
+
+    logoutBtn.addEventListener("click", async function () {
+
+      try {
+
+        const response = await fetch("/api/auth/logout", {
+          method: "POST",
+          credentials: "include"
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          window.location.href = "/login.html";
+        } else {
+          alert(data.message || "Logout failed");
+        }
+
+      } catch (error) {
+
+        console.error("Logout Error:", error);
+
+        alert("Logout नहीं हो पाया।");
+      }
+
+    });
+
+
+    // =====================================
+    // HTML SECURITY HELPER
+    // =====================================
+
+    function escapeHtml(value) {
+
+      return String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+
+    // =====================================
+    // INITIAL LOAD
+    // =====================================
+
+    loadUser();
+    loadTests();
+    loadResults();
+
+  </script>
+
+</body>
+</html>

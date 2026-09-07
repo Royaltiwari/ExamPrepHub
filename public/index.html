@@ -1,0 +1,1262 @@
+<!DOCTYPE html>
+<html lang="hi">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>ExamPrepHub – Free Mock Tests & Competitive Exam Preparation</title>
+
+  <meta name="description"
+    content="ExamPrepHub – SSC, Railway, Defence, Banking, Police, UPSSSC, Teaching और सभी प्रमुख competitive exams के Free Mock Tests और Test Series.">
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: Arial, Helvetica, sans-serif;
+      background: #f4f7fb;
+      color: #1f2937;
+    }
+
+    /* =========================
+       TOP SCROLLING BANNER
+    ========================== */
+
+    .top-banner {
+      width: 100%;
+      overflow: hidden;
+      background: linear-gradient(90deg, #b91c1c, #dc2626, #b91c1c);
+      color: white;
+      padding: 9px 0;
+      font-size: 16px;
+      font-weight: bold;
+      white-space: nowrap;
+    }
+
+    .scroll-text {
+      display: inline-block;
+      padding-left: 100%;
+      animation: scrollText 18s linear infinite;
+    }
+
+    @keyframes scrollText {
+      from {
+        transform: translateX(0);
+      }
+
+      to {
+        transform: translateX(-100%);
+      }
+    }
+
+    /* =========================
+       NAVBAR
+    ========================== */
+
+    .navbar {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+
+      background: rgba(255, 255, 255, 0.96);
+      backdrop-filter: blur(10px);
+
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+
+      padding: 14px 5%;
+
+      box-shadow: 0 3px 15px rgba(0, 0, 0, 0.08);
+    }
+
+    .logo {
+  text-decoration: none;
+  font-size: 25px;
+  font-weight: 900;
+
+  background: linear-gradient(90deg, #2563eb, #7c3aed);
+  background-clip: text;
+  -webkit-background-clip: text;
+
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+}
+
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+    .nav-links a {
+      text-decoration: none;
+      color: #374151;
+      font-weight: 700;
+      padding: 9px 12px;
+      border-radius: 8px;
+    }
+
+    .nav-links a:hover {
+      background: #eef2ff;
+      color: #2563eb;
+    }
+
+    .nav-btn {
+      color: white !important;
+      background: #2563eb !important;
+    }
+
+    .register-btn {
+      background: #16a34a !important;
+    }
+
+    /* Admin initially hidden */
+    #adminBtn {
+      display: none;
+      background: #7c3aed !important;
+    }
+
+    /* =========================
+       HERO
+    ========================== */
+
+    .hero {
+      position: relative;
+      overflow: hidden;
+
+      background: linear-gradient(
+        135deg,
+        #1d4ed8,
+        #4f46e5,
+        #7c3aed
+      );
+
+      color: white;
+      text-align: center;
+
+      padding: 80px 5%;
+    }
+
+    .hero::before {
+      content: "";
+      position: absolute;
+
+      width: 350px;
+      height: 350px;
+
+      background: rgba(255, 255, 255, 0.08);
+
+      border-radius: 50%;
+
+      top: -120px;
+      left: -100px;
+    }
+
+    .hero::after {
+      content: "";
+      position: absolute;
+
+      width: 300px;
+      height: 300px;
+
+      background: rgba(255, 255, 255, 0.07);
+
+      border-radius: 50%;
+
+      right: -100px;
+      bottom: -130px;
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 2;
+    }
+
+    .hero h1 {
+      font-size: 48px;
+      margin-bottom: 16px;
+    }
+
+    .hero h2 {
+      font-size: 25px;
+      margin-bottom: 15px;
+    }
+
+    .hero p {
+      max-width: 850px;
+      margin: auto;
+
+      font-size: 18px;
+      line-height: 1.8;
+
+      color: #eef2ff;
+    }
+
+    .hero-buttons {
+      margin-top: 30px;
+    }
+
+    .hero-buttons a {
+      display: inline-block;
+
+      text-decoration: none;
+
+      margin: 7px;
+
+      padding: 14px 25px;
+
+      border-radius: 10px;
+
+      font-weight: 800;
+
+      background: white;
+      color: #2563eb;
+
+      transition: 0.2s;
+    }
+
+    .hero-buttons a:hover {
+      transform: translateY(-3px);
+    }
+
+    .hero-buttons .green {
+      background: #16a34a;
+      color: white;
+    }
+
+    /* =========================
+       COMMON SECTION
+    ========================== */
+
+    .section {
+      padding: 60px 5%;
+      text-align: center;
+    }
+
+    .section-title {
+      font-size: 32px;
+      margin-bottom: 10px;
+    }
+
+    .section-subtitle {
+      color: #6b7280;
+      margin-bottom: 35px;
+      line-height: 1.6;
+    }
+
+    /* =========================
+       EXAM CATEGORIES
+    ========================== */
+
+    .exam-grid {
+      max-width: 1200px;
+      margin: auto;
+
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+
+      gap: 20px;
+    }
+
+    .exam-card {
+      background: white;
+
+      padding: 25px 15px;
+
+      border-radius: 16px;
+
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.07);
+
+      transition: 0.25s;
+
+      border: 1px solid #eef2f7;
+    }
+
+    .exam-card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.12);
+    }
+
+    .exam-icon {
+      font-size: 42px;
+      margin-bottom: 12px;
+    }
+
+    .exam-card h3 {
+      margin-bottom: 8px;
+      font-size: 19px;
+    }
+
+    .exam-card p {
+      color: #6b7280;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    /* =========================
+       SSC EXAMS
+    ========================== */
+
+    .ssc-section {
+      background: #eef4ff;
+    }
+
+    .mini-grid {
+      max-width: 1200px;
+      margin: auto;
+
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+
+      gap: 15px;
+    }
+
+    .mini-card {
+      background: white;
+
+      padding: 18px;
+
+      border-radius: 12px;
+
+      font-weight: 800;
+
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.06);
+
+      transition: 0.2s;
+    }
+
+    .mini-card:hover {
+      transform: scale(1.03);
+    }
+
+    /* =========================
+       SUBJECTS
+    ========================== */
+
+    .subjects-section {
+      background: #fff;
+    }
+
+    .subject-grid {
+      max-width: 1200px;
+      margin: auto;
+
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+
+      gap: 16px;
+    }
+
+    .subject-card {
+      background: linear-gradient(
+        145deg,
+        #ffffff,
+        #f8fafc
+      );
+
+      padding: 22px 12px;
+
+      border-radius: 14px;
+
+      box-shadow: 0 5px 17px rgba(0, 0, 0, 0.07);
+
+      border: 1px solid #edf0f5;
+
+      transition: 0.2s;
+    }
+
+    .subject-card:hover {
+      transform: translateY(-4px);
+    }
+
+    .subject-icon {
+      font-size: 34px;
+      margin-bottom: 9px;
+    }
+
+    .subject-card h3 {
+      font-size: 16px;
+    }
+
+    /* =========================
+       FEATURES
+    ========================== */
+
+    .feature-grid {
+      max-width: 1100px;
+      margin: auto;
+
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+
+      gap: 18px;
+    }
+
+    .feature-card {
+      background: white;
+
+      padding: 25px 15px;
+
+      border-radius: 15px;
+
+      box-shadow: 0 5px 18px rgba(0, 0, 0, 0.07);
+    }
+
+    .feature-icon {
+      font-size: 37px;
+      margin-bottom: 12px;
+    }
+
+    .feature-card h3 {
+      margin-bottom: 8px;
+    }
+
+    .feature-card p {
+      color: #6b7280;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    /* =========================
+       CTA
+    ========================== */
+
+    .cta {
+      background: linear-gradient(
+        135deg,
+        #111827,
+        #374151
+      );
+
+      color: white;
+    }
+
+    .cta p {
+      color: #d1d5db;
+      margin: 15px 0 25px;
+    }
+
+    .cta a {
+      display: inline-block;
+
+      background: #2563eb;
+
+      color: white;
+
+      text-decoration: none;
+
+      padding: 13px 24px;
+
+      border-radius: 9px;
+
+      font-weight: bold;
+    }
+
+    /* =========================
+       FOOTER
+    ========================== */
+
+    footer {
+      background: #0f172a;
+      color: #cbd5e1;
+
+      text-align: center;
+
+      padding: 35px 5%;
+
+      line-height: 1.8;
+    }
+
+    footer strong {
+      color: white;
+    }
+
+    /* =========================
+       MOBILE
+    ========================== */
+
+    @media (max-width: 1000px) {
+
+      .exam-grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
+
+      .mini-grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
+
+      .subject-grid {
+        grid-template-columns: repeat(4, 1fr);
+      }
+
+      .feature-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 700px) {
+
+      .navbar {
+        padding: 12px 4%;
+      }
+
+      .logo {
+        font-size: 20px;
+      }
+
+      .nav-links a:not(.nav-btn):not(.register-btn) {
+        display: none;
+      }
+
+      .nav-links {
+        gap: 4px;
+      }
+
+      .nav-links a {
+        padding: 8px 9px;
+        font-size: 13px;
+      }
+
+      .hero {
+        padding: 60px 5%;
+      }
+
+      .hero h1 {
+        font-size: 34px;
+      }
+
+      .hero h2 {
+        font-size: 20px;
+      }
+
+      .hero p {
+        font-size: 16px;
+      }
+
+      .exam-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .mini-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .subject-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 450px) {
+
+      .top-banner {
+        font-size: 14px;
+      }
+
+      .hero h1 {
+        font-size: 29px;
+      }
+
+      .hero-buttons a {
+        display: block;
+        max-width: 280px;
+        margin: 10px auto;
+      }
+
+      .exam-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .mini-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .subject-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .feature-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- =========================
+       PATRIOTIC SCROLLING BANNER
+  ========================== -->
+
+  <div class="top-banner">
+    <div class="scroll-text">
+      🇮🇳❤️ देश प्रेम से बड़ा कोई प्रेम नहीं होता ❤️🇮🇳
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+      🇮🇳 जय हिन्द • वन्दे मातरम् 🇮🇳
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+      🇮🇳 देश प्रेम से बड़ा कोई प्रेम नहीं होता ❤️🇮🇳
+    </div>
+  </div>
+
+
+  <!-- =========================
+       NAVBAR
+  ========================== -->
+
+  <nav class="navbar">
+
+    <a href="/index.html" class="logo">
+      🏆 ExamPrepHub
+    </a>
+
+    <div class="nav-links">
+
+      <a href="/index.html">
+        🏠 Home
+      </a>
+
+      <a href="/tests.html" class="nav-btn">
+        📝 Tests
+      </a>
+
+      <a href="/login.html" class="nav-btn">
+        Login
+      </a>
+
+      <a href="/register.html" class="nav-btn register-btn">
+        Register
+      </a>
+
+      <!-- केवल Admin को दिखाई देगा -->
+      <a href="/admin.html"
+         id="adminBtn"
+         class="nav-btn">
+        👑 Admin Panel
+      </a>
+
+    </div>
+
+  </nav>
+
+
+  <!-- =========================
+       HERO
+  ========================== -->
+
+  <section class="hero">
+
+    <div class="hero-content">
+
+      <h1>🏆 ExamPrepHub</h1>
+
+      <h2>
+        भारत की Smart Competitive Exam Preparation Platform 🇮🇳
+      </h2>
+
+      <p>
+        SSC, Railway, Defence, Banking, Police, UPSSSC, Teaching
+        और अन्य प्रतियोगी परीक्षाओं की तैयारी करें।
+        Free Mock Tests, Test Series, Subject-wise और Chapter-wise
+        Practice के साथ अपनी तैयारी को बेहतर बनाएं।
+      </p>
+
+      <div class="hero-buttons">
+
+        <a href="/tests.html">
+          📝 Free Mock Tests शुरू करें
+        </a>
+
+        <a href="/register.html" class="green">
+          🚀 Free Account बनाएं
+        </a>
+
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- =========================
+       ALL EXAM CATEGORIES
+  ========================== -->
+
+  <section class="section">
+
+    <h2 class="section-title">
+      🎯 सभी प्रमुख Competitive Exams
+    </h2>
+
+    <p class="section-subtitle">
+      अपनी परीक्षा चुनें और बेहतर तैयारी की शुरुआत करें।
+    </p>
+
+    <div class="exam-grid">
+
+      <div class="exam-card">
+        <div class="exam-icon">📚</div>
+        <h3>SSC Exams</h3>
+        <p>CGL, CHSL, MTS, GD, CPO, JE और अन्य</p>
+      </div>
+
+      <div class="exam-card">
+        <div class="exam-icon">🚆</div>
+        <h3>Railway Exams</h3>
+        <p>RRB NTPC, Group D, ALP, Technician आदि</p>
+      </div>
+
+      <div class="exam-card">
+        <div class="exam-icon">🪖</div>
+        <h3>Defence Exams</h3>
+        <p>Army, Navy, Air Force, Agniveer आदि</p>
+      </div>
+
+      <div class="exam-card">
+        <div class="exam-icon">👮</div>
+        <h3>Police Exams</h3>
+        <p>SSC GD, UP Police, Constable, SI आदि</p>
+      </div>
+
+      <div class="exam-card">
+        <div class="exam-icon">🏛️</div>
+        <h3>UPSSSC Exams</h3>
+        <p>PET, Lekhpal, VDO और अन्य परीक्षाएँ</p>
+      </div>
+
+      <div class="exam-card">
+        <div class="exam-icon">🏦</div>
+        <h3>Banking Exams</h3>
+        <p>IBPS, SBI, RBI और अन्य Banking Exams</p>
+      </div>
+
+      <div class="exam-card">
+        <div class="exam-icon">👨‍🏫</div>
+        <h3>Teaching Exams</h3>
+        <p>CTET, UPTET, TET और Teaching Exams</p>
+      </div>
+
+      <div class="exam-card">
+        <div class="exam-icon">🎓</div>
+        <h3>Other Exams</h3>
+        <p>State और अन्य Competitive Examinations</p>
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- =========================
+       SSC EXAMS
+  ========================== -->
+
+  <section class="section ssc-section">
+
+    <h2 class="section-title">
+      📚 SSC के प्रमुख Exams
+    </h2>
+
+    <p class="section-subtitle">
+      SSC की अलग-अलग परीक्षाओं के लिए Mock Tests
+    </p>
+
+    <div class="mini-grid">
+
+      <div class="mini-card">🏆 SSC CGL</div>
+      <div class="mini-card">📝 SSC CHSL</div>
+      <div class="mini-card">📖 SSC MTS</div>
+      <div class="mini-card">🪖 SSC GD</div>
+      <div class="mini-card">👮 SSC CPO</div>
+      <div class="mini-card">🔧 SSC JE</div>
+      <div class="mini-card">📊 SSC Stenographer</div>
+      <div class="mini-card">⌨️ SSC Selection Post</div>
+      <div class="mini-card">📚 SSC JHT</div>
+      <div class="mini-card">🏛️ SSC Delhi Police</div>
+      <div class="mini-card">🎯 SSC SI</div>
+      <div class="mini-card">📋 SSC अन्य Exams</div>
+
+    </div>
+
+  </section>
+
+
+  <!-- =========================
+       RAILWAY
+  ========================== -->
+
+  <section class="section">
+
+    <h2 class="section-title">
+      🚆 Railway Exams
+    </h2>
+
+    <p class="section-subtitle">
+      Railway भर्ती परीक्षाओं की तैयारी
+    </p>
+
+    <div class="mini-grid">
+
+      <div class="mini-card">🚆 RRB NTPC</div>
+      <div class="mini-card">🛤️ RRB Group D</div>
+      <div class="mini-card">🔧 RRB ALP</div>
+      <div class="mini-card">⚙️ RRB Technician</div>
+      <div class="mini-card">👨‍🔧 RRB JE</div>
+      <div class="mini-card">📋 RRB अन्य Exams</div>
+
+    </div>
+
+  </section>
+
+
+  <!-- =========================
+       DEFENCE
+  ========================== -->
+
+  <section class="section ssc-section">
+
+    <h2 class="section-title">
+      🪖 Defence Exams
+    </h2>
+
+    <p class="section-subtitle">
+      देश सेवा के लक्ष्य के साथ तैयारी करें 🇮🇳
+    </p>
+
+    <div class="mini-grid">
+
+      <div class="mini-card">🇮🇳 Army Agniveer GD</div>
+      <div class="mini-card">🪖 Army GD</div>
+      <div class="mini-card">⚓ Navy Agniveer</div>
+      <div class="mini-card">✈️ Air Force Agniveer</div>
+      <div class="mini-card">🛡️ BSF</div>
+      <div class="mini-card">🛡️ CRPF</div>
+      <div class="mini-card">🛡️ CISF</div>
+      <div class="mini-card">🛡️ ITBP</div>
+      <div class="mini-card">🛡️ SSB</div>
+      <div class="mini-card">🛡️ Assam Rifles</div>
+      <div class="mini-card">🎖️ Territorial Army</div>
+      <div class="mini-card">🎯 Defence Other Exams</div>
+
+    </div>
+
+  </section>
+
+
+  <!-- =========================
+       UPSSSC / STATE
+  ========================== -->
+
+  <section class="section">
+
+    <h2 class="section-title">
+      🏛️ UPSSSC & State Exams
+    </h2>
+
+    <p class="section-subtitle">
+      उत्तर प्रदेश और अन्य राज्य स्तरीय परीक्षाओं की तैयारी
+    </p>
+
+    <div class="mini-grid">
+
+      <div class="mini-card">🏛️ UPSSSC PET</div>
+      <div class="mini-card">📋 UPSSSC Lekhpal</div>
+      <div class="mini-card">👨‍💼 UPSSSC VDO</div>
+      <div class="mini-card">👮 UP Police Constable</div>
+      <div class="mini-card">👮 UP Police SI</div>
+      <div class="mini-card">🏫 UP Teacher Exams</div>
+      <div class="mini-card">📚 CTET</div>
+      <div class="mini-card">📖 TET Exams</div>
+
+    </div>
+
+  </section>
+
+
+  <!-- =========================
+       SUBJECTS
+  ========================== -->
+
+  <section class="section subjects-section">
+
+    <h2 class="section-title">
+      📚 सभी प्रमुख Subjects
+    </h2>
+
+    <p class="section-subtitle">
+      Subject-wise और Chapter-wise तैयारी करें
+    </p>
+
+    <div class="subject-grid">
+
+      <div class="subject-card">
+        <div class="subject-icon">🌍</div>
+        <h3>General Knowledge</h3>
+      </div>
+
+      <div class="subject-card">
+        <div class="subject-icon">🧠</div>
+        <h3>General Studies</h3>
+      </div>
+
+      <div class="subject-card">
+        <div class="subject-icon">🏛️</div>
+        <h3>Indian Polity</h3>
+      </div>
+
+      <div class="subject-card">
+        <div class="subject-icon">📜</div>
+        <h3>History</h3>
+      </div>
+
+      <div class="subject-card">
+        <div class="subject-icon">🌏</div>
+        <h3>Geography</h3>
+      </div>
+
+      <div class="subject-card">
+        <div class="subject-icon">🧬</div>
+        <h3>Biology</h3>
+      </div>
+
+      <div class="subject-card">
+        <div class="subject-icon">⚛️</div>
+        <h3>Physics</h3>
+      </div>
+
+      <div class="subject-card">
+        <div class="subject-icon">🧪</div>
+        <h3>Chemistry</h3>
+      </div>
+
+      <div class="subject-card">
+        <div class="subject-icon">➗</div>
+        <h3>Mathematics</h3>
+      </div>
+
+      <div class="subject-card">
+        <div class="subject-icon">🧩</div>
+        <h3>Reasoning</h3>
+      </div>
+
+      <div class="subject-card">
+        <div class="subject-icon">🔤</div>
+        <h3>English</h3>
+      </div>
+
+      <div class="subject-card">
+        <div class="subject-icon">🪔</div>
+        <h3>Hindi</h3>
+      </div>
+
+      <div class="subject-card">
+        <div class="subject-icon">💻</div>
+        <h3>Computer</h3>
+      </div>
+
+      <div class="subject-card">
+        <div class="subject-icon">📰</div>
+        <h3>Current Affairs</h3>
+      </div>
+
+      <div class="subject-card">
+        <div class="subject-icon">💰</div>
+        <h3>Economics</h3>
+      </div>
+
+      <div class="subject-card">
+        <div class="subject-icon">🔬</div>
+        <h3>Science</h3>
+      </div>
+
+      <div class="subject-card">
+        <div class="subject-icon">🏺</div>
+        <h3>Ancient History</h3>
+      </div>
+
+      <div class="subject-card">
+        <div class="subject-icon">🏰</div>
+        <h3>Medieval History</h3>
+      </div>
+
+      <div class="subject-card">
+        <div class="subject-icon">🇮🇳</div>
+        <h3>Modern History</h3>
+      </div>
+
+      <div class="subject-card">
+        <div class="subject-icon">📊</div>
+        <h3>Static GK</h3>
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- =========================
+       FEATURES
+  ========================== -->
+
+  <section class="section">
+
+    <h2 class="section-title">
+      🚀 ExamPrepHub Features
+    </h2>
+
+    <p class="section-subtitle">
+      परीक्षा की तैयारी के लिए जरूरी सुविधाएँ
+    </p>
+
+    <div class="feature-grid">
+
+      <div class="feature-card">
+        <div class="feature-icon">📝</div>
+        <h3>Free Mock Tests</h3>
+        <p>
+          अलग-अलग परीक्षाओं के Free Mock Tests।
+        </p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">📚</div>
+        <h3>Subject-wise Tests</h3>
+        <p>
+          विषय के अनुसार Practice Tests।
+        </p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">📖</div>
+        <h3>Chapter-wise Tests</h3>
+        <p>
+          Chapter के अनुसार focused preparation।
+        </p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">⏱️</div>
+        <h3>Exam Timer</h3>
+        <p>
+          Real exam जैसी timed practice।
+        </p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">📊</div>
+        <h3>Detailed Results</h3>
+        <p>
+          Score और सही/गलत answers देखें।
+        </p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">💡</div>
+        <h3>Explanations</h3>
+        <p>
+          Questions के explanations के साथ सीखें।
+        </p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">👤</div>
+        <h3>Student Dashboard</h3>
+        <p>
+          अपने tests और results एक जगह देखें।
+        </p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">🔐</div>
+        <h3>Secure Account</h3>
+        <p>
+          Login और personal test history।
+        </p>
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- =========================
+       CTA
+  ========================== -->
+
+  <section class="section cta">
+
+    <h2>
+      🇮🇳 आज से अपनी तैयारी शुरू करें!
+    </h2>
+
+    <p>
+      Free account बनाएं और उपलब्ध Mock Tests attempt करें।
+    </p>
+
+    <a href="/register.html">
+      🚀 Create Free Account
+    </a>
+
+  </section>
+
+
+  <!-- =========================
+       FOOTER
+  ========================== -->
+
+  <footer>
+
+    <p>
+      © 2026 <strong>ExamPrepHub</strong> — All Rights Reserved.
+    </p>
+
+    <p>
+      📝 Free Mock Tests • 📚 Test Series • 🎯 Exam Preparation
+    </p>
+
+    <p>
+      🇮🇳 देश प्रेम से बड़ा कोई प्रेम नहीं होता 🇮🇳
+    </p>
+
+  </footer>
+
+
+  <!-- =========================
+       ADMIN VISIBILITY
+       यह script केवल एक बार है
+  ========================== -->
+
+  <script>
+
+    async function checkAdmin() {
+
+      try {
+
+        const response = await fetch("/api/auth/me", {
+          credentials: "include"
+        });
+
+        if (!response.ok) {
+          return;
+        }
+
+        const data = await response.json();
+
+        console.log("Current user:", data);
+
+        /*
+          API अगर { user: {...} } भेजे
+          या सीधे user object भेजे,
+          दोनों स्थिति में काम करेगा।
+        */
+
+        const user = data.user || data;
+
+        if (user && user.role === "admin") {
+
+          const adminBtn =
+            document.getElementById("adminBtn");
+
+          if (adminBtn) {
+            adminBtn.style.display = "inline-block";
+          }
+
+        }
+
+      } catch (error) {
+
+        console.log("User not logged in.");
+
+      }
+
+    }
+
+    checkAdmin();
+
+  </script>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+  // Exam names जो आपके Home Page पर पहले से मौजूद हैं
+  const exams = [
+    "SSC CGL",
+    "SSC CHSL",
+    "SSC MTS",
+    "SSC GD",
+    "SSC CPO",
+    "SSC JE",
+    "SSC Stenographer",
+    "SSC Selection Post",
+    "SSC JHT",
+    "SSC Delhi Police",
+    "SSC SI",
+    "SSC अन्य Exams",
+
+    "RRB NTPC",
+    "RRB Group D",
+    "RRB ALP",
+    "RRB Technician",
+    "RRB JE",
+    "RRB अन्य Exams",
+
+    "Army Agniveer GD",
+    "Army GD",
+    "Navy Agniveer",
+    "Air Force Agniveer",
+    "BSF",
+    "CRPF",
+    "CISF",
+    "ITBP",
+    "SSB",
+    "Assam Rifles",
+    "Territorial Army",
+    "Defence Other Exams",
+
+    "UPSSSC PET",
+    "UPSSSC Lekhpal",
+    "UPSSSC VDO",
+    "UP Police Constable",
+    "UP Police SI",
+    "UP Teacher Exams",
+    "CTET",
+    "TET Exams"
+  ];
+
+  // Existing cards/buttons को ढूँढकर clickable बनाना
+  document.querySelectorAll("a, button, .card, .exam-card, .mini-card").forEach(function (element) {
+
+    const text = element.textContent.trim();
+
+    const matchedExam = exams.find(function (exam) {
+      return text.includes(exam);
+    });
+
+    if (!matchedExam) return;
+
+    // अगर पहले से link नहीं है तो exam-tests.html पर भेजें
+    if (element.tagName.toLowerCase() === "a") {
+      element.href =
+        "/exam-tests.html?exam=" + encodeURIComponent(matchedExam);
+    } else {
+      element.style.cursor = "pointer";
+
+      element.addEventListener("click", function () {
+        window.location.href =
+          "/exam-tests.html?exam=" + encodeURIComponent(matchedExam);
+      });
+    }
+
+  });
+
+});
+</script>
+</body>
+
+</html>

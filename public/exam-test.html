@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Exam Tests | ExamPrepHub</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      background: #f5f7fb;
+      color: #222;
+    }
+
+    .topbar {
+      background: linear-gradient(90deg, #ff7a00, #ffb300);
+      color: white;
+      padding: 12px;
+      text-align: center;
+      font-weight: bold;
+    }
+
+    .navbar {
+      background: #ffffff;
+      padding: 15px 5%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    .logo {
+      font-size: 22px;
+      font-weight: bold;
+      color: #1565c0;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 15px;
+    }
+
+    .nav-links a {
+      text-decoration: none;
+      color: #333;
+      font-weight: 600;
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: 30px auto;
+      padding: 0 15px;
+    }
+
+    .heading {
+      text-align: center;
+      margin-bottom: 25px;
+    }
+
+    .heading h1 {
+      color: #1565c0;
+      margin-bottom: 8px;
+    }
+
+    .heading p {
+      color: #666;
+    }
+
+    #loading {
+      text-align: center;
+      padding: 30px;
+      font-size: 18px;
+    }
+
+    .tests-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 20px;
+    }
+
+    .test-card {
+      background: white;
+      border-radius: 14px;
+      padding: 20px;
+      box-shadow: 0 5px 18px rgba(0,0,0,0.08);
+      transition: 0.2s;
+    }
+
+    .test-card:hover {
+      transform: translateY(-3px);
+    }
+
+    .test-card h3 {
+      color: #1565c0;
+      margin-bottom: 12px;
+    }
+
+    .test-info {
+      color: #555;
+      line-height: 1.8;
+      margin-bottom: 15px;
+    }
+
+    .start-btn {
+      display: inline-block;
+      width: 100%;
+      text-align: center;
+      padding: 11px;
+      border-radius: 8px;
+      background: #1565c0;
+      color: white;
+      text-decoration: none;
+      font-weight: bold;
+    }
+
+    .start-btn:hover {
+      background: #0d47a1;
+    }
+
+    .empty {
+      background: white;
+      padding: 35px 20px;
+      text-align: center;
+      border-radius: 14px;
+      box-shadow: 0 5px 18px rgba(0,0,0,0.07);
+    }
+
+    .back-btn {
+      display: inline-block;
+      margin-top: 20px;
+      padding: 10px 18px;
+      background: #555;
+      color: white;
+      border-radius: 8px;
+      text-decoration: none;
+    }
+
+    @media (max-width: 600px) {
+      .navbar {
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      .nav-links {
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+
+      .heading h1 {
+        font-size: 25px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="topbar">
+    🏆 ExamPrepHub – India’s Free Learning & Test Preparation Platform
+  </div>
+
+  <nav class="navbar">
+    <div class="logo">ExamPrepHub</div>
+
+    <div class="nav-links">
+      <a href="/">Home</a>
+      <a href="/tests.html">All Tests</a>
+      <a href="/dashboard.html">Dashboard</a>
+    </div>
+  </nav>
+
+  <main class="container">
+
+    <div class="heading">
+      <h1 id="examTitle">Exam Tests</h1>
+      <p id="examSubtitle">Available Mock Tests</p>
+    </div>
+
+    <div id="loading">
+      ⏳ Tests loading...
+    </div>
+
+    <div id="testsContainer" class="tests-grid"></div>
+
+  </main>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const exam = params.get("exam");
+
+    const examTitle = document.getElementById("examTitle");
+    const examSubtitle = document.getElementById("examSubtitle");
+    const loading = document.getElementById("loading");
+    const testsContainer = document.getElementById("testsContainer");
+
+    function escapeHTML(value) {
+      return String(value ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    async function loadTests() {
+
+      if (!exam) {
+        loading.style.display = "none";
+
+        testsContainer.innerHTML = `
+          <div class="empty">
+            <h2>❌ Exam नहीं मिला</h2>
+            <p style="margin-top:10px;">
+              कृपया Home Page से कोई Exam चुनें।
+            </p>
+            <a href="/" class="back-btn">← Home पर जाएँ</a>
+          </div>
+        `;
+
+        return;
+      }
+
+      examTitle.textContent = exam;
+      examSubtitle.textContent = `${exam} के उपलब्ध Mock Tests`;
+
+      try {
+
+        const response = await fetch(
+          `/api/tests/exam/${encodeURIComponent(exam)}`
+        );
+
+        const contentType =
+          response.headers.get("content-type") || "";
+
+        if (!contentType.includes("application/json")) {
+          throw new Error("Server ने JSON के बजाय HTML response दिया");
+        }
+
+        const data = await response.json();
+
+        loading.style.display = "none";
+
+        if (!response.ok || !data.success) {
+          throw new Error(data.message || "Tests load नहीं हुए");
+        }
+
+        if (!data.tests || data.tests.length === 0) {
+
+          testsContainer.innerHTML = `
+            <div class="empty">
+              <h2>📚 अभी कोई Test उपलब्ध नहीं है</h2>
+
+              <p style="margin-top:10px;">
+                ${escapeHTML(exam)} के लिए अभी कोई Visible Test
+                Admin द्वारा नहीं बनाया गया है।
+              </p>
+
+              <a href="/" class="back-btn">
+                ← सभी Exams
+              </a>
+            </div>
+          `;
+
+          return;
+        }
+
+        testsContainer.innerHTML = data.tests.map(test => {
+
+          return `
+            <div class="test-card">
+
+              <h3>
+                ${escapeHTML(test.name)}
+              </h3>
+
+              <div class="test-info">
+
+                <div>
+                  📝 Questions:
+                  ${Number(test.totalQuestions || 0)}
+                </div>
+
+                <div>
+                  ⏱️ Duration:
+                  ${Number(test.duration || 0)} Minutes
+                </div>
+
+                ${
+                  test.batch
+                    ? `<div>🎯 Batch: ${escapeHTML(test.batch)}</div>`
+                    : ""
+                }
+
+                ${
+                  test.subject
+                    ? `<div>📖 Subject: ${escapeHTML(test.subject)}</div>`
+                    : ""
+                }
+
+                ${
+                  test.chapter
+                    ? `<div>📚 Chapter: ${escapeHTML(test.chapter)}</div>`
+                    : ""
+                }
+
+              </div>
+
+              <a
+                class="start-btn"
+                href="/test.html?id=${encodeURIComponent(test._id)}"
+              >
+                🚀 Start Test
+              </a>
+
+            </div>
+          `;
+
+        }).join("");
+
+      } catch (error) {
+
+        console.error("Load Tests Error:", error);
+
+        loading.style.display = "none";
+
+        testsContainer.innerHTML = `
+          <div class="empty">
+            <h2>⚠️ Error</h2>
+
+            <p style="margin-top:10px;">
+              Tests load नहीं हो सके।
+            </p>
+
+            <p style="margin-top:8px;color:#d32f2f;">
+              ${escapeHTML(error.message)}
+            </p>
+
+            <a href="/" class="back-btn">
+              ← Home पर जाएँ
+            </a>
+          </div>
+        `;
+      }
+    }
+
+    loadTests();
+  </script>
+
+</body>
+</html>

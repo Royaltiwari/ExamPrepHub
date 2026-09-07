@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Admin Panel - ExamPrepHub</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+    }
+
+    body {
+      background: #f1f5f9;
+      color: #1e293b;
+    }
+
+    header {
+      background: #0f172a;
+      color: white;
+      padding: 16px 20px;
+    }
+
+    .header-inner {
+      max-width: 1100px;
+      margin: auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .logo {
+      font-size: 21px;
+      font-weight: 800;
+    }
+
+    .admin-badge {
+      background: #dc2626;
+      padding: 7px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: bold;
+    }
+
+    main {
+      max-width: 1100px;
+      margin: auto;
+      padding: 25px 15px 50px;
+    }
+
+    .welcome {
+      background: white;
+      padding: 25px;
+      border-radius: 15px;
+      box-shadow: 0 5px 20px rgba(0,0,0,.06);
+      margin-bottom: 20px;
+    }
+
+    .welcome h1 {
+      font-size: 25px;
+      margin-bottom: 7px;
+    }
+
+    .welcome p {
+      color: #64748b;
+    }
+
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 18px;
+      margin-bottom: 25px;
+    }
+
+    .card {
+      background: white;
+      padding: 25px;
+      border-radius: 15px;
+      box-shadow: 0 5px 20px rgba(0,0,0,.05);
+    }
+
+    .card-icon {
+      font-size: 32px;
+      margin-bottom: 12px;
+    }
+
+    .card h2 {
+      font-size: 19px;
+      margin-bottom: 7px;
+    }
+
+    .card p {
+      color: #64748b;
+      font-size: 14px;
+      line-height: 1.5;
+      margin-bottom: 18px;
+    }
+
+    .btn {
+      display: inline-block;
+      border: none;
+      text-decoration: none;
+      cursor: pointer;
+      padding: 11px 17px;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 14px;
+    }
+
+    .blue {
+      background: #2563eb;
+      color: white;
+    }
+
+    .green {
+      background: #16a34a;
+      color: white;
+    }
+
+    .purple {
+      background: #7c3aed;
+      color: white;
+    }
+
+    .red {
+      background: #dc2626;
+      color: white;
+    }
+
+    .actions {
+      background: white;
+      padding: 22px;
+      border-radius: 15px;
+      box-shadow: 0 5px 20px rgba(0,0,0,.05);
+    }
+
+    .actions h2 {
+      margin-bottom: 15px;
+      font-size: 19px;
+    }
+
+    .action-buttons {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    #loading {
+      text-align: center;
+      padding: 30px;
+      background: white;
+      border-radius: 15px;
+    }
+
+    #adminContent {
+      display: none;
+    }
+
+    .error {
+      color: #b91c1c;
+      background: #fee2e2;
+      padding: 15px;
+      border-radius: 10px;
+      text-align: center;
+    }
+
+    @media (max-width: 750px) {
+      .cards {
+        grid-template-columns: 1fr;
+      }
+
+      .header-inner {
+        gap: 10px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <header>
+    <div class="header-inner">
+
+      <div class="logo">
+        🏆 ExamPrepHub
+      </div>
+
+      <div class="admin-badge">
+        ADMIN PANEL
+      </div>
+
+    </div>
+  </header>
+
+
+  <main>
+
+    <div id="loading">
+      🔄 Checking admin access...
+    </div>
+
+
+    <div id="adminContent">
+
+      <section class="welcome">
+
+        <h1>👋 Welcome, Admin</h1>
+
+        <p>
+          यहाँ से आप ExamPrepHub के Tests और Questions को manage कर सकते हैं।
+        </p>
+
+      </section>
+
+
+      <section class="cards">
+
+        <!-- TEST MANAGEMENT -->
+
+        <div class="card">
+
+          <div class="card-icon">
+            📝
+          </div>
+
+          <h2>
+            Test Management
+          </h2>
+
+          <p>
+            नया test बनाएँ, test details बदलें और
+            Visible / Non-visible status manage करें।
+          </p>
+
+          <a
+            href="/admin-tests.html"
+            class="btn blue"
+          >
+            Manage Tests
+          </a>
+
+        </div>
+
+
+        <!-- QUESTION MANAGEMENT -->
+
+        <div class="card">
+
+          <div class="card-icon">
+            ❓
+          </div>
+
+          <h2>
+            Question Management
+          </h2>
+
+          <p>
+            Questions add करें, options और correct answer
+            सेट करें तथा explanation जोड़ें।
+          </p>
+
+          <a
+            href="/admin-questions.html"
+            class="btn green"
+          >
+            Manage Questions
+          </a>
+
+        </div>
+
+
+        <!-- RESULT MANAGEMENT -->
+
+        <div class="card">
+
+          <div class="card-icon">
+            📊
+          </div>
+
+          <h2>
+            Results
+          </h2>
+
+          <p>
+            Students के test results और performance
+            देखने के लिए result management खोलें।
+          </p>
+
+          <a
+            href="/admin-results.html"
+            class="btn purple"
+          >
+            View Results
+          </a>
+
+        </div>
+
+      </section>
+
+
+      <section class="actions">
+
+        <h2>
+          ⚡ Quick Actions
+        </h2>
+
+        <div class="action-buttons">
+
+          <a
+            href="/admin-tests.html"
+            class="btn blue"
+          >
+            ➕ Create Test
+          </a>
+
+          <a
+            href="/dashboard.html"
+            class="btn green"
+          >
+            👨‍🎓 Student Dashboard
+          </a>
+
+          <button
+            onclick="logout()"
+            class="btn red"
+          >
+            🚪 Logout
+          </button>
+
+        </div>
+
+      </section>
+
+    </div>
+
+  </main>
+
+
+  <script>
+
+    // =====================================
+    // CHECK ADMIN
+    // =====================================
+
+    async function checkAdmin() {
+
+      try {
+
+        const response = await fetch(
+          "/api/auth/me",
+          {
+            credentials: "include"
+          }
+        );
+
+        const data = await response.json();
+
+        if (!response.ok || !data.success) {
+
+          window.location.href = "/login.html";
+
+          return;
+        }
+
+
+        const user = data.user;
+
+
+        // Admin check
+        if (user.role !== "admin") {
+
+          document.getElementById("loading").innerHTML = `
+            <div class="error">
+              ❌ Access Denied<br><br>
+              केवल Admin इस page को access कर सकता है।
+              <br><br>
+              <a href="/dashboard.html" class="btn blue">
+                Go to Dashboard
+              </a>
+            </div>
+          `;
+
+          return;
+        }
+
+
+        // Show admin panel
+
+        document.getElementById("loading").style.display =
+          "none";
+
+        document.getElementById("adminContent").style.display =
+          "block";
+
+      } catch (error) {
+
+        console.error(error);
+
+        document.getElementById("loading").innerHTML = `
+          <div class="error">
+            ❌ Server से connection नहीं हो पाया।
+          </div>
+        `;
+
+      }
+
+    }
+
+
+    // =====================================
+    // LOGOUT
+    // =====================================
+
+    async function logout() {
+
+      try {
+
+        await fetch(
+          "/api/auth/logout",
+          {
+            method: "POST",
+            credentials: "include"
+          }
+        );
+
+        window.location.href = "/login.html";
+
+      } catch (error) {
+
+        console.error(error);
+
+        window.location.href = "/login.html";
+
+      }
+
+    }
+
+
+    // =====================================
+    // START
+    // =====================================
+
+    checkAdmin();
+
+  </script>
+
+</body>
+</html>

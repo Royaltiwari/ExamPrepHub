@@ -1,0 +1,1355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Test Management - ExamPrepHub</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+    }
+
+    body {
+      background: #f1f5f9;
+      color: #1e293b;
+    }
+
+    header {
+      background: #0f172a;
+      color: white;
+      padding: 15px 20px;
+    }
+
+    .header-inner {
+      max-width: 1100px;
+      margin: auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .logo {
+      font-size: 21px;
+      font-weight: 800;
+    }
+
+    .admin-badge {
+      background: #dc2626;
+      padding: 7px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: bold;
+    }
+
+    main {
+      max-width: 1100px;
+      margin: auto;
+      padding: 25px 15px 50px;
+    }
+
+    .page-title {
+      background: white;
+      padding: 25px;
+      border-radius: 15px;
+      margin-bottom: 20px;
+      box-shadow: 0 5px 20px rgba(0,0,0,.06);
+    }
+
+    .page-title h1 {
+      font-size: 25px;
+      margin-bottom: 7px;
+    }
+
+    .page-title p {
+      color: #64748b;
+    }
+
+    .card {
+      background: white;
+      padding: 25px;
+      border-radius: 15px;
+      margin-bottom: 20px;
+      box-shadow: 0 5px 20px rgba(0,0,0,.05);
+    }
+
+    .card h2 {
+      margin-bottom: 20px;
+      color: #1e3a8a;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+    }
+
+    .form-group {
+      margin-bottom: 5px;
+    }
+
+    .full {
+      grid-column: 1 / -1;
+    }
+
+    label {
+      display: block;
+      font-weight: 700;
+      margin-bottom: 7px;
+    }
+
+    input,
+    select,
+    textarea {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      font-size: 15px;
+      outline: none;
+    }
+
+    textarea {
+      min-height: 90px;
+      resize: vertical;
+    }
+
+    input:focus,
+    select:focus,
+    textarea:focus {
+      border-color: #2563eb;
+    }
+
+    .visibility-box {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px;
+      background: #f8fafc;
+      border-radius: 8px;
+    }
+
+    .visibility-box input {
+      width: auto;
+    }
+
+    .btn {
+      display: inline-block;
+      border: none;
+      cursor: pointer;
+      padding: 11px 18px;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 14px;
+      text-decoration: none;
+    }
+
+    .blue {
+      background: #2563eb;
+      color: white;
+    }
+
+    .green {
+      background: #16a34a;
+      color: white;
+    }
+
+    .orange {
+      background: #f59e0b;
+      color: white;
+    }
+
+    .red {
+      background: #dc2626;
+      color: white;
+    }
+
+    .gray {
+      background: #64748b;
+      color: white;
+    }
+
+    .btn:disabled {
+      opacity: .6;
+      cursor: not-allowed;
+    }
+
+    .actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 20px;
+    }
+
+    .message {
+      display: none;
+      padding: 13px;
+      border-radius: 8px;
+      margin-bottom: 15px;
+      font-weight: 700;
+    }
+
+    .success {
+      background: #dcfce7;
+      color: #166534;
+    }
+
+    .error {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+
+    .test-item {
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 18px;
+      margin-bottom: 15px;
+    }
+
+    .test-item h3 {
+      margin-bottom: 10px;
+      color: #1e40af;
+    }
+
+    .test-info {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 12px;
+    }
+
+    .tag {
+      background: #eff6ff;
+      color: #1d4ed8;
+      padding: 5px 9px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .visible {
+      background: #dcfce7;
+      color: #166534;
+    }
+
+    .hidden {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+
+    .test-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 12px;
+    }
+
+    .empty {
+      text-align: center;
+      color: #64748b;
+      padding: 25px;
+    }
+
+    #loading {
+      background: white;
+      padding: 30px;
+      border-radius: 15px;
+      text-align: center;
+    }
+
+    #pageContent {
+      display: none;
+    }
+
+    @media (max-width: 700px) {
+
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .full {
+        grid-column: auto;
+      }
+
+      .card {
+        padding: 18px;
+      }
+
+      .page-title {
+        padding: 18px;
+      }
+
+      .page-title h1 {
+        font-size: 21px;
+      }
+
+      .header-inner {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+<header>
+
+  <div class="header-inner">
+
+    <div class="logo">
+      🏆 ExamPrepHub
+    </div>
+
+    <div class="admin-badge">
+      👑 ADMIN PANEL
+    </div>
+
+  </div>
+
+</header>
+
+
+<main>
+
+  <div id="loading">
+    🔄 Checking admin access...
+  </div>
+
+
+  <div id="pageContent">
+
+    <section class="page-title">
+
+      <h1>📝 Test Management</h1>
+
+      <p>
+        यहाँ से Test बनाएं और उन्हें manage करें।
+      </p>
+
+    </section>
+
+
+    <div id="successMessage" class="message success"></div>
+
+    <div id="errorMessage" class="message error"></div>
+
+
+    <!-- CREATE TEST -->
+
+    <section class="card">
+
+      <h2 id="formTitle">
+        ➕ Create New Test
+      </h2>
+
+      <form id="testForm">
+
+        <div class="form-grid">
+
+
+          <!-- TEST NAME -->
+
+          <div class="form-group">
+
+            <label>
+              Test Name *
+            </label>
+
+            <input
+              type="text"
+              id="name"
+              placeholder="Example: SSC GD GK Mock Test 01"
+              required>
+
+          </div>
+
+
+          <!-- EXAM -->
+
+          <div class="form-group">
+
+            <label>
+              Exam *
+            </label>
+
+            <select id="exam" required>
+
+              <option value="">
+                -- Select Exam --
+              </option>
+
+              <option>SSC CGL</option>
+              <option>SSC CHSL</option>
+              <option>SSC MTS</option>
+              <option>SSC GD</option>
+              <option>SSC CPO</option>
+              <option>SSC JE</option>
+              <option>RRB NTPC</option>
+              <option>RRB Group D</option>
+              <option>RRB ALP</option>
+              <option>Army Agniveer GD</option>
+              <option>Navy Agniveer</option>
+              <option>Air Force Agniveer</option>
+              <option>BSF</option>
+              <option>CRPF</option>
+              <option>CISF</option>
+              <option>ITBP</option>
+              <option>SSB</option>
+              <option>UP Police</option>
+              <option>UPSSSC PET</option>
+              <option>CTET</option>
+              <option>TET</option>
+              <option>Other</option>
+
+            </select>
+
+          </div>
+
+
+          <!-- BATCH -->
+
+          <div class="form-group">
+
+            <label>
+              Batch *
+            </label>
+
+            <input
+              type="text"
+              id="batch"
+              placeholder="Example: SSC GD 2026 Batch 01"
+              required>
+
+          </div>
+
+
+          <!-- SUBJECT -->
+
+          <div class="form-group">
+
+            <label>
+              Subject *
+            </label>
+
+            <select id="subject" required>
+
+              <option value="">
+                -- Select Subject --
+              </option>
+
+              <option>General Knowledge</option>
+              <option>General Studies</option>
+              <option>History</option>
+              <option>Geography</option>
+              <option>Indian Polity</option>
+              <option>Economics</option>
+              <option>Biology</option>
+              <option>Physics</option>
+              <option>Chemistry</option>
+              <option>Science</option>
+              <option>Mathematics</option>
+              <option>Reasoning</option>
+              <option>English</option>
+              <option>Hindi</option>
+              <option>Computer</option>
+              <option>Current Affairs</option>
+              <option>Static GK</option>
+              <option>Other</option>
+
+            </select>
+
+          </div>
+
+
+          <!-- CHAPTER -->
+
+          <div class="form-group">
+
+            <label>
+              Chapter
+            </label>
+
+            <input
+              type="text"
+              id="chapter"
+              placeholder="Example: Indian Constitution">
+
+          </div>
+
+
+          <!-- LANGUAGE -->
+
+          <div class="form-group">
+
+            <label>
+              Language *
+            </label>
+
+            <select id="language" required>
+
+              <option value="Bilingual">
+                🇮🇳 Hindi + 🇬🇧 English
+              </option>
+
+              <option value="Hindi">
+                🇮🇳 Hindi
+              </option>
+
+              <option value="English">
+                🇬🇧 English
+              </option>
+
+            </select>
+
+          </div>
+
+
+          <!-- TIMER -->
+
+          <div class="form-group">
+
+            <label>
+              Timer / Duration (Minutes) *
+            </label>
+
+            <input
+              type="number"
+              id="duration"
+              value="30"
+              min="1"
+              max="300"
+              required>
+
+          </div>
+
+
+          <!-- DESCRIPTION -->
+
+          <div class="form-group full">
+
+            <label>
+              Test Description
+            </label>
+
+            <textarea
+              id="description"
+              placeholder="इस Test के बारे में जानकारी लिखें..."></textarea>
+
+          </div>
+
+
+          <!-- VISIBILITY -->
+
+          <div class="form-group full">
+
+            <label>
+              Test Visibility
+            </label>
+
+            <div class="visibility-box">
+
+              <input
+                type="checkbox"
+                id="visible">
+
+              <span>
+                👁️ Visible — Students को यह Test दिखाई देगा
+              </span>
+
+            </div>
+
+          </div>
+
+
+        </div>
+
+
+        <div class="actions">
+
+          <button
+            type="submit"
+            class="btn blue"
+            id="saveButton">
+
+            ➕ Create Test
+
+          </button>
+
+
+          <button
+            type="button"
+            class="btn gray"
+            id="cancelButton"
+            style="display:none;">
+
+            Cancel Edit
+
+          </button>
+
+        </div>
+
+      </form>
+
+    </section>
+
+
+    <!-- TEST LIST -->
+
+    <section class="card">
+
+      <h2>
+        📚 All Tests
+      </h2>
+
+      <div id="testList">
+
+        <div class="empty">
+          🔄 Tests loading...
+        </div>
+
+      </div>
+
+    </section>
+
+  </div>
+
+</main>
+
+
+<script>
+
+  let tests = [];
+  let editingTestId = null;
+
+
+  // =====================================
+  // AUTH
+  // =====================================
+
+  async function checkAdmin() {
+
+    try {
+
+      const response = await fetch(
+        "/api/auth/me",
+        {
+          credentials: "include"
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+
+        window.location.href =
+          "/login.html";
+
+        return false;
+      }
+
+
+      const user =
+        data.user || data;
+
+
+      if (!user || user.role !== "admin") {
+
+        document.getElementById("loading").innerHTML = `
+
+          <div class="error"
+               style="display:block;">
+
+            ❌ Access Denied
+
+            <br><br>
+
+            केवल Admin इस page को access कर सकता है।
+
+            <br><br>
+
+            <a
+              href="/dashboard.html"
+              class="btn blue">
+
+              Go to Dashboard
+
+            </a>
+
+          </div>
+
+        `;
+
+        return false;
+      }
+
+
+      document.getElementById("loading")
+        .style.display = "none";
+
+      document.getElementById("pageContent")
+        .style.display = "block";
+
+
+      return true;
+
+    } catch (error) {
+
+      console.error(error);
+
+      document.getElementById("loading").innerHTML = `
+
+        <div class="error"
+             style="display:block;">
+
+          ❌ Server से connection नहीं हो पाया।
+
+        </div>
+
+      `;
+
+      return false;
+    }
+
+  }
+
+
+  // =====================================
+  // LOAD TESTS
+  // =====================================
+
+  async function loadTests() {
+
+    try {
+
+      const response = await fetch(
+        "/api/admin/tests",
+        {
+          credentials: "include"
+        }
+      );
+
+
+      const data =
+        await response.json();
+
+
+      if (!response.ok) {
+
+        throw new Error(
+          data.message ||
+          data.error ||
+          "Tests load नहीं हुए।"
+        );
+
+      }
+
+
+      tests =
+        data.tests ||
+        data ||
+        [];
+
+
+      renderTests();
+
+
+    } catch (error) {
+
+      console.error(error);
+
+      showError(error.message);
+
+      document.getElementById("testList").innerHTML = `
+
+        <div class="empty">
+
+          ❌ ${escapeHtml(error.message)}
+
+        </div>
+
+      `;
+
+    }
+
+  }
+
+
+  // =====================================
+  // CREATE / UPDATE TEST
+  // =====================================
+
+  document.getElementById("testForm")
+    .addEventListener(
+      "submit",
+      async function(event) {
+
+        event.preventDefault();
+
+
+        const payload = {
+
+          name:
+            document.getElementById("name")
+              .value.trim(),
+
+          exam:
+            document.getElementById("exam")
+              .value,
+
+          batch:
+            document.getElementById("batch")
+              .value.trim(),
+
+          subject:
+            document.getElementById("subject")
+              .value,
+
+          chapter:
+            document.getElementById("chapter")
+              .value.trim(),
+
+          language:
+            document.getElementById("language")
+              .value,
+
+          duration:
+            Number(
+              document.getElementById("duration")
+                .value
+            ),
+
+          description:
+            document.getElementById("description")
+              .value.trim(),
+
+          visible:
+            document.getElementById("visible")
+              .checked
+
+        };
+
+
+        try {
+
+          const saveButton =
+            document.getElementById("saveButton");
+
+
+          saveButton.disabled = true;
+
+          saveButton.textContent =
+            editingTestId
+              ? "⏳ Updating..."
+              : "⏳ Creating...";
+
+
+          let url =
+            "/api/admin/tests";
+
+          let method =
+            "POST";
+
+
+          if (editingTestId) {
+
+            url =
+              `/api/admin/tests/${editingTestId}`;
+
+            method =
+              "PUT";
+
+          }
+
+
+          const response =
+            await fetch(
+              url,
+              {
+                method,
+                headers: {
+                  "Content-Type":
+                    "application/json"
+                },
+                credentials: "include",
+                body:
+                  JSON.stringify(payload)
+              }
+            );
+
+
+          const data =
+            await response.json();
+
+
+          if (!response.ok) {
+
+            throw new Error(
+              data.message ||
+              data.error ||
+              "Test save नहीं हुआ।"
+            );
+
+          }
+
+
+          showSuccess(
+            editingTestId
+              ? "✅ Test successfully updated!"
+              : "✅ Test successfully created!"
+          );
+
+
+          resetForm();
+
+          await loadTests();
+
+
+        } catch (error) {
+
+          showError(error.message);
+
+        } finally {
+
+          const saveButton =
+            document.getElementById("saveButton");
+
+          saveButton.disabled = false;
+
+          saveButton.textContent =
+            editingTestId
+              ? "Update Test"
+              : "➕ Create Test";
+
+        }
+
+      }
+    );
+
+
+  // =====================================
+  // RENDER TESTS
+  // =====================================
+
+  function renderTests() {
+
+    const list =
+      document.getElementById("testList");
+
+
+    if (!tests.length) {
+
+      list.innerHTML = `
+
+        <div class="empty">
+
+          अभी कोई Test नहीं बनाया गया।
+
+        </div>
+
+      `;
+
+      return;
+    }
+
+
+    list.innerHTML =
+      tests.map(
+        test => `
+
+          <div class="test-item">
+
+            <h3>
+              📝 ${escapeHtml(test.name || "Untitled")}
+            </h3>
+
+
+            <div class="test-info">
+
+              <span class="tag">
+                🎯 ${escapeHtml(test.exam || "-")}
+              </span>
+
+              <span class="tag">
+                📦 ${escapeHtml(test.batch || "-")}
+              </span>
+
+              <span class="tag">
+                📚 ${escapeHtml(test.subject || "-")}
+              </span>
+
+              <span class="tag">
+                📖 ${escapeHtml(test.chapter || "-")}
+              </span>
+
+              <span class="tag">
+                🌐 ${escapeHtml(test.language || "Bilingual")}
+              </span>
+
+              <span class="tag">
+                ⏱️ ${test.duration || 0} Minutes
+              </span>
+
+              <span class="tag">
+                ❓ ${test.totalQuestions || 0} Questions
+              </span>
+
+              <span class="tag ${
+                test.visible
+                  ? "visible"
+                  : "hidden"
+              }">
+
+                ${
+                  test.visible
+                    ? "👁️ Visible"
+                    : "🚫 Non-visible"
+                }
+
+              </span>
+
+            </div>
+
+
+            ${
+              test.description
+                ? `
+                  <p style="color:#64748b;margin-top:8px;">
+                    ${escapeHtml(test.description)}
+                  </p>
+                `
+                : ""
+            }
+
+
+            <div class="test-actions">
+
+              <button
+                class="btn orange"
+                onclick="editTest('${test._id}')">
+
+                ✏️ Edit
+
+              </button>
+
+
+              <button
+                class="btn green"
+                onclick="manageQuestions('${test._id}')">
+
+                ❓ Questions
+
+              </button>
+
+
+              <button
+                class="btn red"
+                onclick="deleteTest('${test._id}')">
+
+                🗑️ Delete
+
+              </button>
+
+            </div>
+
+          </div>
+
+        `
+      ).join("");
+
+  }
+
+
+  // =====================================
+  // EDIT TEST
+  // =====================================
+
+  function editTest(id) {
+
+    const test =
+      tests.find(
+        item => item._id === id
+      );
+
+
+    if (!test) {
+
+      showError("Test नहीं मिला।");
+
+      return;
+    }
+
+
+    editingTestId = id;
+
+
+    document.getElementById("name").value =
+      test.name || "";
+
+    document.getElementById("exam").value =
+      test.exam || "";
+
+    document.getElementById("batch").value =
+      test.batch || "";
+
+    document.getElementById("subject").value =
+      test.subject || "";
+
+    document.getElementById("chapter").value =
+      test.chapter || "";
+
+    document.getElementById("language").value =
+      test.language || "Bilingual";
+
+    document.getElementById("duration").value =
+      test.duration || 30;
+
+    document.getElementById("description").value =
+      test.description || "";
+
+    document.getElementById("visible").checked =
+      Boolean(test.visible);
+
+
+    document.getElementById("formTitle")
+      .textContent =
+      "✏️ Edit Test";
+
+
+    document.getElementById("saveButton")
+      .textContent =
+      "Update Test";
+
+
+    document.getElementById("cancelButton")
+      .style.display =
+      "inline-block";
+
+
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth"
+    });
+
+  }
+
+
+  // =====================================
+  // DELETE TEST
+  // =====================================
+
+  async function deleteTest(id) {
+
+    if (
+      !confirm(
+        "⚠️ क्या आप इस Test को Delete करना चाहते हैं?"
+      )
+    ) {
+      return;
+    }
+
+
+    try {
+
+      const response =
+        await fetch(
+          `/api/admin/tests/${id}`,
+          {
+            method: "DELETE",
+            credentials: "include"
+          }
+        );
+
+
+      const data =
+        await response.json();
+
+
+      if (!response.ok) {
+
+        throw new Error(
+          data.message ||
+          data.error ||
+          "Test delete नहीं हुआ।"
+        );
+
+      }
+
+
+      showSuccess(
+        "✅ Test successfully deleted!"
+      );
+
+
+      await loadTests();
+
+
+    } catch (error) {
+
+      showError(error.message);
+
+    }
+
+  }
+
+
+  // =====================================
+  // MANAGE QUESTIONS
+  // =====================================
+
+  function manageQuestions(id) {
+
+    window.location.href =
+      `/admin-questions.html?test=${encodeURIComponent(id)}`;
+
+  }
+
+
+  // =====================================
+  // RESET
+  // =====================================
+
+  document.getElementById("cancelButton")
+    .addEventListener(
+      "click",
+      resetForm
+    );
+
+
+  function resetForm() {
+
+    editingTestId = null;
+
+    document.getElementById("testForm")
+      .reset();
+
+
+    document.getElementById("duration")
+      .value = 30;
+
+
+    document.getElementById("language")
+      .value = "Bilingual";
+
+
+    document.getElementById("formTitle")
+      .textContent =
+      "➕ Create New Test";
+
+
+    document.getElementById("saveButton")
+      .textContent =
+      "➕ Create Test";
+
+
+    document.getElementById("cancelButton")
+      .style.display =
+      "none";
+
+  }
+
+
+  // =====================================
+  // MESSAGES
+  // =====================================
+
+  function showSuccess(message) {
+
+    const box =
+      document.getElementById(
+        "successMessage"
+      );
+
+    box.textContent =
+      message;
+
+    box.style.display =
+      "block";
+
+
+    document.getElementById(
+      "errorMessage"
+    ).style.display =
+      "none";
+
+
+    setTimeout(
+      () => {
+        box.style.display =
+          "none";
+      },
+      4000
+    );
+
+  }
+
+
+  function showError(message) {
+
+    const box =
+      document.getElementById(
+        "errorMessage"
+      );
+
+    box.textContent =
+      "❌ " + message;
+
+    box.style.display =
+      "block";
+
+
+    document.getElementById(
+      "successMessage"
+    ).style.display =
+      "none";
+
+  }
+
+
+  // =====================================
+  // ESCAPE HTML
+  // =====================================
+
+  function escapeHtml(value) {
+
+    return String(value)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
+
+  }
+
+
+  // =====================================
+  // START
+  // =====================================
+
+  async function startPage() {
+
+    const isAdmin =
+      await checkAdmin();
+
+
+    if (!isAdmin) {
+      return;
+    }
+
+
+    await loadTests();
+
+  }
+
+
+  startPage();
+
+</script>
+
+</body>
+</html>

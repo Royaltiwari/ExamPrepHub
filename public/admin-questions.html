@@ -1,0 +1,1612 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Question Management - ExamPrepHub</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+    }
+
+    body {
+      background: #f1f5f9;
+      color: #1e293b;
+    }
+
+    header {
+      background: #0f172a;
+      color: white;
+      padding: 16px 20px;
+    }
+
+    .header-inner {
+      max-width: 1100px;
+      margin: auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .logo {
+      font-size: 21px;
+      font-weight: 800;
+    }
+
+    .badge {
+      background: #16a34a;
+      padding: 7px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: bold;
+    }
+
+    main {
+      max-width: 1100px;
+      margin: auto;
+      padding: 25px 15px 60px;
+    }
+
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    .top-bar h1 {
+      font-size: 25px;
+    }
+
+    .btn {
+      border: none;
+      text-decoration: none;
+      cursor: pointer;
+      padding: 11px 17px;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 14px;
+      display: inline-block;
+    }
+
+    .blue {
+      background: #2563eb;
+      color: white;
+    }
+
+    .green {
+      background: #16a34a;
+      color: white;
+    }
+
+    .red {
+      background: #dc2626;
+      color: white;
+    }
+
+    .gray {
+      background: #64748b;
+      color: white;
+    }
+
+    .card {
+      background: white;
+      border-radius: 15px;
+      padding: 22px;
+      margin-bottom: 20px;
+      box-shadow: 0 5px 20px rgba(0,0,0,.06);
+    }
+
+    .card h2 {
+      margin-bottom: 18px;
+      font-size: 20px;
+    }
+
+    .test-info {
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      padding: 15px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+    }
+
+    .test-info strong {
+      color: #1d4ed8;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+    }
+
+    .full {
+      grid-column: 1 / -1;
+    }
+
+    label {
+      display: block;
+      font-weight: 700;
+      margin-bottom: 7px;
+      font-size: 14px;
+    }
+
+    input,
+    textarea,
+    select {
+      width: 100%;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      padding: 11px;
+      font-size: 14px;
+      outline: none;
+      background: white;
+    }
+
+    input:focus,
+    textarea:focus,
+    select:focus {
+      border-color: #2563eb;
+      box-shadow: 0 0 0 2px rgba(37,99,235,.1);
+    }
+
+    textarea {
+      min-height: 100px;
+      resize: vertical;
+    }
+
+    .section-title {
+      grid-column: 1 / -1;
+      font-size: 17px;
+      font-weight: 800;
+      margin-top: 5px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid #e2e8f0;
+    }
+
+    .option-box {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      padding: 15px;
+      border-radius: 10px;
+    }
+
+    .option-title {
+      font-weight: 800;
+      margin-bottom: 8px;
+      color: #334155;
+    }
+
+    .correct-box {
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      padding: 15px;
+      border-radius: 10px;
+    }
+
+    .form-buttons {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 5px;
+    }
+
+    .message {
+      padding: 13px;
+      border-radius: 9px;
+      margin-bottom: 15px;
+      display: none;
+      font-weight: 600;
+    }
+
+    .success {
+      background: #dcfce7;
+      color: #166534;
+    }
+
+    .error {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+
+    .question-item {
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 18px;
+      margin-bottom: 15px;
+      background: #fff;
+    }
+
+    .question-header {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      align-items: flex-start;
+      margin-bottom: 12px;
+    }
+
+    .question-number {
+      font-weight: 800;
+      color: #2563eb;
+      font-size: 17px;
+    }
+
+    .question-text {
+      line-height: 1.6;
+      margin-bottom: 10px;
+      white-space: pre-line;
+    }
+
+    .options-list {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin: 10px 0;
+    }
+
+    .option {
+      background: #f8fafc;
+      padding: 9px;
+      border-radius: 7px;
+      font-size: 14px;
+    }
+
+    .answer {
+      background: #dcfce7;
+      color: #166534;
+      padding: 9px;
+      border-radius: 7px;
+      margin-top: 10px;
+      font-weight: 700;
+    }
+
+    .explanation {
+      background: #f8fafc;
+      padding: 12px;
+      border-radius: 8px;
+      margin-top: 10px;
+      line-height: 1.6;
+      white-space: pre-line;
+    }
+
+    .question-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 14px;
+      flex-wrap: wrap;
+    }
+
+    .small-btn {
+      padding: 8px 12px;
+      border: none;
+      border-radius: 7px;
+      cursor: pointer;
+      font-weight: 700;
+      font-size: 13px;
+    }
+
+    .empty {
+      text-align: center;
+      padding: 30px;
+      color: #64748b;
+    }
+
+    #pageLoading {
+      background: white;
+      padding: 30px;
+      text-align: center;
+      border-radius: 15px;
+    }
+
+    #mainContent {
+      display: none;
+    }
+
+    @media (max-width: 700px) {
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .full {
+        grid-column: auto;
+      }
+
+      .options-list {
+        grid-template-columns: 1fr;
+      }
+
+      .top-bar h1 {
+        font-size: 21px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="logo">🏆 ExamPrepHub</div>
+    <div class="badge">ADMIN • QUESTIONS</div>
+  </div>
+</header>
+
+<main>
+
+  <div id="pageLoading">
+    🔄 Checking admin access...
+  </div>
+
+  <div id="mainContent">
+
+    <div class="top-bar">
+      <h1>❓ Question Management</h1>
+
+      <div>
+        <a href="/admin.html" class="btn gray">← Admin Panel</a>
+        <a href="/admin-tests.html" class="btn blue">📝 Tests</a>
+      </div>
+    </div>
+
+    <div id="message" class="message"></div>
+
+    <!-- TEST INFORMATION -->
+    <div class="card">
+      <div class="test-info">
+        Selected Test:
+        <strong id="testName">Loading...</strong>
+        <br>
+        <span id="testDetails"></span>
+      </div>
+    </div>
+
+    <!-- ADD QUESTION -->
+    <div class="card">
+
+      <h2 id="formTitle">➕ Add New Question</h2>
+
+      <form id="questionForm">
+
+        <input type="hidden" id="questionId">
+
+        <div class="form-grid">
+
+          <!-- HINDI QUESTION -->
+          <div>
+            <label>🇮🇳 Question Hindi</label>
+
+            <textarea
+              id="questionHindi"
+              placeholder="प्रश्न हिंदी में लिखें..."
+              required
+            ></textarea>
+          </div>
+
+          <!-- ENGLISH QUESTION -->
+          <div>
+            <label>🇬🇧 Question English</label>
+
+            <textarea
+              id="questionEnglish"
+              placeholder="Write question in English..."
+            ></textarea>
+          </div>
+
+          <div class="section-title">
+            🅰️ Options / विकल्प
+          </div>
+
+          <!-- OPTION A -->
+          <div class="option-box">
+            <div class="option-title">Option A</div>
+
+            <input
+              type="text"
+              id="hi0"
+              placeholder="Hindi option A"
+              required
+            >
+
+            <br><br>
+
+            <input
+              type="text"
+              id="en0"
+              placeholder="English option A"
+            >
+          </div>
+
+          <!-- OPTION B -->
+          <div class="option-box">
+            <div class="option-title">Option B</div>
+
+            <input
+              type="text"
+              id="hi1"
+              placeholder="Hindi option B"
+              required
+            >
+
+            <br><br>
+
+            <input
+              type="text"
+              id="en1"
+              placeholder="English option B"
+            >
+          </div>
+
+          <!-- OPTION C -->
+          <div class="option-box">
+            <div class="option-title">Option C</div>
+
+            <input
+              type="text"
+              id="hi2"
+              placeholder="Hindi option C"
+              required
+            >
+
+            <br><br>
+
+            <input
+              type="text"
+              id="en2"
+              placeholder="English option C"
+            >
+          </div>
+
+          <!-- OPTION D -->
+          <div class="option-box">
+            <div class="option-title">Option D</div>
+
+            <input
+              type="text"
+              id="hi3"
+              placeholder="Hindi option D"
+              required
+            >
+
+            <br><br>
+
+            <input
+              type="text"
+              id="en3"
+              placeholder="English option D"
+            >
+          </div>
+
+          <!-- CORRECT ANSWER -->
+          <div class="correct-box">
+
+            <label>✅ Correct Answer</label>
+
+            <select id="correctAnswer" required>
+              <option value="">-- Select Correct Option --</option>
+              <option value="0">A</option>
+              <option value="1">B</option>
+              <option value="2">C</option>
+              <option value="3">D</option>
+            </select>
+
+          </div>
+
+          <!-- EXPLANATION -->
+          <div class="section-title">
+            💡 Explanation / व्याख्या
+          </div>
+
+          <div>
+            <label>🇮🇳 Hindi Explanation</label>
+
+            <textarea
+              id="explanationHindi"
+              placeholder="हिंदी में explanation लिखें..."
+            ></textarea>
+          </div>
+
+          <div>
+            <label>🇬🇧 English Explanation</label>
+
+            <textarea
+              id="explanationEnglish"
+              placeholder="Write explanation in English..."
+            ></textarea>
+          </div>
+
+          <!-- BUTTONS -->
+          <div class="full form-buttons">
+
+            <button
+              type="submit"
+              class="btn green"
+              id="saveBtn"
+            >
+              ➕ Add Question
+            </button>
+
+            <button
+              type="button"
+              class="btn gray"
+              id="cancelBtn"
+              style="display:none;"
+              onclick="resetForm()"
+            >
+              Cancel Edit
+            </button>
+
+          </div>
+
+        </div>
+
+      </form>
+
+    </div>
+
+    <!-- QUESTIONS LIST -->
+    <div class="card">
+
+      <h2>📚 Questions List</h2>
+
+      <div id="questionsList">
+        🔄 Loading questions...
+      </div>
+
+    </div>
+
+  </div>
+
+</main>
+
+
+<script>
+
+let testId = null;
+let currentTest = null;
+let questions = [];
+
+
+/* =========================================
+   SHOW MESSAGE
+========================================= */
+
+function showMessage(text, type = "success") {
+
+  const box = document.getElementById("message");
+
+  box.textContent = text;
+
+  box.className = "message " + type;
+
+  box.style.display = "block";
+
+  window.scrollTo({
+    top: 0,
+    behavior: "smooth"
+  });
+
+  setTimeout(() => {
+    box.style.display = "none";
+  }, 4000);
+}
+
+
+/* =========================================
+   GET TEST ID
+========================================= */
+
+function getTestId() {
+
+  const params = new URLSearchParams(window.location.search);
+
+  return params.get("test");
+}
+
+
+/* =========================================
+   CHECK ADMIN
+========================================= */
+
+async function checkAdmin() {
+
+  try {
+
+    const response = await fetch(
+      "/api/auth/me",
+      {
+        credentials: "include"
+      }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok || !data.success) {
+
+      window.location.href = "/login.html";
+
+      return;
+    }
+
+    const user = data.user;
+
+    if (!user || user.role !== "admin") {
+
+      document.getElementById("pageLoading").innerHTML = `
+        <div style="
+          background:#fee2e2;
+          color:#991b1b;
+          padding:20px;
+          border-radius:12px;
+          font-weight:700;
+        ">
+          ❌ Access Denied<br><br>
+          केवल Admin इस page को access कर सकता है।
+          <br><br>
+          <a href="/dashboard.html" class="btn blue">
+            Go to Dashboard
+          </a>
+        </div>
+      `;
+
+      return;
+    }
+
+
+    testId = getTestId();
+
+
+    if (!testId) {
+
+      document.getElementById("pageLoading").innerHTML = `
+        <div style="
+          background:#fee2e2;
+          color:#991b1b;
+          padding:20px;
+          border-radius:12px;
+        ">
+          ❌ Test ID नहीं मिला।
+          <br><br>
+          पहले Admin Panel → Test Management से
+          test select करें।
+          <br><br>
+          <a href="/admin-tests.html" class="btn blue">
+            Go to Tests
+          </a>
+        </div>
+      `;
+
+      return;
+    }
+
+
+    document.getElementById("pageLoading").style.display = "none";
+
+    document.getElementById("mainContent").style.display = "block";
+
+
+    await loadTest();
+
+    await loadQuestions();
+
+  } catch (error) {
+
+    console.error(error);
+
+    document.getElementById("pageLoading").innerHTML = `
+      <div style="
+        background:#fee2e2;
+        color:#991b1b;
+        padding:20px;
+        border-radius:12px;
+      ">
+        ❌ Server से connection नहीं हो पाया।
+      </div>
+    `;
+
+  }
+
+}
+
+
+/* =========================================
+   LOAD TEST
+========================================= */
+
+async function loadTest() {
+
+  try {
+
+    const response = await fetch(
+      "/api/admin/tests",
+      {
+        credentials: "include"
+      }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok || !data.success) {
+
+      throw new Error(
+        data.message || "Unable to load tests"
+      );
+    }
+
+
+    const tests = data.tests || [];
+
+    currentTest = tests.find(
+      test => String(test._id) === String(testId)
+    );
+
+
+    if (!currentTest) {
+
+      document.getElementById("testName").textContent =
+        "Test नहीं मिला";
+
+      return;
+    }
+
+
+    document.getElementById("testName").textContent =
+      currentTest.name || "Unnamed Test";
+
+
+    document.getElementById("testDetails").textContent =
+      [
+        currentTest.exam,
+        currentTest.batch,
+        currentTest.subject,
+        currentTest.chapter
+      ]
+      .filter(Boolean)
+      .join(" • ");
+
+  } catch (error) {
+
+    console.error(error);
+
+    document.getElementById("testName").textContent =
+      "Unable to load test";
+
+  }
+
+}
+
+
+/* =========================================
+   LOAD QUESTIONS
+========================================= */
+
+async function loadQuestions() {
+
+  const list =
+    document.getElementById("questionsList");
+
+  list.innerHTML = "🔄 Loading questions...";
+
+
+  try {
+
+    /*
+      IMPORTANT:
+      आपके routes/questions.js के अनुसार
+      यही सही API है।
+    */
+
+    const response = await fetch(
+      `/api/questions/admin/test/${testId}`,
+      {
+        credentials: "include"
+      }
+    );
+
+
+    /*
+      JSON आने से पहले response check
+    */
+
+    const contentType =
+      response.headers.get("content-type") || "";
+
+
+    if (!contentType.includes("application/json")) {
+
+      const text = await response.text();
+
+      console.error(
+        "Server returned non-JSON:",
+        text
+      );
+
+      throw new Error(
+        "Server ने JSON की जगह HTML भेजा। API route check करें।"
+      );
+    }
+
+
+    const data = await response.json();
+
+
+    if (!response.ok || !data.success) {
+
+      throw new Error(
+        data.message || "Unable to load questions"
+      );
+    }
+
+
+    questions = data.questions || [];
+
+    renderQuestions();
+
+  } catch (error) {
+
+    console.error("Load Questions Error:", error);
+
+    list.innerHTML = `
+      <div class="empty" style="color:#b91c1c;">
+        ❌ ${escapeHtml(error.message)}
+      </div>
+    `;
+
+  }
+
+}
+
+
+/* =========================================
+   RENDER QUESTIONS
+========================================= */
+
+function renderQuestions() {
+
+  const list =
+    document.getElementById("questionsList");
+
+
+  if (!questions.length) {
+
+    list.innerHTML = `
+      <div class="empty">
+        📭 अभी इस Test में कोई Question नहीं है।
+        <br><br>
+        ऊपर से पहला Question Add करें।
+      </div>
+    `;
+
+    return;
+  }
+
+
+  list.innerHTML = questions.map(
+    (q, index) => {
+
+      const hindiQuestion =
+        q.questionHindi || q.question || "";
+
+      const englishQuestion =
+        q.questionEnglish || "";
+
+
+      const hiOptions =
+        Array.isArray(q.optionsHindi)
+          ? q.optionsHindi
+          : [];
+
+
+      const enOptions =
+        Array.isArray(q.optionsEnglish)
+          ? q.optionsEnglish
+          : [];
+
+
+      const oldOptions =
+        Array.isArray(q.options)
+          ? q.options
+          : [];
+
+
+      let optionHtml = "";
+
+
+      for (let i = 0; i < 4; i++) {
+
+        const hi =
+          hiOptions[i] || "";
+
+        const en =
+          enOptions[i] || "";
+
+        const old =
+          oldOptions[i] || "";
+
+
+        optionHtml += `
+          <div class="option">
+
+            <strong>
+              ${String.fromCharCode(65 + i)}.
+            </strong>
+
+            ${escapeHtml(hi || old)}
+
+            ${
+              en
+                ? `<br>
+                   <small>
+                     ${escapeHtml(en)}
+                   </small>`
+                : ""
+            }
+
+          </div>
+        `;
+      }
+
+
+      const correct =
+        Number(q.correctAnswer);
+
+
+      const explanationHindi =
+        q.explanationHindi ||
+        q.explanation ||
+        "";
+
+
+      const explanationEnglish =
+        q.explanationEnglish ||
+        "";
+
+
+      return `
+
+        <div class="question-item">
+
+          <div class="question-header">
+
+            <div class="question-number">
+              Q${index + 1}
+            </div>
+
+          </div>
+
+
+          <div class="question-text">
+
+            <strong>🇮🇳 Hindi:</strong><br>
+            ${escapeHtml(hindiQuestion)}
+
+            ${
+              englishQuestion
+                ? `
+                  <br><br>
+                  <strong>🇬🇧 English:</strong><br>
+                  ${escapeHtml(englishQuestion)}
+                `
+                : ""
+            }
+
+          </div>
+
+
+          <div class="options-list">
+
+            ${optionHtml}
+
+          </div>
+
+
+          <div class="answer">
+
+            ✅ Correct Answer:
+            ${String.fromCharCode(65 + correct)}
+
+          </div>
+
+
+          ${
+            explanationHindi
+              ? `
+                <div class="explanation">
+                  <strong>🇮🇳 Hindi Explanation:</strong><br>
+                  ${escapeHtml(explanationHindi)}
+                </div>
+              `
+              : ""
+          }
+
+
+          ${
+            explanationEnglish
+              ? `
+                <div class="explanation">
+                  <strong>🇬🇧 English Explanation:</strong><br>
+                  ${escapeHtml(explanationEnglish)}
+                </div>
+              `
+              : ""
+          }
+
+
+          <div class="question-actions">
+
+            <button
+              class="small-btn blue"
+              onclick="editQuestion('${q._id}')"
+            >
+              ✏️ Edit
+            </button>
+
+            <button
+              class="small-btn red"
+              onclick="deleteQuestion('${q._id}')"
+            >
+              🗑️ Delete
+            </button>
+
+          </div>
+
+        </div>
+
+      `;
+
+    }
+  ).join("");
+
+}
+
+
+/* =========================================
+   ADD / EDIT QUESTION
+========================================= */
+
+document
+  .getElementById("questionForm")
+  .addEventListener(
+    "submit",
+    async function(event) {
+
+      event.preventDefault();
+
+
+      if (!testId) {
+
+        showMessage(
+          "❌ Test ID नहीं मिला।",
+          "error"
+        );
+
+        return;
+      }
+
+
+      const questionHindi =
+        document
+          .getElementById("questionHindi")
+          .value
+          .trim();
+
+
+      const questionEnglish =
+        document
+          .getElementById("questionEnglish")
+          .value
+          .trim();
+
+
+      const hiOptions = [
+        document.getElementById("hi0").value.trim(),
+        document.getElementById("hi1").value.trim(),
+        document.getElementById("hi2").value.trim(),
+        document.getElementById("hi3").value.trim()
+      ];
+
+
+      const enOptions = [
+        document.getElementById("en0").value.trim(),
+        document.getElementById("en1").value.trim(),
+        document.getElementById("en2").value.trim(),
+        document.getElementById("en3").value.trim()
+      ];
+
+
+      const correctAnswer =
+        document.getElementById("correctAnswer").value;
+
+
+      const explanationHindi =
+        document
+          .getElementById("explanationHindi")
+          .value
+          .trim();
+
+
+      const explanationEnglish =
+        document
+          .getElementById("explanationEnglish")
+          .value
+          .trim();
+
+
+      if (!questionHindi) {
+
+        showMessage(
+          "❌ Hindi Question लिखिए।",
+          "error"
+        );
+
+        return;
+      }
+
+
+      if (
+        hiOptions.some(
+          option => !option
+        )
+      ) {
+
+        showMessage(
+          "❌ चारों Hindi Options भरना जरूरी है।",
+          "error"
+        );
+
+        return;
+      }
+
+
+      if (correctAnswer === "") {
+
+        showMessage(
+          "❌ Correct Answer select करें।",
+          "error"
+        );
+
+        return;
+      }
+
+
+      /*
+        पुराने backend के लिए combined values
+      */
+
+      const combinedQuestion =
+        questionEnglish
+          ? `${questionHindi}\n\n${questionEnglish}`
+          : questionHindi;
+
+
+      const combinedOptions =
+        hiOptions.map(
+          (hi, i) =>
+            enOptions[i]
+              ? `${hi} / ${enOptions[i]}`
+              : hi
+        );
+
+
+      const combinedExplanation =
+        explanationEnglish
+          ? `${explanationHindi}\n\n${explanationEnglish}`
+          : explanationHindi;
+
+
+      const payload = {
+
+        testId,
+
+        question: combinedQuestion,
+
+        options: combinedOptions,
+
+        correctAnswer: Number(correctAnswer),
+
+        explanation: combinedExplanation
+
+      };
+
+
+      const questionId =
+        document
+          .getElementById("questionId")
+          .value;
+
+
+      const isEdit =
+        Boolean(questionId);
+
+
+      const url =
+        isEdit
+          ? `/api/questions/${questionId}`
+          : `/api/questions/`;
+
+
+      const method =
+        isEdit
+          ? "PUT"
+          : "POST";
+
+
+      const saveBtn =
+        document.getElementById("saveBtn");
+
+
+      saveBtn.disabled = true;
+
+      saveBtn.textContent =
+        isEdit
+          ? "⏳ Updating..."
+          : "⏳ Adding...";
+
+
+      try {
+
+        const response = await fetch(
+          url,
+          {
+            method,
+
+            headers: {
+              "Content-Type":
+                "application/json"
+            },
+
+            credentials: "include",
+
+            body: JSON.stringify(payload)
+
+          }
+        );
+
+
+        const contentType =
+          response.headers.get("content-type") || "";
+
+
+        if (!contentType.includes("application/json")) {
+
+          const text =
+            await response.text();
+
+          console.error(
+            "Non JSON response:",
+            text
+          );
+
+          throw new Error(
+            "Server ने JSON की जगह HTML भेजा। Route या server check करें।"
+          );
+        }
+
+
+        const data =
+          await response.json();
+
+
+        if (!response.ok || !data.success) {
+
+          throw new Error(
+            data.message ||
+            "Question save नहीं हुआ"
+          );
+        }
+
+
+        showMessage(
+          isEdit
+            ? "✅ Question successfully updated!"
+            : "✅ Question successfully added!"
+        );
+
+
+        resetForm();
+
+        await loadQuestions();
+
+      } catch (error) {
+
+        console.error(
+          "Save Question Error:",
+          error
+        );
+
+        showMessage(
+          "❌ " + error.message,
+          "error"
+        );
+
+      } finally {
+
+        saveBtn.disabled = false;
+
+        saveBtn.textContent =
+          isEdit
+            ? "✏️ Update Question"
+            : "➕ Add Question";
+
+      }
+
+    }
+  );
+
+
+/* =========================================
+   EDIT QUESTION
+========================================= */
+
+function editQuestion(id) {
+
+  const q =
+    questions.find(
+      item =>
+        String(item._id) === String(id)
+    );
+
+
+  if (!q) {
+
+    showMessage(
+      "❌ Question नहीं मिला।",
+      "error"
+    );
+
+    return;
+  }
+
+
+  document
+    .getElementById("questionId")
+    .value = q._id;
+
+
+  document
+    .getElementById("questionHindi")
+    .value =
+      q.questionHindi ||
+      q.question ||
+      "";
+
+
+  document
+    .getElementById("questionEnglish")
+    .value =
+      q.questionEnglish ||
+      "";
+
+
+  const hiOptions =
+    Array.isArray(q.optionsHindi)
+      ? q.optionsHindi
+      : [];
+
+
+  const enOptions =
+    Array.isArray(q.optionsEnglish)
+      ? q.optionsEnglish
+      : [];
+
+
+  const oldOptions =
+    Array.isArray(q.options)
+      ? q.options
+      : [];
+
+
+  for (let i = 0; i < 4; i++) {
+
+    document.getElementById(`hi${i}`).value =
+      hiOptions[i] ||
+      oldOptions[i] ||
+      "";
+
+
+    document.getElementById(`en${i}`).value =
+      enOptions[i] ||
+      "";
+  }
+
+
+  document
+    .getElementById("correctAnswer")
+    .value =
+      String(q.correctAnswer);
+
+
+  document
+    .getElementById("explanationHindi")
+    .value =
+      q.explanationHindi ||
+      q.explanation ||
+      "";
+
+
+  document
+    .getElementById("explanationEnglish")
+    .value =
+      q.explanationEnglish ||
+      "";
+
+
+  document
+    .getElementById("formTitle")
+    .textContent =
+      "✏️ Edit Question";
+
+
+  document
+    .getElementById("saveBtn")
+    .textContent =
+      "✏️ Update Question";
+
+
+  document
+    .getElementById("cancelBtn")
+    .style.display =
+      "inline-block";
+
+
+  window.scrollTo({
+    top: 0,
+    behavior: "smooth"
+  });
+
+}
+
+
+/* =========================================
+   DELETE QUESTION
+========================================= */
+
+async function deleteQuestion(id) {
+
+  if (
+    !confirm(
+      "क्या आप इस Question को delete करना चाहते हैं?"
+    )
+  ) {
+    return;
+  }
+
+
+  try {
+
+    const response = await fetch(
+      `/api/questions/${id}`,
+      {
+        method: "DELETE",
+        credentials: "include"
+      }
+    );
+
+
+    const contentType =
+      response.headers.get("content-type") || "";
+
+
+    if (!contentType.includes("application/json")) {
+
+      const text =
+        await response.text();
+
+      console.error(
+        "Delete non JSON:",
+        text
+      );
+
+      throw new Error(
+        "Server ने JSON की जगह HTML भेजा।"
+      );
+    }
+
+
+    const data =
+      await response.json();
+
+
+    if (!response.ok || !data.success) {
+
+      throw new Error(
+        data.message ||
+        "Question delete नहीं हुआ"
+      );
+    }
+
+
+    showMessage(
+      "✅ Question successfully deleted!"
+    );
+
+
+    await loadQuestions();
+
+  } catch (error) {
+
+    console.error(error);
+
+    showMessage(
+      "❌ " + error.message,
+      "error"
+    );
+
+  }
+
+}
+
+
+/* =========================================
+   RESET FORM
+========================================= */
+
+function resetForm() {
+
+  document
+    .getElementById("questionForm")
+    .reset();
+
+
+  document
+    .getElementById("questionId")
+    .value = "";
+
+
+  document
+    .getElementById("formTitle")
+    .textContent =
+      "➕ Add New Question";
+
+
+  document
+    .getElementById("saveBtn")
+    .textContent =
+      "➕ Add Question";
+
+
+  document
+    .getElementById("cancelBtn")
+    .style.display =
+      "none";
+
+}
+
+
+/* =========================================
+   ESCAPE HTML
+========================================= */
+
+function escapeHtml(value) {
+
+  if (value === null || value === undefined) {
+    return "";
+  }
+
+  return String(value)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+
+}
+
+
+/* =========================================
+   START
+========================================= */
+
+checkAdmin();
+
+</script>
+
+</body>
+</html>

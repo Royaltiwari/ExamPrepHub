@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Result - ExamPrepHub</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+    }
+
+    body {
+      background: #f1f5f9;
+      color: #1e293b;
+      min-height: 100vh;
+    }
+
+    header {
+      background: #2563eb;
+      color: white;
+      padding: 16px 20px;
+    }
+
+    .header-inner {
+      max-width: 1000px;
+      margin: auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .logo {
+      font-size: 21px;
+      font-weight: 800;
+    }
+
+    main {
+      max-width: 900px;
+      margin: auto;
+      padding: 25px 15px 50px;
+    }
+
+    .loading,
+    .error-box {
+      background: white;
+      padding: 35px;
+      text-align: center;
+      border-radius: 14px;
+      box-shadow: 0 5px 20px rgba(0,0,0,.06);
+    }
+
+    .error-box {
+      color: #b91c1c;
+    }
+
+    .result-header {
+      background: white;
+      padding: 25px;
+      border-radius: 16px;
+      text-align: center;
+      box-shadow: 0 5px 20px rgba(0,0,0,.06);
+      margin-bottom: 20px;
+    }
+
+    .result-header h1 {
+      font-size: 26px;
+      margin-bottom: 8px;
+    }
+
+    .test-name {
+      color: #64748b;
+      font-size: 14px;
+    }
+
+    .score {
+      margin: 20px auto;
+      width: 130px;
+      height: 130px;
+      border-radius: 50%;
+      background: #dbeafe;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .score-number {
+      font-size: 30px;
+      font-weight: 800;
+      color: #2563eb;
+    }
+
+    .score-label {
+      font-size: 13px;
+      color: #64748b;
+      margin-top: 3px;
+    }
+
+    .percentage {
+      font-size: 18px;
+      font-weight: 700;
+      color: #334155;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+      margin-bottom: 25px;
+    }
+
+    .stat {
+      background: white;
+      padding: 18px 10px;
+      border-radius: 12px;
+      text-align: center;
+      box-shadow: 0 4px 15px rgba(0,0,0,.05);
+    }
+
+    .stat-number {
+      font-size: 24px;
+      font-weight: 800;
+    }
+
+    .correct {
+      color: #16a34a;
+    }
+
+    .wrong {
+      color: #dc2626;
+    }
+
+    .skipped {
+      color: #ca8a04;
+    }
+
+    .total {
+      color: #2563eb;
+    }
+
+    .stat-title {
+      color: #64748b;
+      font-size: 13px;
+      margin-top: 5px;
+    }
+
+    .details {
+      background: white;
+      padding: 22px;
+      border-radius: 14px;
+      box-shadow: 0 5px 20px rgba(0,0,0,.05);
+      margin-bottom: 20px;
+    }
+
+    .details h2 {
+      font-size: 20px;
+      margin-bottom: 18px;
+    }
+
+    .question-result {
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 18px;
+      margin-bottom: 14px;
+    }
+
+    .question-result:last-child {
+      margin-bottom: 0;
+    }
+
+    .question-title {
+      font-weight: 700;
+      line-height: 1.5;
+      margin-bottom: 12px;
+    }
+
+    .answer-row {
+      margin: 7px 0;
+      padding: 9px 11px;
+      border-radius: 7px;
+      font-size: 14px;
+      line-height: 1.45;
+    }
+
+    .your-answer {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+
+    .your-correct-answer {
+      background: #dcfce7;
+      color: #166534;
+    }
+
+    .not-answered {
+      background: #fef3c7;
+      color: #92400e;
+    }
+
+    .explanation {
+      margin-top: 12px;
+      padding: 12px;
+      background: #eff6ff;
+      border-left: 4px solid #2563eb;
+      border-radius: 6px;
+      color: #334155;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .actions {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 22px;
+    }
+
+    .btn {
+      border: none;
+      padding: 12px 20px;
+      border-radius: 9px;
+      cursor: pointer;
+      font-weight: 700;
+      text-decoration: none;
+      display: inline-block;
+    }
+
+    .dashboard-btn {
+      background: #2563eb;
+      color: white;
+    }
+
+    .tests-btn {
+      background: #e2e8f0;
+      color: #334155;
+    }
+
+    @media (max-width: 700px) {
+      .stats {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 450px) {
+      .stats {
+        gap: 9px;
+      }
+
+      .stat {
+        padding: 15px 8px;
+      }
+
+      .result-header h1 {
+        font-size: 22px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <header>
+    <div class="header-inner">
+      <div class="logo">🏆 ExamPrepHub</div>
+    </div>
+  </header>
+
+  <main id="main">
+
+    <div class="loading">
+      Loading result...
+    </div>
+
+  </main>
+
+  <script>
+
+    // =====================================
+    // RESULT ID
+    // =====================================
+
+    const params = new URLSearchParams(window.location.search);
+    const resultId = params.get("id");
+
+    const main = document.getElementById("main");
+
+
+    // =====================================
+    // START
+    // =====================================
+
+    if (!resultId) {
+
+      showError("Result ID नहीं मिला।");
+
+    } else {
+
+      loadResult();
+
+    }
+
+
+    // =====================================
+    // LOAD RESULT
+    // =====================================
+
+    async function loadResult() {
+
+      try {
+
+        const response = await fetch(
+          "/api/results/" + encodeURIComponent(resultId),
+          {
+            credentials: "include"
+          }
+        );
+
+        if (response.status === 401) {
+          window.location.href = "/login.html";
+          return;
+        }
+
+        const data = await response.json();
+
+        if (!response.ok || !data.success) {
+          throw new Error(
+            data.message || "Unable to load result"
+          );
+        }
+
+        renderResult(data.result);
+
+      } catch (error) {
+
+        console.error("Result Error:", error);
+
+        showError(error.message);
+
+      }
+    }
+
+
+    // =====================================
+    // RENDER RESULT
+    // =====================================
+
+    function renderResult(result) {
+
+      const test = result.testId || {};
+      const answerDetails = result.answers || [];
+
+      const percentage =
+        Number(result.percentage || 0).toFixed(2);
+
+
+      main.innerHTML = `
+
+        <section class="result-header">
+
+          <h1>🎉 Test Result</h1>
+
+          <div class="test-name">
+            ${escapeHtml(test.name || "Mock Test")}
+          </div>
+
+          <div class="score">
+
+            <div class="score-number">
+              ${Number(result.score || 0)}
+            </div>
+
+            <div class="score-label">
+              / ${Number(result.totalQuestions || 0)}
+            </div>
+
+          </div>
+
+          <div class="percentage">
+            ${percentage}% Score
+          </div>
+
+        </section>
+
+
+        <section class="stats">
+
+          <div class="stat">
+            <div class="stat-number correct">
+              ${Number(result.correctAnswers || 0)}
+            </div>
+
+            <div class="stat-title">
+              Correct
+            </div>
+          </div>
+
+
+          <div class="stat">
+            <div class="stat-number wrong">
+              ${Number(result.wrongAnswers || 0)}
+            </div>
+
+            <div class="stat-title">
+              Wrong
+            </div>
+          </div>
+
+
+          <div class="stat">
+            <div class="stat-number skipped">
+              ${Number(result.skippedQuestions || 0)}
+            </div>
+
+            <div class="stat-title">
+              Skipped
+            </div>
+          </div>
+
+
+          <div class="stat">
+            <div class="stat-number total">
+              ${Number(result.totalQuestions || 0)}
+            </div>
+
+            <div class="stat-title">
+              Total
+            </div>
+          </div>
+
+        </section>
+
+
+        <section class="details">
+
+          <h2>
+            📖 Question Review
+          </h2>
+
+          <div id="reviewContainer">
+            ${renderQuestions(answerDetails)}
+          </div>
+
+        </section>
+
+
+        <div class="actions">
+
+          <a
+            href="/dashboard.html"
+            class="btn dashboard-btn"
+          >
+            ← Dashboard
+          </a>
+
+          <a
+            href="/tests.html"
+            class="btn tests-btn"
+          >
+            More Tests
+          </a>
+
+        </div>
+
+      `;
+    }
+
+
+    // =====================================
+    // QUESTION REVIEW
+    // =====================================
+
+    function renderQuestions(answers) {
+
+      if (!answers.length) {
+
+        return `
+          <p style="color:#64748b;">
+            Question review उपलब्ध नहीं है।
+          </p>
+        `;
+
+      }
+
+
+      return answers.map((item, index) => {
+
+        const question = item.questionId || {};
+
+        const options = question.options || [];
+
+        const selected =
+          item.selectedAnswer !== null &&
+          item.selectedAnswer !== undefined
+            ? Number(item.selectedAnswer)
+            : null;
+
+
+        let answerHtml = "";
+
+
+        if (selected === null) {
+
+          answerHtml = `
+            <div class="answer-row not-answered">
+              ⏭️ आपने इस question को skip किया।
+            </div>
+          `;
+
+        } else if (item.isCorrect) {
+
+          answerHtml = `
+            <div class="answer-row your-correct-answer">
+              ✅ आपका Answer:
+              ${escapeHtml(
+                options[selected] || "Answer"
+              )}
+            </div>
+          `;
+
+        } else {
+
+          answerHtml = `
+            <div class="answer-row your-answer">
+              ❌ आपका Answer:
+              ${escapeHtml(
+                options[selected] || "Answer"
+              )}
+            </div>
+          `;
+
+        }
+
+
+        const explanation =
+          question.explanation || "";
+
+
+        return `
+
+          <div class="question-result">
+
+            <div class="question-title">
+
+              Q${index + 1}.
+              ${escapeHtml(
+                question.question || "Question"
+              )}
+
+            </div>
+
+            ${answerHtml}
+
+            ${
+              explanation
+                ? `
+                  <div class="explanation">
+                    <strong>📖 Explanation:</strong>
+                    <br>
+                    ${escapeHtml(explanation)}
+                  </div>
+                `
+                : ""
+            }
+
+          </div>
+
+        `;
+
+      }).join("");
+
+    }
+
+
+    // =====================================
+    // ERROR
+    // =====================================
+
+    function showError(message) {
+
+      main.innerHTML = `
+
+        <div class="error-box">
+
+          ❌ ${escapeHtml(
+            message || "Unable to load result"
+          )}
+
+          <br><br>
+
+          <a
+            href="/dashboard.html"
+            class="btn dashboard-btn"
+          >
+            Go to Dashboard
+          </a>
+
+        </div>
+
+      `;
+
+    }
+
+
+    // =====================================
+    // SECURITY HELPER
+    // =====================================
+
+    function escapeHtml(value) {
+
+      return String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+
+    }
+
+  </script>
+
+</body>
+</html>
