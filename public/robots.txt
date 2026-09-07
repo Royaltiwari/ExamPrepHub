@@ -1,0 +1,11 @@
+User-agent: *
+Allow: /
+
+Disallow: /admin.html
+Disallow: /admin-tests.html
+Disallow: /admin-questions.html
+Disallow: /admin-results.html
+Disallow: /dashboard.html
+Disallow: /profile.html
+
+Sitemap: https://examprephub-2.onrender.com/sitemap.xml

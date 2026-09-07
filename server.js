@@ -40,7 +40,10 @@ app.use(
 // =========================
 
 app.use(express.static(path.join(__dirname, "public")));
-
+app.get("/robots.txt", (req, res) => {
+  res.type("text/plain");
+  res.sendFile(path.join(__dirname, "public", "robots.txt"));
+});
 const authRoutes = require("./routes/auth");
 app.use("/api/auth", authRoutes);
 const testRoutes = require("./routes/tests");
