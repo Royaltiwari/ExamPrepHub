@@ -40,10 +40,20 @@ router.post("/register", async (req, res) => {
       email: normalizedEmail,
       mobile: mobile ? mobile.trim() : "",
       password: hashedPassword,
-      role: "student"
+      role: "student",
+      isActive: true
     });
 
-    req.session.userId = user._id;
+    // Session
+    req.session.userId = user._id.toString();
+
+    req.session.user = {
+      id: user._id.toString(),
+      name: user.name,
+      email: user.email,
+      mobile: user.mobile,
+      role: user.role
+    };
 
     res.status(201).json({
       success: true,
@@ -95,7 +105,8 @@ router.post("/login", async (req, res) => {
       });
     }
 
-    if (!user.isActive) {
+    // Undefined होने पर भी inactive न माना जाए
+    if (user.isActive === false) {
       return res.status(403).json({
         success: false,
         message: "Your account is inactive"
@@ -114,18 +125,42 @@ router.post("/login", async (req, res) => {
       });
     }
 
-    req.session.userId = user._id;
+    // ===============================
+    // SAVE LOGIN SESSION
+    // ===============================
 
-    res.json({
-      success: true,
-      message: "Login successful",
-      user: {
-        id: user._id,
-        name: user.name,
-        email: user.email,
-        mobile: user.mobile,
-        role: user.role
+    req.session.userId = user._id.toString();
+
+    req.session.user = {
+      id: user._id.toString(),
+      name: user.name,
+      email: user.email,
+      mobile: user.mobile,
+      role: user.role
+    };
+
+    // Session save होने के बाद response
+    req.session.save((sessionError) => {
+      if (sessionError) {
+        console.error("Session Save Error:", sessionError);
+
+        return res.status(500).json({
+          success: false,
+          message: "Login session could not be saved"
+        });
       }
+
+      return res.json({
+        success: true,
+        message: "Login successful",
+        user: {
+          id: user._id,
+          name: user.name,
+          email: user.email,
+          mobile: user.mobile,
+          role: user.role
+        }
+      });
     });
 
   } catch (error) {
@@ -160,6 +195,15 @@ router.get("/me", async (req, res) => {
         message: "User not found"
       });
     }
+
+    // Session को भी update रखें
+    req.session.user = {
+      id: user._id.toString(),
+      name: user.name,
+      email: user.email,
+      mobile: user.mobile,
+      role: user.role
+    };
 
     res.json({
       success: true,
