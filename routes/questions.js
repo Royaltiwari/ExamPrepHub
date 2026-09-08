@@ -536,7 +536,7 @@ async function extractFileText(file) {
 router.post(
   "/bulk/preview",
   adminOnly,
-  upload.single("file"),
+  upload.single("pdfFile"),
   async (req, res) => {
     try {
       if (!req.file) {
@@ -625,12 +625,12 @@ router.post(
   async (req, res) => {
     try {
       const {
-        testId,
-        language,
-        subject,
-        chapter,
-        questions
-      } = req.body;
+  testId,
+  language,
+  subject,
+  chapter,
+  questions
+} = req.body;
 
       // --------------------------------------------------
       // BASIC VALIDATION

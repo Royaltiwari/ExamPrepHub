@@ -5,7 +5,7 @@ const cors = require('cors');
 const bodyParser = require('body-parser');
 require('dotenv').config();
 
-// Routes Import
+// Routes Import - अब local routes folder use करें
 const pdfRoutes = require('./routes/pdfRoutes');
 const questionRoutes = require('./routes/questionRoutes');
 const testRoutes = require('./routes/testRoutes');
