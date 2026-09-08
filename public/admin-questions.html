@@ -4328,7 +4328,34 @@ function renderBulkPreview(
 
 }
 
+/* =========================================================
+   SAFE API RESPONSE
+========================================================= */
+async function readApiResponse(response) {
 
+  const text = await response.text();
+
+  if (!text) {
+    throw new Error("Server से खाली response मिला।");
+  }
+
+  try {
+    return JSON.parse(text);
+  } catch (error) {
+
+    console.error("SERVER RESPONSE:", text);
+
+    if (text.includes("<!DOCTYPE") || text.includes("<html")) {
+      throw new Error(
+        "Render server ने API की जगह Login/HTML page भेजा। Backend API route check करना होगा।"
+      );
+    }
+
+    throw new Error(
+      "Server का response JSON नहीं है।"
+    );
+  }
+}
 /* =========================================================
    PREVIEW BULK FILE
 ========================================================= */
@@ -4516,9 +4543,7 @@ async function previewBulkQuestions() {
       );
 
 
-    const data =
-      await response.json();
-
+    const data = await readApiResponse(response);
 
     if (
       !response.ok ||
