@@ -1,749 +1,2054 @@
 const express = require("express");
+const router = express.Router();
+
 const mongoose = require("mongoose");
+const multer = require("multer");
+const mammoth = require("mammoth");
 
 const Question = require("../models/Question");
 const Test = require("../models/Test");
-const requireAdmin = require("../middleware/admin");
-
-const router = express.Router();
 
 
-// =====================================================
-// PUBLIC: Visible Test Questions
-// =====================================================
+/* =========================================================
+   MULTER - PDF / DOCX UPLOAD
+========================================================= */
 
-router.get("/test/:testId", async (req, res) => {
-  try {
-    const { testId } = req.params;
+const routerUpload = multer({
+  storage: multer.memoryStorage(),
 
-    if (!mongoose.Types.ObjectId.isValid(testId)) {
-      return res.status(400).json({
-        success: false,
-        message: "Invalid test ID"
-      });
+  limits: {
+    fileSize: 10 * 1024 * 1024
+  },
+
+  fileFilter: (req, file, cb) => {
+
+    const ext = file.originalname
+      .toLowerCase()
+      .split(".")
+      .pop();
+
+    if (ext === "pdf" || ext === "docx") {
+      return cb(null, true);
     }
 
-    const test = await Test.findOne({
-      _id: testId,
-      visible: true
-    });
-
-    if (!test) {
-      return res.status(404).json({
-        success: false,
-        message: "Test not found"
-      });
-    }
-
-    const questions = await Question.find({
-      testId
-    })
-      .select("-correctAnswer -__v")
-      .sort({ createdAt: 1 });
-
-    res.json({
-      success: true,
-      questions
-    });
-
-  } catch (error) {
-    console.error("Get Questions Error:", error);
-
-    res.status(500).json({
-      success: false,
-      message: "Unable to load questions"
-    });
+    cb(new Error("Only PDF and DOCX files are allowed."));
   }
 });
 
 
-// =====================================================
-// ADMIN: Test Questions
-// =====================================================
+/* =========================================================
+   ADMIN MIDDLEWARE
+========================================================= */
 
-router.get("/admin/test/:testId", requireAdmin, async (req, res) => {
-  try {
-    const { testId } = req.params;
+function adminOnly(req, res, next) {
 
-    if (!mongoose.Types.ObjectId.isValid(testId)) {
-      return res.status(400).json({
-        success: false,
-        message: "Invalid test ID"
-      });
-    }
+  if (!req.session || !req.session.user) {
 
-    const questions = await Question.find({
-      testId
-    }).sort({ createdAt: 1 });
-
-    res.json({
-      success: true,
-      questions
-    });
-
-  } catch (error) {
-    console.error("Admin Questions Error:", error);
-
-    res.status(500).json({
+    return res.status(401).json({
       success: false,
-      message: "Unable to load questions"
+      message: "Login required."
     });
   }
-});
+
+  if (req.session.user.role !== "admin") {
+
+    return res.status(403).json({
+      success: false,
+      message: "Admin access required."
+    });
+  }
+
+  next();
+}
 
 
-// =====================================================
-// ADMIN: ADD NEW QUESTION
-// =====================================================
+/* =========================================================
+   HELPERS
+========================================================= */
 
-router.post("/", requireAdmin, async (req, res) => {
-  try {
+function clean(value) {
 
-    const {
-      testId,
-      subject,
-      chapter,
+  if (value === undefined || value === null) {
+    return "";
+  }
 
-      questionHindi,
-      questionEnglish,
-
-      optionsHindi,
-      optionsEnglish,
-
-      explanationHindi,
-      explanationEnglish,
-
-      correctAnswer
-    } = req.body;
+  return String(value)
+    .replace(/\u00A0/g, " ")
+    .trim();
+}
 
 
-    // -----------------------------
-    // TEST ID
-    // -----------------------------
+function normalizeLanguage(language) {
 
-    if (!testId) {
-      return res.status(400).json({
-        success: false,
-        message: "Test is required"
-      });
-    }
+  const value = clean(language).toLowerCase();
 
-    if (!mongoose.Types.ObjectId.isValid(testId)) {
-      return res.status(400).json({
-        success: false,
-        message: "Invalid test ID"
-      });
-    }
+  if (
+    value === "english" ||
+    value === "en"
+  ) {
+    return "english";
+  }
 
+  if (
+    value === "bilingual" ||
+    value === "both" ||
+    value === "bi"
+  ) {
+    return "bilingual";
+  }
 
-    // -----------------------------
-    // SUBJECT
-    // -----------------------------
-
-    if (!subject || !String(subject).trim()) {
-      return res.status(400).json({
-        success: false,
-        message: "Subject is required"
-      });
-    }
+  return "hindi";
+}
 
 
-    // -----------------------------
-    // CHAPTER
-    // -----------------------------
+function answerToIndex(answer) {
 
-    if (!chapter || !String(chapter).trim()) {
-      return res.status(400).json({
-        success: false,
-        message: "Chapter is required"
-      });
-    }
+  const value = clean(answer)
+    .toUpperCase()
+    .replace(/[.)]/g, "")
+    .trim();
 
+  if (["A", "1"].includes(value)) return 0;
+  if (["B", "2"].includes(value)) return 1;
+  if (["C", "3"].includes(value)) return 2;
+  if (["D", "4"].includes(value)) return 3;
 
-    // -----------------------------
-    // HINDI QUESTION
-    // -----------------------------
-
-    if (!questionHindi || !String(questionHindi).trim()) {
-      return res.status(400).json({
-        success: false,
-        message: "Hindi question is required"
-      });
-    }
+  return -1;
+}
 
 
-    // -----------------------------
-    // HINDI OPTIONS
-    // -----------------------------
+function normalizeOptions(options) {
 
-    if (
-      !Array.isArray(optionsHindi) ||
-      optionsHindi.length !== 4
-    ) {
-      return res.status(400).json({
-        success: false,
-        message: "Exactly 4 Hindi options are required"
-      });
-    }
+  if (!Array.isArray(options)) {
+    return [];
+  }
 
-    const cleanHindiOptions = optionsHindi.map(
-      option => String(option || "").trim()
-    );
-
-    if (
-      cleanHindiOptions.some(option => !option)
-    ) {
-      return res.status(400).json({
-        success: false,
-        message: "All 4 Hindi options are required"
-      });
-    }
+  return options.map(item => clean(item));
+}
 
 
-    // -----------------------------
-    // ENGLISH OPTIONS
-    // -----------------------------
+/* =========================================================
+   COMBINE LANGUAGE DATA
+========================================================= */
 
-    let cleanEnglishOptions = [];
+function combineQuestion(
+  hindi,
+  english,
+  language
+) {
 
-    if (Array.isArray(optionsEnglish)) {
+  hindi = clean(hindi);
+  english = clean(english);
 
-      cleanEnglishOptions = optionsEnglish.map(
-        option => String(option || "").trim()
+  if (language === "english") {
+    return english;
+  }
+
+  if (language === "bilingual") {
+
+    if (!hindi) return english;
+    if (!english) return hindi;
+
+    return `${hindi}\n\n${english}`;
+  }
+
+  return hindi;
+}
+
+
+function combineOptions(
+  hindiOptions,
+  englishOptions,
+  language
+) {
+
+  if (language === "english") {
+    return englishOptions;
+  }
+
+  if (language === "bilingual") {
+
+    return hindiOptions.map((hi, index) => {
+
+      const en = clean(
+        englishOptions[index]
       );
+
+      const h = clean(hi);
+
+      if (!h) return en;
+      if (!en) return h;
+
+      /*
+        Agar Hindi aur English option same hain
+        to duplicate nahi banega.
+      */
+
+      if (h === en) {
+        return h;
+      }
+
+      return `${h}\n${en}`;
+    });
+  }
+
+  return hindiOptions;
+}
+
+
+function combineExplanation(
+  hindi,
+  english,
+  language
+) {
+
+  hindi = clean(hindi);
+  english = clean(english);
+
+  if (language === "english") {
+    return english;
+  }
+
+  if (language === "bilingual") {
+
+    if (!hindi) return english;
+    if (!english) return hindi;
+
+    return `${hindi}\n\n${english}`;
+  }
+
+  return hindi;
+}
+
+
+/* =========================================================
+   PREPARE QUESTION
+========================================================= */
+
+function prepareQuestionData(
+  data,
+  language
+) {
+
+  language = normalizeLanguage(language);
+
+  const subject = clean(data.subject);
+  const chapter = clean(data.chapter);
+
+  const questionHindi =
+    clean(data.questionHindi);
+
+  const questionEnglish =
+    clean(data.questionEnglish);
+
+  let optionsHindi =
+    normalizeOptions(data.optionsHindi);
+
+  let optionsEnglish =
+    normalizeOptions(data.optionsEnglish);
+
+  const explanationHindi =
+    clean(data.explanationHindi);
+
+  const explanationEnglish =
+    clean(data.explanationEnglish);
+
+
+  /* -------------------------------------------------------
+     IMPORTANT:
+     Simple A/B/C/D format me agar language-specific
+     options nahi mile, to available options ko dono
+     language arrays me use karenge.
+  ------------------------------------------------------- */
+
+  if (
+    language === "bilingual"
+  ) {
+
+    if (
+      optionsHindi.length === 4 &&
+      optionsEnglish.length === 0
+    ) {
+      optionsEnglish = [...optionsHindi];
+    }
+
+    if (
+      optionsEnglish.length === 4 &&
+      optionsHindi.length === 0
+    ) {
+      optionsHindi = [...optionsEnglish];
+    }
+  }
+
+
+  /* -------------------------------------------------------
+     HINDI
+  ------------------------------------------------------- */
+
+  if (language === "hindi") {
+
+    if (!questionHindi) {
+
+      throw new Error(
+        "Hindi question is required."
+      );
+    }
+
+    if (optionsHindi.length !== 4) {
+
+      throw new Error(
+        "Hindi question must have exactly 4 options."
+      );
+    }
+
+    if (optionsHindi.some(option => !option)) {
+
+      throw new Error(
+        "All Hindi options A-D are required."
+      );
+    }
+  }
+
+
+  /* -------------------------------------------------------
+     ENGLISH
+  ------------------------------------------------------- */
+
+  if (language === "english") {
+
+    if (!questionEnglish) {
+
+      throw new Error(
+        "English question is required."
+      );
+    }
+
+    if (optionsEnglish.length !== 4) {
+
+      throw new Error(
+        "English question must have exactly 4 options."
+      );
+    }
+
+    if (optionsEnglish.some(option => !option)) {
+
+      throw new Error(
+        "All English options A-D are required."
+      );
+    }
+  }
+
+
+  /* -------------------------------------------------------
+     BILINGUAL
+  ------------------------------------------------------- */
+
+  if (language === "bilingual") {
+
+    if (!questionHindi) {
+
+      throw new Error(
+        "Hindi question is required for bilingual mode."
+      );
+    }
+
+    if (!questionEnglish) {
+
+      throw new Error(
+        "English question is required for bilingual mode."
+      );
+    }
+
+    if (optionsHindi.length !== 4) {
+
+      throw new Error(
+        "Bilingual mode requires exactly 4 options."
+      );
+    }
+
+    if (optionsEnglish.length !== 4) {
+
+      throw new Error(
+        "Bilingual mode requires exactly 4 options."
+      );
+    }
+
+    if (optionsHindi.some(option => !option)) {
+
+      throw new Error(
+        "Hindi options A-D are required."
+      );
+    }
+
+    if (optionsEnglish.some(option => !option)) {
+
+      throw new Error(
+        "English options A-D are required."
+      );
+    }
+  }
+
+
+  /* -------------------------------------------------------
+     ANSWER
+  ------------------------------------------------------- */
+
+  let correctAnswer =
+    data.correctAnswer;
+
+  if (
+    typeof correctAnswer === "string"
+  ) {
+
+    correctAnswer =
+      answerToIndex(correctAnswer);
+
+  } else {
+
+    correctAnswer =
+      Number(correctAnswer);
+  }
+
+
+  if (
+    !Number.isInteger(correctAnswer) ||
+    correctAnswer < 0 ||
+    correctAnswer > 3
+  ) {
+
+    throw new Error(
+      "Correct answer must be A, B, C, D or 0, 1, 2, 3."
+    );
+  }
+
+
+  /* -------------------------------------------------------
+     SUBJECT / CHAPTER
+  ------------------------------------------------------- */
+
+  if (!subject) {
+
+    throw new Error(
+      "Subject is required."
+    );
+  }
+
+  if (!chapter) {
+
+    throw new Error(
+      "Chapter is required."
+    );
+  }
+
+
+  /* -------------------------------------------------------
+     FINAL DATA
+  ------------------------------------------------------- */
+
+  return {
+
+    subject,
+    chapter,
+
+    questionHindi,
+    questionEnglish,
+
+    optionsHindi,
+    optionsEnglish,
+
+    question:
+      combineQuestion(
+        questionHindi,
+        questionEnglish,
+        language
+      ),
+
+    options:
+      combineOptions(
+        optionsHindi,
+        optionsEnglish,
+        language
+      ),
+
+    correctAnswer,
+
+    explanationHindi,
+    explanationEnglish,
+
+    explanation:
+      combineExplanation(
+        explanationHindi,
+        explanationEnglish,
+        language
+      ),
+
+    type: "single"
+  };
+}
+
+
+/* =========================================================
+   GET QUESTIONS - STUDENT
+========================================================= */
+
+router.get(
+  "/test/:testId",
+  async (req, res) => {
+
+    try {
+
+      const { testId } = req.params;
 
       if (
-        cleanEnglishOptions.length !== 0 &&
-        cleanEnglishOptions.length !== 4
+        !mongoose.Types.ObjectId.isValid(
+          testId
+        )
       ) {
+
         return res.status(400).json({
           success: false,
-          message: "English options must contain 4 options"
+          message: "Invalid test ID."
         });
       }
-    }
 
 
-    // -----------------------------
-    // ENGLISH QUESTION
-    // -----------------------------
-
-    const cleanHindiQuestion =
-      String(questionHindi).trim();
-
-    const cleanEnglishQuestion =
-      questionEnglish
-        ? String(questionEnglish).trim()
-        : "";
+      const test =
+        await Test.findOne({
+          _id: testId,
+          visible: true
+        });
 
 
-    // -----------------------------
-    // COMBINED QUESTION
-    // -----------------------------
+      if (!test) {
 
-    let combinedQuestion = cleanHindiQuestion;
-
-    if (cleanEnglishQuestion) {
-      combinedQuestion =
-        cleanHindiQuestion +
-        "\n\n" +
-        cleanEnglishQuestion;
-    }
-
-
-    // -----------------------------
-    // COMBINED OPTIONS
-    // -----------------------------
-
-    const combinedOptions = [];
-
-    for (let i = 0; i < 4; i++) {
-
-      const hindi =
-        cleanHindiOptions[i];
-
-      const english =
-        cleanEnglishOptions[i] || "";
-
-      if (english) {
-        combinedOptions.push(
-          `${hindi} / ${english}`
-        );
-      } else {
-        combinedOptions.push(hindi);
+        return res.status(404).json({
+          success: false,
+          message: "Test not found."
+        });
       }
-    }
 
 
-    // -----------------------------
-    // EXPLANATION
-    // -----------------------------
-
-    const cleanExplanationHindi =
-      explanationHindi
-        ? String(explanationHindi).trim()
-        : "";
-
-    const cleanExplanationEnglish =
-      explanationEnglish
-        ? String(explanationEnglish).trim()
-        : "";
-
-    let combinedExplanation =
-      cleanExplanationHindi;
-
-    if (cleanExplanationEnglish) {
-      combinedExplanation =
-        cleanExplanationHindi
-          ? cleanExplanationHindi +
-            "\n\n" +
-            cleanExplanationEnglish
-          : cleanExplanationEnglish;
-    }
+      const questions =
+        await Question.find({
+          testId
+        })
+          .select("-correctAnswer -__v")
+          .sort({
+            createdAt: 1
+          });
 
 
-    // -----------------------------
-    // CORRECT ANSWER
-    // -----------------------------
+      res.json({
+        success: true,
+        questions
+      });
 
-    const correct = Number(correctAnswer);
+    } catch (error) {
 
-    if (
-      !Number.isInteger(correct) ||
-      correct < 0 ||
-      correct > 3
-    ) {
-      return res.status(400).json({
+      console.error(
+        "GET QUESTIONS ERROR:",
+        error
+      );
+
+      res.status(500).json({
         success: false,
-        message: "Correct answer must be between 0 and 3"
+        message: "Failed to load questions."
       });
     }
-
-
-    // -----------------------------
-    // TEST CHECK
-    // -----------------------------
-
-    const test = await Test.findById(testId);
-
-    if (!test) {
-      return res.status(404).json({
-        success: false,
-        message: "Test not found"
-      });
-    }
-
-
-    // =================================================
-    // CREATE NEW QUESTION
-    // IMPORTANT:
-    // Every Save creates a NEW MongoDB document.
-    // =================================================
-
-    const newQuestion = new Question({
-
-      testId: testId,
-
-      subject: String(subject).trim(),
-
-      chapter: String(chapter).trim(),
-
-      questionHindi: cleanHindiQuestion,
-
-      questionEnglish: cleanEnglishQuestion,
-
-      question: combinedQuestion,
-
-      optionsHindi: cleanHindiOptions,
-
-      optionsEnglish: cleanEnglishOptions,
-
-      options: combinedOptions,
-
-      correctAnswer: correct,
-
-      explanationHindi: cleanExplanationHindi,
-
-      explanationEnglish: cleanExplanationEnglish,
-
-      explanation: combinedExplanation,
-
-      type: "single"
-    });
-
-
-    // Save NEW document
-    await newQuestion.save();
-
-
-    // -----------------------------
-    // UPDATE TOTAL QUESTIONS
-    // -----------------------------
-
-    const totalQuestions =
-      await Question.countDocuments({
-        testId: testId
-      });
-
-    test.totalQuestions = totalQuestions;
-
-    await test.save();
-
-
-    // -----------------------------
-    // SERVER LOG
-    // -----------------------------
-
-    console.log("=================================");
-    console.log("✅ NEW QUESTION SAVED");
-    console.log("Question ID:", newQuestion._id);
-    console.log("Test ID:", testId);
-    console.log("Subject:", subject);
-    console.log("Chapter:", chapter);
-    console.log("Total Questions:", totalQuestions);
-    console.log("=================================");
-
-
-    // -----------------------------
-    // RESPONSE
-    // -----------------------------
-
-    return res.status(201).json({
-      success: true,
-      message: "Question added successfully",
-      question: newQuestion,
-      totalQuestions: totalQuestions
-    });
-
-
-  } catch (error) {
-
-    console.error("=================================");
-    console.error("❌ ADD QUESTION ERROR");
-    console.error(error);
-    console.error("=================================");
-
-    return res.status(500).json({
-      success: false,
-      message: "Unable to add question",
-      error: error.message
-    });
   }
-});
+);
 
 
-// =====================================================
-// ADMIN: EDIT QUESTION
-// =====================================================
+/* =========================================================
+   GET QUESTIONS - ADMIN
+========================================================= */
 
-router.put("/:id", requireAdmin, async (req, res) => {
-  try {
+router.get(
+  "/admin/test/:testId",
+  adminOnly,
+  async (req, res) => {
 
-    const { id } = req.params;
+    try {
 
-    if (!mongoose.Types.ObjectId.isValid(id)) {
-      return res.status(400).json({
-        success: false,
-        message: "Invalid question ID"
+      const { testId } = req.params;
+
+      if (
+        !mongoose.Types.ObjectId.isValid(
+          testId
+        )
+      ) {
+
+        return res.status(400).json({
+          success: false,
+          message: "Invalid test ID."
+        });
+      }
+
+
+      const questions =
+        await Question.find({
+          testId
+        })
+          .sort({
+            createdAt: 1
+          });
+
+
+      res.json({
+        success: true,
+        questions
       });
-    }
 
+    } catch (error) {
 
-    const {
-      subject,
-      chapter,
-
-      questionHindi,
-      questionEnglish,
-
-      optionsHindi,
-      optionsEnglish,
-
-      explanationHindi,
-      explanationEnglish,
-
-      correctAnswer
-    } = req.body;
-
-
-    if (!subject || !String(subject).trim()) {
-      return res.status(400).json({
-        success: false,
-        message: "Subject is required"
-      });
-    }
-
-
-    if (!chapter || !String(chapter).trim()) {
-      return res.status(400).json({
-        success: false,
-        message: "Chapter is required"
-      });
-    }
-
-
-    if (!questionHindi || !String(questionHindi).trim()) {
-      return res.status(400).json({
-        success: false,
-        message: "Hindi question is required"
-      });
-    }
-
-
-    if (
-      !Array.isArray(optionsHindi) ||
-      optionsHindi.length !== 4
-    ) {
-      return res.status(400).json({
-        success: false,
-        message: "Exactly 4 Hindi options are required"
-      });
-    }
-
-
-    const cleanHindiOptions = optionsHindi.map(
-      option => String(option || "").trim()
-    );
-
-
-    if (
-      cleanHindiOptions.some(option => !option)
-    ) {
-      return res.status(400).json({
-        success: false,
-        message: "All 4 Hindi options are required"
-      });
-    }
-
-
-    let cleanEnglishOptions = [];
-
-    if (Array.isArray(optionsEnglish)) {
-      cleanEnglishOptions = optionsEnglish.map(
-        option => String(option || "").trim()
+      console.error(
+        "ADMIN QUESTIONS ERROR:",
+        error
       );
-    }
 
-
-    const cleanHindiQuestion =
-      String(questionHindi).trim();
-
-    const cleanEnglishQuestion =
-      questionEnglish
-        ? String(questionEnglish).trim()
-        : "";
-
-
-    let combinedQuestion =
-      cleanHindiQuestion;
-
-    if (cleanEnglishQuestion) {
-      combinedQuestion =
-        cleanHindiQuestion +
-        "\n\n" +
-        cleanEnglishQuestion;
-    }
-
-
-    const combinedOptions = [];
-
-    for (let i = 0; i < 4; i++) {
-
-      const hindi =
-        cleanHindiOptions[i];
-
-      const english =
-        cleanEnglishOptions[i] || "";
-
-      combinedOptions.push(
-        english
-          ? `${hindi} / ${english}`
-          : hindi
-      );
-    }
-
-
-    const cleanExplanationHindi =
-      explanationHindi
-        ? String(explanationHindi).trim()
-        : "";
-
-    const cleanExplanationEnglish =
-      explanationEnglish
-        ? String(explanationEnglish).trim()
-        : "";
-
-
-    let combinedExplanation =
-      cleanExplanationHindi;
-
-    if (cleanExplanationEnglish) {
-      combinedExplanation =
-        cleanExplanationHindi
-          ? cleanExplanationHindi +
-            "\n\n" +
-            cleanExplanationEnglish
-          : cleanExplanationEnglish;
-    }
-
-
-    const correct = Number(correctAnswer);
-
-    if (
-      !Number.isInteger(correct) ||
-      correct < 0 ||
-      correct > 3
-    ) {
-      return res.status(400).json({
+      res.status(500).json({
         success: false,
-        message: "Correct answer must be between 0 and 3"
+        message: "Failed to load questions."
       });
     }
+  }
+);
 
 
-    const updatedQuestion =
-      await Question.findByIdAndUpdate(
-        id,
+/* =========================================================
+   MANUAL ADD QUESTION
+========================================================= */
+
+router.post(
+  "/",
+  adminOnly,
+  async (req, res) => {
+
+    try {
+
+      const {
+        testId,
+        language
+      } = req.body;
+
+
+      if (
+        !mongoose.Types.ObjectId.isValid(
+          testId
+        )
+      ) {
+
+        return res.status(400).json({
+          success: false,
+          message: "Invalid test ID."
+        });
+      }
+
+
+      const test =
+        await Test.findById(testId);
+
+
+      if (!test) {
+
+        return res.status(404).json({
+          success: false,
+          message: "Test not found."
+        });
+      }
+
+
+      let selectedLanguage =
+        normalizeLanguage(language);
+
+
+      /*
+        Old HTML compatibility
+      */
+
+      if (!language) {
+
+        const hiQuestion =
+          clean(req.body.questionHindi);
+
+        const enQuestion =
+          clean(req.body.questionEnglish);
+
+
+        if (
+          hiQuestion &&
+          enQuestion
+        ) {
+
+          selectedLanguage =
+            "bilingual";
+
+        } else if (enQuestion) {
+
+          selectedLanguage =
+            "english";
+
+        } else {
+
+          selectedLanguage =
+            "hindi";
+        }
+      }
+
+
+      const prepared =
+        prepareQuestionData(
+          req.body,
+          selectedLanguage
+        );
+
+
+      const question =
+        await Question.create({
+
+          testId,
+
+          ...prepared
+        });
+
+
+      const totalQuestions =
+        await Question.countDocuments({
+          testId
+        });
+
+
+      await Test.findByIdAndUpdate(
+        testId,
         {
-          subject: String(subject).trim(),
-
-          chapter: String(chapter).trim(),
-
-          questionHindi:
-            cleanHindiQuestion,
-
-          questionEnglish:
-            cleanEnglishQuestion,
-
-          question:
-            combinedQuestion,
-
-          optionsHindi:
-            cleanHindiOptions,
-
-          optionsEnglish:
-            cleanEnglishOptions,
-
-          options:
-            combinedOptions,
-
-          correctAnswer:
-            correct,
-
-          explanationHindi:
-            cleanExplanationHindi,
-
-          explanationEnglish:
-            cleanExplanationEnglish,
-
-          explanation:
-            combinedExplanation
-        },
-        {
-          new: true,
-          runValidators: true
+          $set: {
+            totalQuestions
+          }
         }
       );
 
 
-    if (!updatedQuestion) {
-      return res.status(404).json({
+      res.status(201).json({
+
+        success: true,
+
+        message:
+          "Question added successfully.",
+
+        question
+      });
+
+    } catch (error) {
+
+      console.error(
+        "ADD QUESTION ERROR:",
+        error
+      );
+
+      res.status(400).json({
+
         success: false,
-        message: "Question not found"
+
+        message:
+          error.message ||
+          "Failed to add question."
       });
     }
-
-
-    console.log(
-      "✏️ Question Updated:",
-      id
-    );
-
-
-    res.json({
-      success: true,
-      message: "Question updated successfully",
-      question: updatedQuestion
-    });
-
-
-  } catch (error) {
-
-    console.error(
-      "❌ Update Question Error:",
-      error
-    );
-
-    res.status(500).json({
-      success: false,
-      message: "Unable to update question",
-      error: error.message
-    });
   }
-});
+);
 
 
-// =====================================================
-// ADMIN: DELETE QUESTION
-// =====================================================
+/* =========================================================
+   UPDATE QUESTION
+========================================================= */
 
-router.delete("/:id", requireAdmin, async (req, res) => {
-  try {
+router.put(
+  "/:id",
+  adminOnly,
+  async (req, res) => {
 
-    const deletedQuestion =
-      await Question.findByIdAndDelete(
-        req.params.id
+    try {
+
+      const { id } = req.params;
+
+
+      if (
+        !mongoose.Types.ObjectId.isValid(id)
+      ) {
+
+        return res.status(400).json({
+          success: false,
+          message: "Invalid question ID."
+        });
+      }
+
+
+      const existing =
+        await Question.findById(id);
+
+
+      if (!existing) {
+
+        return res.status(404).json({
+          success: false,
+          message: "Question not found."
+        });
+      }
+
+
+      let selectedLanguage =
+        normalizeLanguage(
+          req.body.language
+        );
+
+
+      if (!req.body.language) {
+
+        const hiQuestion =
+          clean(req.body.questionHindi);
+
+        const enQuestion =
+          clean(req.body.questionEnglish);
+
+
+        if (
+          hiQuestion &&
+          enQuestion
+        ) {
+
+          selectedLanguage =
+            "bilingual";
+
+        } else if (enQuestion) {
+
+          selectedLanguage =
+            "english";
+
+        } else {
+
+          selectedLanguage =
+            "hindi";
+        }
+      }
+
+
+      const prepared =
+        prepareQuestionData(
+          req.body,
+          selectedLanguage
+        );
+
+
+      const updated =
+        await Question.findByIdAndUpdate(
+          id,
+          {
+            ...prepared
+          },
+          {
+            new: true,
+            runValidators: true
+          }
+        );
+
+
+      const count =
+        await Question.countDocuments({
+          testId: updated.testId
+        });
+
+
+      await Test.findByIdAndUpdate(
+        updated.testId,
+        {
+          $set: {
+            totalQuestions: count
+          }
+        }
       );
 
 
-    if (!deletedQuestion) {
-      return res.status(404).json({
-        success: false,
-        message: "Question not found"
+      res.json({
+
+        success: true,
+
+        message:
+          "Question updated successfully.",
+
+        question: updated
       });
+
+    } catch (error) {
+
+      console.error(
+        "UPDATE QUESTION ERROR:",
+        error
+      );
+
+      res.status(400).json({
+
+        success: false,
+
+        message:
+          error.message ||
+          "Failed to update question."
+      });
+    }
+  }
+);
+
+
+/* =========================================================
+   DELETE QUESTION
+========================================================= */
+
+router.delete(
+  "/:id",
+  adminOnly,
+  async (req, res) => {
+
+    try {
+
+      const { id } = req.params;
+
+
+      if (
+        !mongoose.Types.ObjectId.isValid(id)
+      ) {
+
+        return res.status(400).json({
+          success: false,
+          message: "Invalid question ID."
+        });
+      }
+
+
+      const question =
+        await Question.findById(id);
+
+
+      if (!question) {
+
+        return res.status(404).json({
+          success: false,
+          message: "Question not found."
+        });
+      }
+
+
+      const testId =
+        question.testId;
+
+
+      await Question.findByIdAndDelete(id);
+
+
+      const count =
+        await Question.countDocuments({
+          testId
+        });
+
+
+      await Test.findByIdAndUpdate(
+        testId,
+        {
+          $set: {
+            totalQuestions: count
+          }
+        }
+      );
+
+
+      res.json({
+
+        success: true,
+
+        message:
+          "Question deleted successfully.",
+
+        totalQuestions: count
+      });
+
+    } catch (error) {
+
+      console.error(
+        "DELETE QUESTION ERROR:",
+        error
+      );
+
+      res.status(500).json({
+
+        success: false,
+
+        message:
+          "Failed to delete question."
+      });
+    }
+  }
+);
+
+
+/* =========================================================
+   PDF TEXT EXTRACTION
+========================================================= */
+
+async function extractPdfText(buffer) {
+
+  try {
+
+    const pdfModule =
+      require("pdf-parse");
+
+
+    /*
+      Old pdf-parse API
+    */
+
+    if (
+      typeof pdfModule === "function"
+    ) {
+
+      const result =
+        await pdfModule(buffer);
+
+      return result.text || "";
     }
 
 
-    const totalQuestions =
-      await Question.countDocuments({
-        testId: deletedQuestion.testId
-      });
+    /*
+      New pdf-parse API
+    */
+
+    if (
+      pdfModule &&
+      typeof pdfModule.PDFParse === "function"
+    ) {
+
+      const parser =
+        new pdfModule.PDFParse({
+          data: buffer
+        });
 
 
-    await Test.findByIdAndUpdate(
-      deletedQuestion.testId,
-      {
-        totalQuestions: totalQuestions
+      const result =
+        await parser.getText();
+
+
+      if (
+        typeof parser.destroy === "function"
+      ) {
+
+        await parser.destroy();
       }
+
+
+      return result.text || "";
+    }
+
+
+    throw new Error(
+      "PDF parser API was not recognized."
     );
-
-
-    console.log(
-      "🗑️ Question Deleted:",
-      req.params.id
-    );
-
-
-    res.json({
-      success: true,
-      message: "Question deleted successfully",
-      totalQuestions: totalQuestions
-    });
-
 
   } catch (error) {
 
     console.error(
-      "❌ Delete Question Error:",
+      "PDF PARSER ERROR:",
       error
     );
 
-    res.status(500).json({
-      success: false,
-      message: "Unable to delete question"
-    });
+    throw new Error(
+      "PDF read nahi ho pa raha. Please PDF file check karein."
+    );
   }
-});
+}
 
+
+/* =========================================================
+   DOCX TEXT EXTRACTION
+========================================================= */
+
+async function extractDocxText(buffer) {
+
+  try {
+
+    const result =
+      await mammoth.extractRawText({
+        buffer
+      });
+
+
+    return result.value || "";
+
+  } catch (error) {
+
+    console.error(
+      "DOCX PARSER ERROR:",
+      error
+    );
+
+    throw new Error(
+      "Word file read nahi ho pa rahi. Please DOCX file check karein."
+    );
+  }
+}
+
+
+/* =========================================================
+   FIELD EXTRACTOR
+========================================================= */
+
+function getField(
+  text,
+  label,
+  nextLabels = []
+) {
+
+  const escapedLabel =
+    label.replace(
+      /[.*+?^${}()|[\]\\]/g,
+      "\\$&"
+    );
+
+
+  let lookAhead = "$";
+
+
+  if (nextLabels.length) {
+
+    const escapedNext =
+      nextLabels.map(
+        item =>
+          item.replace(
+            /[.*+?^${}()|[\]\\]/g,
+            "\\$&"
+          )
+      );
+
+
+    lookAhead =
+      `(?=\\n\\s*(?:${escapedNext.join("|")})\\s*:|$)`;
+  }
+
+
+  const regex =
+    new RegExp(
+      `${escapedLabel}\\s*:\\s*([\\s\\S]*?)${lookAhead}`,
+      "i"
+    );
+
+
+  const match =
+    text.match(regex);
+
+
+  if (!match) {
+    return "";
+  }
+
+
+  return clean(match[1]);
+}
+
+
+/* =========================================================
+   GENERIC A/B/C/D OPTION PARSER
+========================================================= */
+
+function getGenericOptions(block) {
+
+  const options = {
+    A: "",
+    B: "",
+    C: "",
+    D: ""
+  };
+
+
+  /*
+    Option begins with:
+
+    A.
+    B.
+    C.
+    D.
+
+    and ends when next option / Answer / Explanation starts.
+  */
+
+  const regex =
+    /(?:^|\n)\s*([ABCD])\s*[\.\):\-]\s*([\s\S]*?)(?=\n\s*[ABCD]\s*[\.\):\-]\s*|\n\s*Answer\s*:|\n\s*Hindi Explanation\s*:|\n\s*English Explanation\s*:|$)/gi;
+
+
+  let match;
+
+
+  while (
+    (match = regex.exec(block)) !== null
+  ) {
+
+    const letter =
+      match[1].toUpperCase();
+
+    const value =
+      clean(match[2]);
+
+
+    if (
+      options[letter] === ""
+    ) {
+
+      options[letter] =
+        value;
+    }
+  }
+
+
+  return [
+    options.A,
+    options.B,
+    options.C,
+    options.D
+  ];
+}
+
+
+/* =========================================================
+   LANGUAGE-SPECIFIC OPTION PARSER
+========================================================= */
+
+function getLanguageOptions(
+  block,
+  language
+) {
+
+  const options = [];
+
+
+  for (
+    const letter of ["A", "B", "C", "D"]
+  ) {
+
+    const regex =
+      new RegExp(
+        `${language}\\s+Option\\s+${letter}\\s*:\\s*([\\s\\S]*?)(?=\\n\\s*${language}\\s+Option\\s+[ABCD]\\s*:|\\n\\s*Answer\\s*:|\\n\\s*Hindi\\s+Explanation\\s*:|\\n\\s*English\\s+Explanation\\s*:|$)`,
+        "i"
+      );
+
+
+    const match =
+      block.match(regex);
+
+
+    options.push(
+      match
+        ? clean(match[1])
+        : ""
+    );
+  }
+
+
+  return options;
+}
+
+
+/* =========================================================
+   PARSE ONE QUESTION
+========================================================= */
+
+function parseOneQuestion(
+  block,
+  number
+) {
+
+  /* -------------------------------------------------------
+     Subject / Chapter
+     Optional in file.
+     Admin selected values will be used later.
+  ------------------------------------------------------- */
+
+  const subject =
+    getField(
+      block,
+      "Subject",
+      [
+        "Chapter",
+        "Hindi Question",
+        "English Question",
+        "Answer"
+      ]
+    );
+
+
+  const chapter =
+    getField(
+      block,
+      "Chapter",
+      [
+        "Hindi Question",
+        "English Question",
+        "Answer"
+      ]
+    );
+
+
+  /* -------------------------------------------------------
+     QUESTIONS
+  ------------------------------------------------------- */
+
+  const questionHindi =
+    getField(
+      block,
+      "Hindi Question",
+      [
+        "English Question",
+        "Hindi Option A",
+        "English Option A",
+        "Answer",
+        "Hindi Explanation",
+        "English Explanation"
+      ]
+    );
+
+
+  const questionEnglish =
+    getField(
+      block,
+      "English Question",
+      [
+        "Hindi Option A",
+        "English Option A",
+        "Answer",
+        "Hindi Explanation",
+        "English Explanation"
+      ]
+    );
+
+
+  /* -------------------------------------------------------
+     LANGUAGE-SPECIFIC OPTIONS
+  ------------------------------------------------------- */
+
+  let optionsHindi =
+    getLanguageOptions(
+      block,
+      "Hindi"
+    );
+
+
+  let optionsEnglish =
+    getLanguageOptions(
+      block,
+      "English"
+    );
+
+
+  /* -------------------------------------------------------
+     SIMPLE A/B/C/D OPTIONS
+  ------------------------------------------------------- */
+
+  const genericOptions =
+    getGenericOptions(block);
+
+
+  /*
+    Agar Hindi/English labelled options nahi hain,
+    to generic A-D options use honge.
+  */
+
+  if (
+    optionsHindi.length !== 4 ||
+    optionsHindi.some(x => !x)
+  ) {
+
+    optionsHindi =
+      genericOptions.slice();
+  }
+
+
+  if (
+    optionsEnglish.length !== 4 ||
+    optionsEnglish.some(x => !x)
+  ) {
+
+    optionsEnglish =
+      genericOptions.slice();
+  }
+
+
+  /* -------------------------------------------------------
+     ANSWER
+  ------------------------------------------------------- */
+
+  const answer =
+    getField(
+      block,
+      "Answer",
+      [
+        "Hindi Explanation",
+        "English Explanation"
+      ]
+    );
+
+
+  /* -------------------------------------------------------
+     EXPLANATIONS
+  ------------------------------------------------------- */
+
+  const explanationHindi =
+    getField(
+      block,
+      "Hindi Explanation",
+      [
+        "English Explanation"
+      ]
+    );
+
+
+  const explanationEnglish =
+    getField(
+      block,
+      "English Explanation",
+      []
+    );
+
+
+  return {
+
+    number,
+
+    subject,
+    chapter,
+
+    questionHindi,
+    questionEnglish,
+
+    optionsHindi,
+    optionsEnglish,
+
+    answer,
+
+    explanationHindi,
+    explanationEnglish
+  };
+}
+
+
+/* =========================================================
+   PARSE COMPLETE FILE
+========================================================= */
+
+function parseQuestionsFromText(text) {
+
+  text =
+    String(text || "")
+      .replace(/\r\n/g, "\n")
+      .replace(/\r/g, "\n")
+      .replace(/\u00A0/g, " ")
+      .replace(/[ \t]+\n/g, "\n");
+
+
+  /*
+    Supported:
+
+    QUESTION 1
+    QUESTION 2
+
+    Q1
+    Q2
+
+    Q.1
+    Q.2
+
+    QUESTION 1:
+  */
+
+  const matches =
+    [
+      ...text.matchAll(
+        /^\s*(?:QUESTION|Q)\s*\.?\s*(\d+)\s*:?\s*$/gim
+      )
+    ];
+
+
+  if (!matches.length) {
+
+    throw new Error(
+      "Question numbers nahi mile. File format check karein. Example: QUESTION 1"
+    );
+  }
+
+
+  const questions = [];
+
+
+  for (
+    let i = 0;
+    i < matches.length;
+    i++
+  ) {
+
+    const start =
+      matches[i].index +
+      matches[i][0].length;
+
+
+    const end =
+      i + 1 < matches.length
+        ? matches[i + 1].index
+        : text.length;
+
+
+    const block =
+      text
+        .slice(start, end)
+        .trim();
+
+
+    if (!block) {
+      continue;
+    }
+
+
+    const question =
+      parseOneQuestion(
+        block,
+        Number(matches[i][1])
+      );
+
+
+    questions.push(question);
+  }
+
+
+  return questions;
+}
+
+
+/* =========================================================
+   VALIDATE BULK QUESTIONS
+========================================================= */
+
+function validateBulkQuestions(
+  questions,
+  language,
+  defaultSubject,
+  defaultChapter
+) {
+
+  language =
+    normalizeLanguage(language);
+
+
+  if (!Array.isArray(questions)) {
+
+    throw new Error(
+      "Questions data invalid."
+    );
+  }
+
+
+  if (!questions.length) {
+
+    throw new Error(
+      "No questions found."
+    );
+  }
+
+
+  const validated = [];
+
+
+  for (
+    let i = 0;
+    i < questions.length;
+    i++
+  ) {
+
+    const item =
+      questions[i] || {};
+
+
+    const data = {
+
+      /*
+        File ke andar Subject/Chapter ho
+        to woh use hoga.
+
+        Nahi ho to Admin panel ke selected
+        Subject/Chapter use honge.
+      */
+
+      subject:
+        clean(item.subject) ||
+        clean(defaultSubject),
+
+      chapter:
+        clean(item.chapter) ||
+        clean(defaultChapter),
+
+      questionHindi:
+        clean(item.questionHindi),
+
+      questionEnglish:
+        clean(item.questionEnglish),
+
+      optionsHindi:
+        normalizeOptions(
+          item.optionsHindi
+        ),
+
+      optionsEnglish:
+        normalizeOptions(
+          item.optionsEnglish
+        ),
+
+      correctAnswer:
+        item.answer !== undefined
+          ? item.answer
+          : item.correctAnswer,
+
+      explanationHindi:
+        clean(item.explanationHindi),
+
+      explanationEnglish:
+        clean(item.explanationEnglish)
+    };
+
+
+    try {
+
+      const prepared =
+        prepareQuestionData(
+          data,
+          language
+        );
+
+
+      validated.push({
+
+        ...prepared,
+
+        number:
+          item.number || i + 1
+      });
+
+    } catch (error) {
+
+      throw new Error(
+        `Question ${item.number || i + 1}: ${error.message}`
+      );
+    }
+  }
+
+
+  return validated;
+}
+
+
+/* =========================================================
+   BULK PREVIEW
+========================================================= */
+
+router.post(
+  "/bulk/preview",
+  adminOnly,
+  routerUpload.single("file"),
+  async (req, res) => {
+
+    try {
+
+      if (!req.file) {
+
+        return res.status(400).json({
+
+          success: false,
+
+          message:
+            "Please upload a PDF or DOCX file."
+        });
+      }
+
+
+      const language =
+        normalizeLanguage(
+          req.body.language
+        );
+
+
+      let text = "";
+
+
+      const filename =
+        req.file.originalname
+          .toLowerCase();
+
+
+      /* -----------------------------------------------------
+         DOCX
+      ----------------------------------------------------- */
+
+      if (
+        filename.endsWith(".docx")
+      ) {
+
+        text =
+          await extractDocxText(
+            req.file.buffer
+          );
+      }
+
+
+      /* -----------------------------------------------------
+         PDF
+      ----------------------------------------------------- */
+
+      else if (
+        filename.endsWith(".pdf")
+      ) {
+
+        text =
+          await extractPdfText(
+            req.file.buffer
+          );
+      }
+
+
+      else {
+
+        return res.status(400).json({
+
+          success: false,
+
+          message:
+            "Only PDF and DOCX files are supported."
+        });
+      }
+
+
+      if (!text.trim()) {
+
+        return res.status(400).json({
+
+          success: false,
+
+          message:
+            "File se text read nahi hua."
+        });
+      }
+
+
+      /* -----------------------------------------------------
+         PARSE
+      ----------------------------------------------------- */
+
+      const parsed =
+        parseQuestionsFromText(
+          text
+        );
+
+
+      /* -----------------------------------------------------
+         VALIDATE
+      ----------------------------------------------------- */
+
+      const questions =
+        validateBulkQuestions(
+
+          parsed,
+
+          language,
+
+          req.body.subject,
+
+          req.body.chapter
+        );
+
+
+      res.json({
+
+        success: true,
+
+        message:
+          `${questions.length} questions successfully parsed.`,
+
+        language,
+
+        count:
+          questions.length,
+
+        questions
+      });
+
+    } catch (error) {
+
+      console.error(
+        "BULK PREVIEW ERROR:",
+        error
+      );
+
+
+      res.status(400).json({
+
+        success: false,
+
+        message:
+          error.message ||
+          "Bulk preview failed."
+      });
+    }
+  }
+);
+
+
+/* =========================================================
+   BULK IMPORT
+========================================================= */
+
+router.post(
+  "/bulk/import",
+  adminOnly,
+  async (req, res) => {
+
+    try {
+
+      const {
+        testId,
+        language,
+        questions
+      } = req.body;
+
+
+      /* -----------------------------------------------------
+         TEST ID
+      ----------------------------------------------------- */
+
+      if (
+        !mongoose.Types.ObjectId.isValid(
+          testId
+        )
+      ) {
+
+        return res.status(400).json({
+
+          success: false,
+
+          message:
+            "Invalid test ID."
+        });
+      }
+
+
+      /* -----------------------------------------------------
+         TEST
+      ----------------------------------------------------- */
+
+      const test =
+        await Test.findById(
+          testId
+        );
+
+
+      if (!test) {
+
+        return res.status(404).json({
+
+          success: false,
+
+          message:
+            "Test not found."
+        });
+      }
+
+
+      const selectedLanguage =
+        normalizeLanguage(
+          language
+        );
+
+
+      /* -----------------------------------------------------
+         VALIDATE PREVIEW DATA AGAIN
+      ----------------------------------------------------- */
+
+      const validated =
+        validateBulkQuestions(
+
+          questions,
+
+          selectedLanguage,
+
+          "",
+
+          ""
+        );
+
+
+      if (!validated.length) {
+
+        return res.status(400).json({
+
+          success: false,
+
+          message:
+            "No valid questions to import."
+        });
+      }
+
+
+      /* -----------------------------------------------------
+         REMOVE NUMBER BEFORE DATABASE
+      ----------------------------------------------------- */
+
+      const documents =
+        validated.map(item => {
+
+          const {
+            number,
+            ...questionData
+          } = item;
+
+
+          return {
+
+            testId,
+
+            ...questionData
+          };
+        });
+
+
+      /* -----------------------------------------------------
+         INSERT MANY
+      ----------------------------------------------------- */
+
+      const inserted =
+        await Question.insertMany(
+
+          documents,
+
+          {
+            ordered: true
+          }
+        );
+
+
+      /* -----------------------------------------------------
+         UPDATE TOTAL QUESTIONS
+      ----------------------------------------------------- */
+
+      const totalQuestions =
+        await Question.countDocuments({
+          testId
+        });
+
+
+      await Test.findByIdAndUpdate(
+
+        testId,
+
+        {
+          $set: {
+            totalQuestions
+          }
+        }
+      );
+
+
+      res.status(201).json({
+
+        success: true,
+
+        message:
+          `${inserted.length} questions imported successfully.`,
+
+        imported:
+          inserted.length,
+
+        totalQuestions
+      });
+
+    } catch (error) {
+
+      console.error(
+        "BULK IMPORT ERROR:",
+        error
+      );
+
+
+      res.status(400).json({
+
+        success: false,
+
+        message:
+          error.message ||
+          "Bulk import failed."
+      });
+    }
+  }
+);
+
+
+/* =========================================================
+   MULTER ERROR HANDLER
+========================================================= */
+
+router.use(
+  (error, req, res, next) => {
+
+    if (
+      error instanceof multer.MulterError
+    ) {
+
+      if (
+        error.code === "LIMIT_FILE_SIZE"
+      ) {
+
+        return res.status(400).json({
+
+          success: false,
+
+          message:
+            "File size maximum 10 MB ho sakta hai."
+        });
+      }
+
+
+      return res.status(400).json({
+
+        success: false,
+
+        message:
+          error.message
+      });
+    }
+
+
+    if (
+      error &&
+      error.message &&
+      error.message.includes(
+        "Only PDF and DOCX"
+      )
+    ) {
+
+      return res.status(400).json({
+
+        success: false,
+
+        message:
+          error.message
+      });
+    }
+
+
+    next(error);
+  }
+);
+
+
+/* =========================================================
+   EXPORT
+========================================================= */
 
 module.exports = router;
