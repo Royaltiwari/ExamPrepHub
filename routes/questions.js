@@ -632,6 +632,10 @@ router.post(
         questions
       } = req.body;
 
+      // --------------------------------------------------
+      // BASIC VALIDATION
+      // --------------------------------------------------
+
       if (!testId) {
         return res.status(400).json({
           success: false,
@@ -646,6 +650,10 @@ router.post(
         });
       }
 
+      // --------------------------------------------------
+      // CHECK TEST
+      // --------------------------------------------------
+
       const test = await Test.findById(testId);
 
       if (!test) {
@@ -655,138 +663,302 @@ router.post(
         });
       }
 
+      // --------------------------------------------------
+      // NORMALIZE LANGUAGE
+      // --------------------------------------------------
+
+      const selectedLanguage = normalizeLanguage(language);
+
+      // --------------------------------------------------
+      // BUILD MONGODB DOCUMENTS
+      // --------------------------------------------------
+
       const docs = [];
 
       for (let i = 0; i < questions.length; i++) {
         const q = questions[i];
+
+        // ----------------------------------------------
+        // QUESTION TEXT
+        // ----------------------------------------------
+
+        const questionHindi = clean(
+          q.hindiQuestion ||
+          q.questionHindi ||
+          q.question?.hindi ||
+          ""
+        );
+
+        const questionEnglish = clean(
+          q.englishQuestion ||
+          q.questionEnglish ||
+          q.question?.english ||
+          ""
+        );
+
+        // ----------------------------------------------
+        // OPTIONS
+        // ----------------------------------------------
+
+        const hindiOptions = [
+          clean(
+            q.optionsHindi?.[0] ||
+            q.options?.hindi?.A ||
+            ""
+          ),
+
+          clean(
+            q.optionsHindi?.[1] ||
+            q.options?.hindi?.B ||
+            ""
+          ),
+
+          clean(
+            q.optionsHindi?.[2] ||
+            q.options?.hindi?.C ||
+            ""
+          ),
+
+          clean(
+            q.optionsHindi?.[3] ||
+            q.options?.hindi?.D ||
+            ""
+          )
+        ];
+
+        const englishOptions = [
+          clean(
+            q.optionsEnglish?.[0] ||
+            q.options?.english?.A ||
+            ""
+          ),
+
+          clean(
+            q.optionsEnglish?.[1] ||
+            q.options?.english?.B ||
+            ""
+          ),
+
+          clean(
+            q.optionsEnglish?.[2] ||
+            q.options?.english?.C ||
+            ""
+          ),
+
+          clean(
+            q.optionsEnglish?.[3] ||
+            q.options?.english?.D ||
+            ""
+          )
+        ];
+
+        // ----------------------------------------------
+        // COMBINED OPTIONS
+        // ----------------------------------------------
+
+        const combinedOptions = [];
+
+        for (let j = 0; j < 4; j++) {
+          const hindi = hindiOptions[j];
+          const english = englishOptions[j];
+
+          let combined = "";
+
+          if (hindi && english && hindi !== english) {
+            combined = `${hindi} / ${english}`;
+          } else {
+            combined = hindi || english || "";
+          }
+
+          combinedOptions.push(combined);
+        }
+
+        // ----------------------------------------------
+        // CORRECT ANSWER
+        // ----------------------------------------------
+
+        let correctAnswer = q.correctAnswer;
+
+        if (
+          typeof correctAnswer === "string" &&
+          /^[A-Da-d]$/.test(correctAnswer.trim())
+        ) {
+          correctAnswer =
+            correctAnswer.trim().toUpperCase().charCodeAt(0) -
+            "A".charCodeAt(0);
+        }
+
+        if (
+          correctAnswer === undefined ||
+          correctAnswer === null ||
+          correctAnswer === ""
+        ) {
+          const answer = String(
+            q.answer || ""
+          )
+            .trim()
+            .toUpperCase();
+
+          if (/^[A-D]$/.test(answer)) {
+            correctAnswer =
+              answer.charCodeAt(0) -
+              "A".charCodeAt(0);
+          }
+        }
+
+        correctAnswer = Number(correctAnswer);
+
+        // ----------------------------------------------
+        // EXPLANATION
+        // ----------------------------------------------
+
+        const explanationHindi = clean(
+          q.hindiExplanation ||
+          q.explanationHindi ||
+          q.explanation?.hindi ||
+          ""
+        );
+
+        const explanationEnglish = clean(
+          q.englishExplanation ||
+          q.explanationEnglish ||
+          q.explanation?.english ||
+          ""
+        );
+
+        // ----------------------------------------------
+        // COMBINED QUESTION
+        // ----------------------------------------------
+
+        let combinedQuestion = "";
+
+        if (
+          questionHindi &&
+          questionEnglish &&
+          questionHindi !== questionEnglish
+        ) {
+          combinedQuestion =
+            `${questionHindi}\n\n${questionEnglish}`;
+        } else {
+          combinedQuestion =
+            questionHindi ||
+            questionEnglish ||
+            "";
+        }
+
+        // ----------------------------------------------
+        // COMBINED EXPLANATION
+        // ----------------------------------------------
+
+        let combinedExplanation = "";
+
+        if (
+          explanationHindi &&
+          explanationEnglish &&
+          explanationHindi !== explanationEnglish
+        ) {
+          combinedExplanation =
+            `${explanationHindi}\n\n${explanationEnglish}`;
+        } else {
+          combinedExplanation =
+            explanationHindi ||
+            explanationEnglish ||
+            "";
+        }
+
+        // ----------------------------------------------
+        // VALIDATION
+        // ----------------------------------------------
+
+        if (!combinedQuestion) {
+          throw new Error(
+            `Question ${i + 1}: Question text is missing`
+          );
+        }
+
+        if (combinedOptions.length !== 4) {
+          throw new Error(
+            `Question ${i + 1}: Exactly 4 options are required`
+          );
+        }
+
+        if (
+          combinedOptions.some(
+            option => !option
+          )
+        ) {
+          throw new Error(
+            `Question ${i + 1}: All 4 options are required`
+          );
+        }
+
+        if (
+          !Number.isInteger(correctAnswer) ||
+          correctAnswer < 0 ||
+          correctAnswer > 3
+        ) {
+          throw new Error(
+            `Question ${i + 1}: Correct answer must be A, B, C or D`
+          );
+        }
+
+        // ----------------------------------------------
+        // FINAL MONGODB DOCUMENT
+        // ----------------------------------------------
 
         const questionData = {
           testId: test._id,
 
           subject:
             clean(q.subject) ||
-            clean(subject),
+            clean(subject) ||
+            "General",
 
           chapter:
             clean(q.chapter) ||
-            clean(chapter),
+            clean(chapter) ||
+            "General",
 
-          language:
-            normalizeLanguage(
-              q.language || language
-            ),
+          questionHindi,
 
-          question: {
-            hindi:
-              clean(
-                q.hindiQuestion ||
-                q.question?.hindi ||
-                ""
-              ),
+          questionEnglish,
 
-            english:
-              clean(
-                q.englishQuestion ||
-                q.question?.english ||
-                ""
-              )
-          },
+          question: combinedQuestion,
 
-          options: {
-            hindi: {
-              A:
-                clean(
-                  q.options?.hindi?.A ||
-                  ""
-                ),
+          optionsHindi: hindiOptions,
 
-              B:
-                clean(
-                  q.options?.hindi?.B ||
-                  ""
-                ),
+          optionsEnglish: englishOptions,
 
-              C:
-                clean(
-                  q.options?.hindi?.C ||
-                  ""
-                ),
+          options: combinedOptions,
 
-              D:
-                clean(
-                  q.options?.hindi?.D ||
-                  ""
-                )
-            },
+          correctAnswer,
 
-            english: {
-              A:
-                clean(
-                  q.options?.english?.A ||
-                  ""
-                ),
+          explanationHindi,
 
-              B:
-                clean(
-                  q.options?.english?.B ||
-                  ""
-                ),
+          explanationEnglish,
 
-              C:
-                clean(
-                  q.options?.english?.C ||
-                  ""
-                ),
+          explanation: combinedExplanation,
 
-              D:
-                clean(
-                  q.options?.english?.D ||
-                  ""
-                )
-            }
-          },
-
-          answer:
-            String(q.answer || "")
-              .trim()
-              .toUpperCase(),
-
-          explanation: {
-            hindi:
-              clean(
-                q.hindiExplanation ||
-                q.explanation?.hindi ||
-                ""
-              ),
-
-            english:
-              clean(
-                q.englishExplanation ||
-                q.explanation?.english ||
-                ""
-              )
-          },
-
-          visible: true
+          type: "single"
         };
 
         docs.push(questionData);
       }
 
-      /*
-        insertMany is much faster than saving
-        each question separately.
-
-        100 / 500 / 1000 questions can therefore
-        be imported in one operation.
-      */
+      // --------------------------------------------------
+      // INSERT ALL QUESTIONS
+      // --------------------------------------------------
 
       const inserted = await Question.insertMany(
         docs,
         {
-          ordered: false
+          ordered: true
         }
       );
+
+      // --------------------------------------------------
+      // SUCCESS
+      // --------------------------------------------------
 
       return res.json({
         success: true,
@@ -798,11 +970,16 @@ router.post(
 
         total: questions.length
       });
+
     } catch (error) {
-      console.error("Bulk Import Error:", error);
+      console.error(
+        "Bulk Import Error:",
+        error
+      );
 
       return res.status(500).json({
         success: false,
+
         message:
           error.message ||
           "Questions import failed"
@@ -810,11 +987,6 @@ router.post(
     }
   }
 );
-
-// ======================================================
-// GET QUESTIONS FOR ADMIN
-// ======================================================
-
 router.get(
   "/admin/test/:testId",
   adminOnly,
