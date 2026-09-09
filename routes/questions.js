@@ -112,14 +112,14 @@ function normalizeText(text) {
 // ======================================================
 
 function isQuestionHeading(line) {
-  return /^\s*(?:QUESTION|Question|question|Q|q)\s*\.?\s*\d+\s*$/i.test(
+  return /^\s*(?:QUESTION|Question|question|Q|q)\s*\.?\s*\d+\s*[\.\):\-]?\s*/i.test(
     line
   );
 }
 
 function getQuestionNumber(line) {
   const match = String(line || "").match(
-    /^\s*(?:QUESTION|Question|question|Q|q)\s*\.?\s*(\d+)\s*$/i
+    /^\s*(?:QUESTION|Question|question|Q|q)\s*\.?\s*(\d+)\s*[\.\):\-]?\s*/i
   );
 
   return match ? Number(match[1]) : null;
@@ -381,37 +381,55 @@ function splitIntoQuestionBlocks(text) {
   let currentNumber = null;
 
   for (const line of lines) {
+
+    // Empty line
     if (!line) {
       if (current.length) {
         current.push("");
       }
-
       continue;
     }
 
-    if (isQuestionHeading(line)) {
+    // Detect Q1. / Q2. / QUESTION 1. etc.
+    const match = line.match(
+      /^\s*(?:QUESTION|Question|question|Q|q)\s*\.?\s*(\d+)\s*[\.\):\-]?\s*(.*)$/i
+    );
+
+    if (match) {
+
+      // Save previous question
       if (current.length && currentNumber !== null) {
         blocks.push({
           number: currentNumber,
-          text: current.join("\n")
+          text: current.join("\n").trim()
         });
       }
 
+      // Start new question
+      currentNumber = Number(match[1]);
+
+      // IMPORTANT:
+      // Q1. के बाद उसी line में लिखा question भी save होगा
       current = [];
-      currentNumber = getQuestionNumber(line);
+
+      if (match[2]) {
+        current.push(match[2].trim());
+      }
 
       continue;
     }
 
+    // Add text to current question
     if (currentNumber !== null) {
       current.push(line);
     }
   }
 
+  // Save last question
   if (current.length && currentNumber !== null) {
     blocks.push({
       number: currentNumber,
-      text: current.join("\n")
+      text: current.join("\n").trim()
     });
   }
 

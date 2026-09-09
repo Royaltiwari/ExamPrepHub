@@ -4484,7 +4484,10 @@ async function previewBulkQuestions() {
   "pdfFile",
   file
 );
-
+formData.append(
+  "testId",
+  selectedTest
+);
 
   formData.append(
     "language",
