@@ -21,7 +21,6 @@ const upload = multer({
     fileSize: 10 * 1024 * 1024
   },
   fileFilter: (req, file, cb) => {
-
     const ext = path
       .extname(file.originalname)
       .toLowerCase();
@@ -31,7 +30,6 @@ const upload = multer({
     } else {
       cb(new Error("Only PDF and DOCX files are allowed."));
     }
-
   }
 });
 
@@ -41,88 +39,102 @@ const upload = multer({
 ===================================================== */
 
 function cleanText(value) {
-
   return String(value || "")
     .replace(/\r/g, "")
+    .replace(/\u00A0/g, " ")
+    .replace(/[ \t]+/g, " ")
     .trim();
+}
 
+
+/* =====================================================
+   NORMALIZE EXTRACTED FILE TEXT
+===================================================== */
+
+function normalizeFileText(text) {
+  return String(text || "")
+    .replace(/\r/g, "")
+    .replace(/\u00A0/g, " ")
+    .replace(/[ \t]+/g, " ")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
 }
 
 
 /* =====================================================
    QUESTION BLOCKS
+
+   Supports:
+
+   Q1.
+   Q1)
+   Q1:
+   Q1-
+   Question 1
+   QUESTION 1
 ===================================================== */
 
 function splitIntoQuestionBlocks(text) {
 
-  const lines = String(text || "")
-    .replace(/\r/g, "")
-    .split("\n")
-    .map(line => line.trim());
+  const normalized = normalizeFileText(text);
 
-  const blocks = [];
+  const questionRegex =
+    /(?:^|\n|\s)(?:QUESTION|Q)\s*\.?\s*(\d+)\s*[\.\):\-]?\s*/gi;
 
-  let current = [];
-  let currentNumber = null;
+  const matches = [];
 
-  for (const line of lines) {
+  let match;
 
-    if (!line) {
+  while ((match = questionRegex.exec(normalized)) !== null) {
 
-      if (current.length) {
-        current.push("");
-      }
-
-      continue;
-    }
-
-    const match = line.match(
-      /^\s*(?:QUESTION|Question|question|Q|q)\s*\.?\s*(\d+)\s*[\.\):\-]?\s*(.*)$/i
-    );
-
-    if (match) {
-
-      if (current.length && currentNumber !== null) {
-
-        blocks.push({
-          number: currentNumber,
-          text: current.join("\n").trim()
-        });
-
-      }
-
-      currentNumber = Number(match[1]);
-      current = [];
-
-      if (match[2]) {
-        current.push(match[2].trim());
-      }
-
-      continue;
-    }
-
-    if (currentNumber !== null) {
-      current.push(line);
-    }
-
-  }
-
-  if (current.length && currentNumber !== null) {
-
-    blocks.push({
-      number: currentNumber,
-      text: current.join("\n").trim()
+    matches.push({
+      number: Number(match[1]),
+      start: match.index + match[0].length
     });
 
   }
 
-  return blocks;
+  const blocks = [];
 
+  for (let i = 0; i < matches.length; i++) {
+
+    const current = matches[i];
+    const next = matches[i + 1];
+
+    const end = next
+      ? next.start
+      : normalized.length;
+
+    const blockText = normalized
+      .substring(current.start, end)
+      .trim();
+
+    if (blockText) {
+
+      blocks.push({
+        number: current.number,
+        text: blockText
+      });
+
+    }
+
+  }
+
+  return blocks;
 }
 
 
 /* =====================================================
    OPTIONS
+
+   Supports:
+
+   (A) Option
+   A. Option
+   A) Option
+
+   Also works when PDF puts each option
+   on separate lines.
 ===================================================== */
 
 function extractOptions(block) {
@@ -135,7 +147,7 @@ function extractOptions(block) {
   };
 
   const optionRegex =
-    /(?:^|\s|\n)(?:\(([ABCD])\)|([ABCD])\s*[\.\)])\s*/gi;
+    /(?:^|\n|\s)(?:\(([ABCD])\)|([ABCD])\s*[\.\)])\s*/gi;
 
   const matches = [];
 
@@ -166,9 +178,11 @@ function extractOptions(block) {
       .substring(current.start, end)
       .trim();
 
-    value = value.replace(/\s+/g, " ");
+    value = value
+      .replace(/\s+/g, " ")
+      .trim();
 
-    if (options.hasOwnProperty(current.letter)) {
+    if (Object.prototype.hasOwnProperty.call(options, current.letter)) {
 
       options[current.letter] = value;
 
@@ -177,18 +191,24 @@ function extractOptions(block) {
   }
 
   return options;
-
 }
 
 
 /* =====================================================
    ANSWER
+
+   Supports:
+
+   Ans: A
+   Ans A
+   Answer: A
+   Answer A
 ===================================================== */
 
 function extractAnswer(block) {
 
   const match = block.match(
-    /^\s*(?:Ans|Answer)\s*[:\-]?\s*\(?([ABCD])\)?\s*$/im
+    /(?:^|\n)\s*(?:Ans|Answer)\s*[:\-]?\s*\(?([ABCD])\)?\s*(?=\n|$)/i
   );
 
   if (!match) {
@@ -196,7 +216,6 @@ function extractAnswer(block) {
   }
 
   return match[1].toUpperCase();
-
 }
 
 
@@ -207,7 +226,7 @@ function extractAnswer(block) {
 function extractExplanation(block) {
 
   const match = block.match(
-    /^\s*Explanation\s*:\s*([\s\S]*?)(?=\n\s*(?:QUESTION|Question|question|Q|q)\s*\.?\s*\d+|$)/i
+    /(?:^|\n)\s*Explanation\s*:\s*([\s\S]*?)(?=\n\s*(?:Q|Question)\s*\.?\s*\d+\s*[\.\):\-]?|$)/i
   );
 
   if (!match) {
@@ -215,27 +234,34 @@ function extractExplanation(block) {
   }
 
   return cleanText(match[1]);
-
 }
 
 
 /* =====================================================
    QUESTION TEXT
+
+   Everything before first option is question text.
 ===================================================== */
 
 function extractQuestionText(block) {
 
-  let text = block;
+  let text = String(block || "");
+
+  /* Remove answer section */
 
   text = text.replace(
-    /^\s*(?:Ans|Answer)\s*[:\-]?\s*\(?[ABCD]\)?\s*$/im,
+    /(?:^|\n)\s*(?:Ans|Answer)\s*[:\-]?\s*\(?[ABCD]\)?\s*[\s\S]*$/i,
     ""
   );
 
+  /* Remove explanation section */
+
   text = text.replace(
-    /^\s*Explanation\s*:\s*[\s\S]*$/im,
+    /(?:^|\n)\s*Explanation\s*:\s*[\s\S]*$/i,
     ""
   );
+
+  /* Find first option */
 
   const optionMatch = text.match(
     /(?:^|\n|\s)(?:\([ABCD]\)|[ABCD]\s*[\.\)])\s*/i
@@ -251,19 +277,19 @@ function extractQuestionText(block) {
   }
 
   return cleanText(text);
-
 }
 
 
 /* =====================================================
-   PARSE QUESTION
+   PARSE QUESTION BLOCK
 ===================================================== */
 
 function parseQuestionBlock(block, meta) {
 
   const text = block.text;
 
-  const options = extractOptions(text);
+  const options =
+    extractOptions(text);
 
   const correctAnswer =
     extractAnswer(text);
@@ -278,7 +304,12 @@ function parseQuestionBlock(block, meta) {
 
     questionText,
 
-    options,
+    options: {
+      A: cleanText(options.A),
+      B: cleanText(options.B),
+      C: cleanText(options.C),
+      D: cleanText(options.D)
+    },
 
     correctAnswer,
 
@@ -307,7 +338,6 @@ function parseQuestionBlock(block, meta) {
     pageNumber: 1
 
   };
-
 }
 
 
@@ -347,7 +377,6 @@ async function getExamType(testId) {
     return "General";
 
   }
-
 }
 
 
@@ -360,13 +389,25 @@ function validateQuestion(question) {
   const errors = [];
 
   if (!question.questionText) {
-    errors.push("Question text missing");
+
+    errors.push(
+      "Question text missing"
+    );
+
   }
 
   for (const letter of ["A", "B", "C", "D"]) {
 
-    if (!question.options[letter]) {
-      errors.push(`Option ${letter} missing`);
+    if (
+      !question.options ||
+      !question.options[letter] ||
+      !question.options[letter].trim()
+    ) {
+
+      errors.push(
+        `Option ${letter} missing`
+      );
+
     }
 
   }
@@ -383,7 +424,6 @@ function validateQuestion(question) {
   }
 
   return errors;
-
 }
 
 
@@ -400,6 +440,8 @@ router.post(
 
     try {
 
+      /* ---------- FILE CHECK ---------- */
+
       if (!req.file) {
 
         return res.status(400).json({
@@ -415,6 +457,9 @@ router.post(
 
       filePath = req.file.path;
 
+
+      /* ---------- FORM DATA ---------- */
+
       const {
         language,
         subject,
@@ -423,16 +468,22 @@ router.post(
       } = req.body;
 
 
+      /* ---------- EXTENSION ---------- */
+
       const extension =
-        path.extname(
-          req.file.originalname
-        ).toLowerCase();
+        path
+          .extname(
+            req.file.originalname
+          )
+          .toLowerCase();
 
 
       let text = "";
 
 
-      /* ---------- PDF ---------- */
+      /* =================================================
+         PDF
+      ================================================= */
 
       if (extension === ".pdf") {
 
@@ -442,12 +493,15 @@ router.post(
         const data =
           await pdfParse(buffer);
 
-        text = data.text || "";
+        text =
+          data.text || "";
 
       }
 
 
-      /* ---------- DOCX ---------- */
+      /* =================================================
+         DOCX / WORD
+      ================================================= */
 
       else if (extension === ".docx") {
 
@@ -456,10 +510,15 @@ router.post(
             path: filePath
           });
 
-        text = result.value || "";
+        text =
+          result.value || "";
 
       }
 
+
+      /* =================================================
+         OTHER FILE
+      ================================================= */
 
       else {
 
@@ -468,14 +527,22 @@ router.post(
           success: false,
 
           message:
-            "Only PDF and DOCX allowed."
+            "Only PDF and DOCX files allowed."
 
         });
 
       }
 
 
-      if (!text.trim()) {
+      /* =================================================
+         TEXT CHECK
+      ================================================= */
+
+      text =
+        normalizeFileText(text);
+
+
+      if (!text) {
 
         return res.status(400).json({
 
@@ -488,6 +555,10 @@ router.post(
 
       }
 
+
+      /* =================================================
+         SPLIT QUESTIONS
+      ================================================= */
 
       const blocks =
         splitIntoQuestionBlocks(text);
@@ -507,9 +578,17 @@ router.post(
       }
 
 
+      /* =================================================
+         EXAM TYPE
+      ================================================= */
+
       const examType =
         await getExamType(testId);
 
+
+      /* =================================================
+         META
+      ================================================= */
 
       const meta = {
 
@@ -530,6 +609,10 @@ router.post(
       };
 
 
+      /* =================================================
+         PARSE ALL QUESTIONS
+      ================================================= */
+
       const questions =
         blocks.map(block =>
           parseQuestionBlock(
@@ -538,6 +621,10 @@ router.post(
           )
         );
 
+
+      /* =================================================
+         VALID / INVALID
+      ================================================= */
 
       const validQuestions = [];
       const invalidQuestions = [];
@@ -573,6 +660,10 @@ router.post(
       );
 
 
+      /* =================================================
+         RESPONSE
+      ================================================= */
+
       res.json({
 
         success: true,
@@ -601,6 +692,7 @@ router.post(
         error
       );
 
+
       res.status(500).json({
 
         success: false,
@@ -614,11 +706,17 @@ router.post(
 
     } finally {
 
+      /* =================================================
+         DELETE TEMP FILE
+      ================================================= */
+
       if (filePath) {
 
         try {
 
-          fs.unlinkSync(filePath);
+          fs.unlinkSync(
+            filePath
+          );
 
         } catch (e) {}
 
@@ -649,6 +747,10 @@ router.post(
       } = req.body;
 
 
+      /* =================================================
+         TEST CHECK
+      ================================================= */
+
       if (!testId) {
 
         return res.status(400).json({
@@ -662,6 +764,10 @@ router.post(
 
       }
 
+
+      /* =================================================
+         QUESTIONS CHECK
+      ================================================= */
 
       if (
         !Array.isArray(questions) ||
@@ -680,12 +786,20 @@ router.post(
       }
 
 
+      /* =================================================
+         EXAM TYPE
+      ================================================= */
+
       const examType =
         await getExamType(testId);
 
 
       const documents = [];
 
+
+      /* =================================================
+         PREPARE DOCUMENTS
+      ================================================= */
 
       for (const item of questions) {
 
@@ -695,6 +809,7 @@ router.post(
             cleanText(
               item.questionText
             ),
+
 
           options: {
 
@@ -720,59 +835,82 @@ router.post(
 
           },
 
+
           correctAnswer:
             String(
               item.correctAnswer || ""
             ).toUpperCase(),
+
 
           explanation:
             cleanText(
               item.explanation
             ),
 
+
           subject:
             cleanText(
               item.subject || subject
             ) || "General",
+
 
           topic:
             cleanText(
               item.topic || chapter
             ) || "General",
 
+
           examType:
             cleanText(
               item.examType
             ) || examType,
 
+
           difficulty:
             ["Easy", "Medium", "Hard"]
-              .includes(item.difficulty)
+              .includes(
+                item.difficulty
+              )
               ? item.difficulty
               : "Medium",
 
+
           isSelected: false,
 
+
           batches:
-            Array.isArray(item.batches)
+            Array.isArray(
+              item.batches
+            )
               ? item.batches
               : [],
 
+
           tests: [testId],
+
 
           sourcePDF:
             cleanText(
               item.sourcePDF
             ),
 
+
           pageNumber:
-            Number(item.pageNumber) || 1
+            Number(
+              item.pageNumber
+            ) || 1
 
         };
 
 
+        /* =================================================
+           VALIDATE
+        ================================================= */
+
         const errors =
-          validateQuestion(question);
+          validateQuestion(
+            question
+          );
 
 
         if (errors.length) {
@@ -789,10 +927,16 @@ router.post(
         }
 
 
-        documents.push(question);
+        documents.push(
+          question
+        );
 
       }
 
+
+      /* =================================================
+         INSERT MONGODB
+      ================================================= */
 
       const inserted =
         await Question.insertMany(
@@ -800,9 +944,17 @@ router.post(
         );
 
 
+      /* =================================================
+         TOTAL
+      ================================================= */
+
       const totalQuestions =
         await Question.countDocuments();
 
+
+      /* =================================================
+         RESPONSE
+      ================================================= */
 
       res.status(201).json({
 
@@ -828,6 +980,7 @@ router.post(
         "Bulk Import Error:",
         error
       );
+
 
       res.status(500).json({
 
