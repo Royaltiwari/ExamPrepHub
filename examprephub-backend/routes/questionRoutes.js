@@ -11,6 +11,11 @@ const questionController = require("../controllers/questionController");
 
 const router = express.Router();
 
+// ========== DEBUG MODE (Add this) ==========
+const DEBUG = true;
+function log(...args) {
+  if (DEBUG) console.log("[DEBUG]", ...args);
+}
 /* =====================================================
    MULTER
 ===================================================== */
@@ -43,10 +48,10 @@ function cleanText(value) {
     .replace(/\r/g, "")
     .replace(/\u00A0/g, " ")
     .replace(/[ \t]+/g, " ")
+    // Hindi text ke liye extra care
+    .replace(/([\u0900-\u097F]+)\s+/g, "$1 ")
     .trim();
 }
-
-
 /* =====================================================
    NORMALIZE EXTRACTED FILE TEXT
 ===================================================== */
@@ -75,54 +80,152 @@ function normalizeFileText(text) {
 ===================================================== */
 
 function splitIntoQuestionBlocks(text) {
-
   const normalized = normalizeFileText(text);
-
-  const questionRegex =
-    /(?:^|\n|\s)(?:QUESTION|Q)\s*\.?\s*(\d+)\s*[\.\):\-]?\s*/gi;
-
+  
+  // Supports: Q1., 1., प्रश्न 1, Question 1
+  const questionRegex = /(?:^|\n)(?:(?:Q|Question|प्रश्न|प्र\.)\s*\.?\s*(\d+)|(\d+)\s*[\.\):])\s*/gi;
+  
   const matches = [];
-
   let match;
-
+  
   while ((match = questionRegex.exec(normalized)) !== null) {
-
+    const number = parseInt(match[1] || match[2]);
     matches.push({
-      number: Number(match[1]),
+      number: number,
       start: match.index + match[0].length
     });
-
   }
-
+  
   const blocks = [];
-
   for (let i = 0; i < matches.length; i++) {
-
     const current = matches[i];
     const next = matches[i + 1];
-
-    const end = next
-      ? next.start
-      : normalized.length;
-
-    const blockText = normalized
-      .substring(current.start, end)
-      .trim();
-
+    const end = next ? next.start : normalized.length;
+    const blockText = normalized.substring(current.start, end).trim();
     if (blockText) {
-
       blocks.push({
         number: current.number,
         text: blockText
       });
-
     }
-
   }
-
+  
+  return blocks;
+}// Fallback parser
+function splitIntoQuestionBlocks(text) {
+  const normalized = normalizeFileText(text);
+  
+  log("📝 Normalized text length:", normalized.length);
+  log("📝 Sample:", normalized.substring(0, 200));
+  
+  // Multiple patterns for bilingual support
+  const patterns = [
+    // English: Q1., Q1), Question 1
+    /(?:^|\n)(?:Q|Question)\s*\.?\s*(\d+)\s*[\.\):\-]?\s*/gi,
+    
+    // Hindi: प्रश्न 1, प्र. 1
+    /(?:^|\n)(?:प्रश्न|प्र\.)\s*\.?\s*(\d+)\s*[\.\):\-]?\s*/gi,
+    
+    // Number only: 1., 1) (works for both languages)
+    /(?:^|\n)(\d+)\s*[\.\):]\s*/gi,
+    
+    // Bilingual: Q1. / प्र.1
+    /(?:^|\n)(?:Q|प्र)\s*\.?\s*(\d+)\s*[\.\):\-]?\s*/gi
+  ];
+  
+  let matches = [];
+  let usedPattern = null;
+  
+  for (const pattern of patterns) {
+    const tempMatches = [];
+    let match;
+    const patternCopy = new RegExp(pattern.source, pattern.flags);
+    
+    while ((match = patternCopy.exec(normalized)) !== null) {
+      tempMatches.push({
+        number: parseInt(match[1]),
+        start: match.index + match[0].length
+      });
+    }
+    
+    if (tempMatches.length > 0) {
+      matches = tempMatches;
+      usedPattern = pattern;
+      log(`✅ Found ${matches.length} questions with pattern`);
+      break;
+    }
+  }
+  
+  if (matches.length === 0) {
+    log("❌ No pattern matched! Trying fallback...");
+    return parseByLines(normalized);
+  }
+  
+  const blocks = [];
+  for (let i = 0; i < matches.length; i++) {
+    const current = matches[i];
+    const next = matches[i + 1];
+    const end = next ? next.start : normalized.length;
+    const blockText = normalized.substring(current.start, end).trim();
+    
+    if (blockText) {
+      blocks.push({
+        number: current.number,
+        text: blockText
+      });
+    }
+  }
+  
+  log(`✅ Created ${blocks.length} question blocks`);
   return blocks;
 }
 
+// Fallback parser
+function parseByLines(text) {
+  const lines = text.split('\n').filter(line => line.trim());
+  const blocks = [];
+  let currentBlock = null;
+  
+  for (const line of lines) {
+    const trimmed = line.trim();
+    
+    // Check for question start (English + Hindi)
+    const isQuestionStart = 
+      /^\d+[\.\):]\s*/.test(trimmed) ||
+      /^Q\d+[\.\):]\s*/i.test(trimmed) ||
+      /^प्रश्न\s*\d+/i.test(trimmed) ||
+      /^प्र\.\s*\d+/i.test(trimmed);
+    
+    if (isQuestionStart) {
+      if (currentBlock) {
+        blocks.push(currentBlock);
+      }
+      
+      const numMatch = trimmed.match(/(\d+)/);
+      const number = numMatch ? parseInt(numMatch[1]) : blocks.length + 1;
+      
+      let text = trimmed
+        .replace(/^\d+[\.\):]\s*/, '')
+        .replace(/^Q\d+[\.\):]\s*/i, '')
+        .replace(/^प्रश्न\s*\d+\s*/i, '')
+        .replace(/^प्र\.\s*\d+\s*/i, '');
+      
+      currentBlock = {
+        number: number,
+        text: text
+      };
+    } else if (currentBlock) {
+      currentBlock.text += '\n' + trimmed;
+    }
+  }
+  
+  if (currentBlock) {
+    blocks.push(currentBlock);
+  }
+  
+  log(`📝 Fallback parser found ${blocks.length} blocks`);
+  return blocks;
+}
 
 /* =====================================================
    OPTIONS
@@ -138,63 +241,37 @@ function splitIntoQuestionBlocks(text) {
 ===================================================== */
 
 function extractOptions(block) {
-
-  const options = {
-    A: "",
-    B: "",
-    C: "",
-    D: ""
-  };
-
-  const optionRegex =
-    /(?:^|\n|\s)(?:\(([ABCD])\)|([ABCD])\s*[\.\)])\s*/gi;
-
+  const options = { A: "", B: "", C: "", D: "" };
+  
+  // Supports: A., (A), क., (क)
+  const optionRegex = /(?:^|\n|\s)(?:\(?([ABCDकखगघ])\)?[\s]*[\.\):])\s*/gi;
+  
   const matches = [];
-
   let match;
-
+  
   while ((match = optionRegex.exec(block)) !== null) {
-
-    const letter =
-      (match[1] || match[2]).toUpperCase();
-
+    const letter = match[1].toUpperCase();
+    const map = { 'क': 'A', 'ख': 'B', 'ग': 'C', 'घ': 'D' };
+    const mappedLetter = map[letter] || letter;
     matches.push({
-      letter,
+      letter: mappedLetter,
       start: match.index + match[0].length
     });
-
   }
-
+  
   for (let i = 0; i < matches.length; i++) {
-
     const current = matches[i];
     const next = matches[i + 1];
-
-    const end = next
-      ? next.start
-      : block.length;
-
-    let value = block
-      .substring(current.start, end)
-      .trim();
-
-    value = value
-      .replace(/\s+/g, " ")
-      .trim();
-
+    const end = next ? next.start : block.length;
+    let value = block.substring(current.start, end).trim();
+    value = value.replace(/\s+/g, " ").trim();
     if (Object.prototype.hasOwnProperty.call(options, current.letter)) {
-
       options[current.letter] = value;
-
     }
-
   }
-
+  
   return options;
-}
-
-
-/* =====================================================
+}/* =====================================================
    ANSWER
 
    Supports:
@@ -206,18 +283,18 @@ function extractOptions(block) {
 ===================================================== */
 
 function extractAnswer(block) {
-
+  // Supports: Ans:, Answer:, उत्तर:, सही
   const match = block.match(
-    /(?:^|\n)\s*(?:Ans|Answer)\s*[:\-]?\s*\(?([ABCD])\)?\s*(?=\n|$)/i
+    /(?:^|\n)\s*(?:Ans|Answer|उत्तर|सही)\s*[:\-]?\s*\(?([ABCDकखगघ])\)?/i
   );
-
-  if (!match) {
-    return "";
-  }
-
-  return match[1].toUpperCase();
-}
-
+  
+  if (!match) return "";
+  
+  const letter = match[1].toUpperCase();
+  const map = { 'क': 'A', 'ख': 'B', 'ग': 'C', 'घ': 'D' };
+  return map[letter] || letter;
+}  
+  return "";
 
 /* =====================================================
    EXPLANATION
@@ -560,32 +637,84 @@ router.post(
          SPLIT QUESTIONS
       ================================================= */
 
-      const blocks =
-        splitIntoQuestionBlocks(text);
-
-
-      if (!blocks.length) {
-
-        return res.status(400).json({
-
-          success: false,
-
-          message:
-            "Q1, Q2, Q3... format mein questions nahi mile."
-
-        });
-
-      }
-
-
+      function splitIntoQuestionBlocks(text) {
+  const normalized = normalizeFileText(text);
+  
+  // AB YEH SAB SUPPORT KAREGA:
+  // Q1. ✅
+  // 1. ✅
+  // प्रश्न 1 ✅
+  // Question 1 ✅
+  
+  const questionRegex = /(?:^|\n)(?:(?:Q|Question|प्रश्न|प्र\.)\s*\.?\s*(\d+)|(\d+)\s*[\.\):])\s*/gi;
+  
+  const matches = [];
+  let match;
+  
+  while ((match = questionRegex.exec(normalized)) !== null) {
+    const number = parseInt(match[1] || match[2]);
+    matches.push({
+      number: number,
+      start: match.index + match[0].length
+    });
+  }
+  
+  const blocks = [];
+  for (let i = 0; i < matches.length; i++) {
+    const current = matches[i];
+    const next = matches[i + 1];
+    const end = next ? next.start : normalized.length;
+    const blockText = normalized.substring(current.start, end).trim();
+    if (blockText) {
+      blocks.push({
+        number: current.number,
+        text: blockText
+      });
+    }
+  }
+  
+  return blocks;
+}
       /* =================================================
          EXAM TYPE
       ================================================= */
-
-      const examType =
-        await getExamType(testId);
-
-
+function extractOptions(block) {
+  const options = { A: "", B: "", C: "", D: "" };
+  
+  // AB YEH SAB SUPPORT KAREGA:
+  // A. ✅
+  // (A) ✅
+  // क. ✅ (Hindi)
+  // (क) ✅ (Hindi)
+  
+  const optionRegex = /(?:^|\n|\s)(?:\(?([ABCDकखगघ])\)?[\s]*[\.\):])\s*/gi;
+  
+  const matches = [];
+  let match;
+  
+  while ((match = optionRegex.exec(block)) !== null) {
+    const letter = match[1].toUpperCase();
+    const map = { 'क': 'A', 'ख': 'B', 'ग': 'C', 'घ': 'D' };
+    const mappedLetter = map[letter] || letter;
+    matches.push({
+      letter: mappedLetter,
+      start: match.index + match[0].length
+    });
+  }
+  
+  for (let i = 0; i < matches.length; i++) {
+    const current = matches[i];
+    const next = matches[i + 1];
+    const end = next ? next.start : block.length;
+    let value = block.substring(current.start, end).trim();
+    value = value.replace(/\s+/g, " ").trim();
+    if (Object.prototype.hasOwnProperty.call(options, current.letter)) {
+      options[current.letter] = value;
+    }
+  }
+  
+  return options;
+}
       /* =================================================
          META
       ================================================= */

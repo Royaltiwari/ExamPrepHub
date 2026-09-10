@@ -370,67 +370,42 @@ function parseQuestionBlock(block, number) {
 // ======================================================
 
 function splitIntoQuestionBlocks(text) {
-  const lines = String(text || "")
+  const normalized = String(text || "")
     .replace(/\r/g, "")
-    .split("\n")
-    .map(line => line.trim());
+    .replace(/\u00A0/g, " ")
+    .replace(/[ \t]+/g, " ")
+    .trim();
+
+  const matches = [];
+  const questionRegex = /(?:^|\n|\s)(?:QUESTION|Question|question|Q|q)\s*\.?\s*(\d+)\s*[\.\):\-]\s*/gi;
+
+  let match;
+
+  while ((match = questionRegex.exec(normalized)) !== null) {
+    matches.push({
+      number: Number(match[1]),
+      start: match.index + match[0].length
+    });
+  }
 
   const blocks = [];
 
-  let current = [];
-  let currentNumber = null;
+  for (let i = 0; i < matches.length; i++) {
+    const current = matches[i];
+    const next = matches[i + 1];
 
-  for (const line of lines) {
+    const end = next ? next.start - 1 : normalized.length;
 
-    // Empty line
-    if (!line) {
-      if (current.length) {
-        current.push("");
-      }
-      continue;
+    const blockText = normalized
+      .substring(current.start, end)
+      .trim();
+
+    if (blockText) {
+      blocks.push({
+        number: current.number,
+        text: blockText
+      });
     }
-
-    // Detect Q1. / Q2. / QUESTION 1. etc.
-    const match = line.match(
-      /^\s*(?:QUESTION|Question|question|Q|q)\s*\.?\s*(\d+)\s*[\.\):\-]?\s*(.*)$/i
-    );
-
-    if (match) {
-
-      // Save previous question
-      if (current.length && currentNumber !== null) {
-        blocks.push({
-          number: currentNumber,
-          text: current.join("\n").trim()
-        });
-      }
-
-      // Start new question
-      currentNumber = Number(match[1]);
-
-      // IMPORTANT:
-      // Q1. के बाद उसी line में लिखा question भी save होगा
-      current = [];
-
-      if (match[2]) {
-        current.push(match[2].trim());
-      }
-
-      continue;
-    }
-
-    // Add text to current question
-    if (currentNumber !== null) {
-      current.push(line);
-    }
-  }
-
-  // Save last question
-  if (current.length && currentNumber !== null) {
-    blocks.push({
-      number: currentNumber,
-      text: current.join("\n").trim()
-    });
   }
 
   return blocks;
