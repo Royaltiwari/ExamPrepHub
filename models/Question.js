@@ -1,37 +1,158 @@
 const mongoose = require('mongoose');
 
 const QuestionSchema = new mongoose.Schema({
-  // PDF से Extract किया गया
-  questionText: { type: String, required: true },
-  options: {
-    A: String,
-    B: String,
-    C: String,
-    D: String
+  // ══════════════════════════════════════════════
+  // TEST LINK
+  // ══════════════════════════════════════════════
+  testId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Test',
+    required: true
   },
-  correctAnswer: { type: String, required: true },
-  explanation: String,
-  
-  // Meta Data
-  subject: String,
+
+  questionNumber: {
+    type: Number,
+    default: 0
+  },
+
+  // ══════════════════════════════════════════════
+  // QUESTION TEXT - हर format support
+  // ══════════════════════════════════════════════
+  questionText: {
+    type: String,
+    default: ''
+  },
+
+  questionHindi: {
+    type: String,
+    default: ''
+  },
+
+  questionEnglish: {
+    type: String,
+    default: ''
+  },
+
+  question: {
+    type: String,
+    default: ''
+  },
+
+  // ══════════════════════════════════════════════
+  // OPTIONS - Array format (नया) + Object format (पुराना) दोनों
+  // ══════════════════════════════════════════════
+  options: {
+    type: [String],
+    default: []
+  },
+
+  optionsHindi: {
+    type: [String],
+    default: []
+  },
+
+  optionsEnglish: {
+    type: [String],
+    default: []
+  },
+
+  optionsText: {
+    type: [String],
+    default: []
+  },
+
+  // ══════════════════════════════════════════════
+  // CORRECT ANSWER (0-3 Number, या पुराना String)
+  // ══════════════════════════════════════════════
+  correctAnswer: {
+    type: Number,
+    default: 0
+  },
+
+  // ══════════════════════════════════════════════
+  // EXPLANATION
+  // ══════════════════════════════════════════════
+  explanation: {
+    type: String,
+    default: ''
+  },
+
+  explanationHindi: {
+    type: String,
+    default: ''
+  },
+
+  explanationEnglish: {
+    type: String,
+    default: ''
+  },
+
+  // ══════════════════════════════════════════════
+  // META DATA
+  // ══════════════════════════════════════════════
+  subject: {
+    type: String,
+    default: 'General'
+  },
+
+  chapter: {
+    type: String,
+    default: 'General'
+  },
+
   topic: String,
-  examType: String, // SSC, Railway, etc.
-  difficulty: String, // Easy, Medium, Hard
-  
-  // Admin द्वारा Select किया गया
-  isSelected: { type: Boolean, default: false },
-  selectedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'Admin' },
+
+  examType: String,       // SSC, Railway, etc.
+
+  difficulty: String,     // Easy, Medium, Hard
+
+  language: {
+    type: String,
+    default: 'bilingual'
+  },
+
+  type: {
+    type: String,
+    default: 'single'
+  },
+
+  // ══════════════════════════════════════════════
+  // ADMIN SELECTION
+  // ══════════════════════════════════════════════
+  isSelected: {
+    type: Boolean,
+    default: false
+  },
+
+  selectedBy: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Admin'
+  },
+
   selectedDate: Date,
-  
-  // Batch/Test से Linked
-  batches: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Batch' }],
-  tests: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Test' }],
-  
-  // PDF Source
+
+  // ══════════════════════════════════════════════
+  // BATCH / TEST LINK (पुराना system)
+  // ══════════════════════════════════════════════
+  batches: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Batch'
+  }],
+
+  tests: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Test'
+  }],
+
+  // ══════════════════════════════════════════════
+  // PDF SOURCE
+  // ══════════════════════════════════════════════
   sourcePDF: String,
-  pageNumber: Number,
-  
-  createdAt: { type: Date, default: Date.now }
+
+  pageNumber: Number
+
+}, {
+  timestamps: true
 });
 
 module.exports = mongoose.model('Question', QuestionSchema);

@@ -45,6 +45,16 @@
       font-weight: 800;
     }
 
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    /* =========================
+       LOGOUT BUTTON
+    ========================= */
+
     .logout-btn {
       border: 1px solid rgba(255, 255, 255, 0.7);
       background: transparent;
@@ -61,6 +71,27 @@
     }
 
     /* =========================
+       ADMIN BUTTON
+    ========================= */
+
+    .admin-btn {
+      display: none;
+      border: none;
+      background: #dc2626;
+      color: white;
+      padding: 9px 15px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 700;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+
+    .admin-btn:hover {
+      background: #b91c1c;
+    }
+
+    /* =========================
        MAIN
     ========================= */
 
@@ -69,6 +100,10 @@
       margin: auto;
       padding: 25px 20px 50px;
     }
+
+    /* =========================
+       WELCOME
+    ========================= */
 
     .welcome-card {
       background: white;
@@ -211,18 +246,31 @@
     ========================= */
 
     @media (max-width: 800px) {
+
       #testsContainer {
         grid-template-columns: repeat(2, 1fr);
       }
+
     }
 
     @media (max-width: 600px) {
+
       .header-inner {
-        align-items: flex-start;
+        align-items: center;
+      }
+
+      .header-actions {
+        gap: 6px;
       }
 
       .logo {
         font-size: 18px;
+      }
+
+      .admin-btn,
+      .logout-btn {
+        padding: 8px 10px;
+        font-size: 12px;
       }
 
       .stats {
@@ -236,7 +284,22 @@
       .welcome-card h1 {
         font-size: 22px;
       }
+
     }
+
+    @media (max-width: 430px) {
+
+      .header-inner {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .header-actions {
+        justify-content: flex-end;
+      }
+
+    }
+
   </style>
 </head>
 
@@ -247,17 +310,37 @@
   ========================== -->
 
   <header>
+
     <div class="header-inner">
 
       <div class="logo">
         🏆 ExamPrepHub
       </div>
 
-      <button class="logout-btn" id="logoutBtn">
-        Logout
-      </button>
+      <div class="header-actions">
+
+        <!-- ADMIN BUTTON
+             केवल admin को दिखाई देगा -->
+        <a
+          href="/admin.html"
+          class="admin-btn"
+          id="adminBtn"
+        >
+          👑 Admin Panel
+        </a>
+
+        <!-- LOGOUT -->
+        <button
+          class="logout-btn"
+          id="logoutBtn"
+        >
+          Logout
+        </button>
+
+      </div>
 
     </div>
+
   </header>
 
 
@@ -267,12 +350,14 @@
 
   <main>
 
-    <!-- Welcome -->
+    <!-- WELCOME -->
 
     <section class="welcome-card">
 
       <h1>
-        Welcome, <span id="userName">Student</span> 👋
+        Welcome,
+        <span id="userName">Student</span>
+        👋
       </h1>
 
       <p>
@@ -282,9 +367,13 @@
     </section>
 
 
-    <!-- Stats -->
+    <!-- =========================
+         STATS
+    ========================== -->
 
     <section class="stats">
+
+      <!-- AVAILABLE TESTS -->
 
       <div class="stat-card">
 
@@ -292,7 +381,10 @@
           📝
         </div>
 
-        <div class="stat-number" id="testCount">
+        <div
+          class="stat-number"
+          id="testCount"
+        >
           0
         </div>
 
@@ -303,13 +395,18 @@
       </div>
 
 
+      <!-- RESULTS -->
+
       <div class="stat-card">
 
         <div class="stat-icon">
           📊
         </div>
 
-        <div class="stat-number" id="resultCount">
+        <div
+          class="stat-number"
+          id="resultCount"
+        >
           0
         </div>
 
@@ -319,6 +416,8 @@
 
       </div>
 
+
+      <!-- PLATFORM -->
 
       <div class="stat-card">
 
@@ -339,7 +438,9 @@
     </section>
 
 
-    <!-- Tests -->
+    <!-- =========================
+         TESTS
+    ========================== -->
 
     <section>
 
@@ -366,11 +467,27 @@
 
   <script>
 
-    const userName = document.getElementById("userName");
-    const testCount = document.getElementById("testCount");
-    const resultCount = document.getElementById("resultCount");
-    const testsContainer = document.getElementById("testsContainer");
-    const logoutBtn = document.getElementById("logoutBtn");
+    // =====================================
+    // ELEMENTS
+    // =====================================
+
+    const userName =
+      document.getElementById("userName");
+
+    const testCount =
+      document.getElementById("testCount");
+
+    const resultCount =
+      document.getElementById("resultCount");
+
+    const testsContainer =
+      document.getElementById("testsContainer");
+
+    const logoutBtn =
+      document.getElementById("logoutBtn");
+
+    const adminBtn =
+      document.getElementById("adminBtn");
 
 
     // =====================================
@@ -381,25 +498,81 @@
 
       try {
 
-        const response = await fetch("/api/auth/me", {
-          credentials: "include"
-        });
+        const response = await fetch(
+          "/api/auth/me",
+          {
+            credentials: "include"
+          }
+        );
 
         const data = await response.json();
 
-        if (!response.ok || !data.success) {
-          window.location.href = "/login.html";
-          return;
+        console.log("Current User:", data);
+
+
+        // ---------------------------------
+        // LOGIN CHECK
+        // ---------------------------------
+
+        if (
+          !response.ok ||
+          !data.success ||
+          !data.user
+        ) {
+
+          window.location.href =
+            "/login.html";
+
+          return false;
+
         }
 
-        userName.textContent = data.user.name || "Student";
+
+        // ---------------------------------
+        // USER NAME
+        // ---------------------------------
+
+        userName.textContent =
+          data.user.name || "Student";
+
+
+        // ---------------------------------
+        // ADMIN CHECK
+        // ---------------------------------
+
+        if (
+          String(data.user.role || "")
+            .trim()
+            .toLowerCase() === "admin"
+        ) {
+
+          adminBtn.style.display =
+            "inline-block";
+
+        } else {
+
+          adminBtn.style.display =
+            "none";
+
+        }
+
+
+        return true;
 
       } catch (error) {
 
-        console.error("User Error:", error);
+        console.error(
+          "User Error:",
+          error
+        );
 
-        window.location.href = "/login.html";
+        window.location.href =
+          "/login.html";
+
+        return false;
+
       }
+
     }
 
 
@@ -411,82 +584,159 @@
 
       try {
 
-        const response = await fetch("/api/tests");
+        const response = await fetch(
+          "/api/tests",
+          {
+            credentials: "include"
+          }
+        );
 
-        const data = await response.json();
+        const data =
+          await response.json();
 
-        if (!response.ok || !data.success) {
-          throw new Error(data.message || "Unable to load tests");
+        console.log(
+          "Tests Response:",
+          data
+        );
+
+
+        if (
+          !response.ok ||
+          !data.success
+        ) {
+
+          throw new Error(
+            data.message ||
+            "Unable to load tests"
+          );
+
         }
 
-        const tests = data.tests || [];
 
-        testCount.textContent = tests.length;
+        const tests =
+          data.tests || [];
+
+
+        // TEST COUNT
+
+        testCount.textContent =
+          tests.length;
+
+
+        // NO TESTS
 
         if (tests.length === 0) {
 
           testsContainer.innerHTML = `
+
             <div class="message-box">
+
               अभी कोई visible test उपलब्ध नहीं है।
+
             </div>
+
           `;
 
           return;
+
         }
 
 
-        testsContainer.innerHTML = tests.map(test => `
+        // ---------------------------------
+        // RENDER TESTS
+        // ---------------------------------
 
-          <div class="test-card">
+        testsContainer.innerHTML =
+          tests.map(test => `
 
-            <span class="test-exam">
-              ${escapeHtml(test.exam || "Exam")}
-            </span>
+            <div class="test-card">
 
-            <h3>
-              ${escapeHtml(test.name || "Mock Test")}
-            </h3>
+              <span class="test-exam">
 
-            <div class="test-info">
+                ${escapeHtml(
+                  test.exam || "Exam"
+                )}
 
-              📚 Subject:
-              ${escapeHtml(test.subject || "General")}
+              </span>
 
-              <br>
 
-              ⏱️ Duration:
-              ${Number(test.duration) || 0} Minutes
+              <h3>
 
-              <br>
+                ${escapeHtml(
+                  test.name || "Mock Test"
+                )}
 
-              ❓ Questions:
-              ${Number(test.totalQuestions) || 0}
+              </h3>
+
+
+              <div class="test-info">
+
+                📚 Subject:
+
+                ${escapeHtml(
+                  test.subject || "General"
+                )}
+
+                <br>
+
+
+                ⏱️ Duration:
+
+                ${Number(
+                  test.duration
+                ) || 0}
+
+                Minutes
+
+                <br>
+
+
+                ❓ Questions:
+
+                ${Number(
+                  test.totalQuestions
+                ) || 0}
+
+              </div>
+
+
+              <button
+                class="start-btn"
+                onclick="startTest('${test._id}')"
+              >
+
+                Start Test
+
+              </button>
 
             </div>
 
-            <button
-              class="start-btn"
-              onclick="startTest('${test._id}')"
-            >
-              Start Test
-            </button>
-
-          </div>
-
-        `).join("");
+          `).join("");
 
       } catch (error) {
 
-        console.error("Tests Error:", error);
+        console.error(
+          "Tests Error:",
+          error
+        );
+
 
         testsContainer.innerHTML = `
+
           <div class="message-box error">
+
             Tests load नहीं हो पाए।
+
             <br>
+
             कृपया server और MongoDB connection check करें।
+
           </div>
+
         `;
+
       }
+
     }
 
 
@@ -498,22 +748,36 @@
 
       try {
 
-        const response = await fetch("/api/results", {
-          credentials: "include"
-        });
+        const response = await fetch(
+          "/api/results",
+          {
+            credentials: "include"
+          }
+        );
 
-        const data = await response.json();
+        const data =
+          await response.json();
 
-        if (response.ok && data.success) {
+
+        if (
+          response.ok &&
+          data.success
+        ) {
+
           resultCount.textContent =
             (data.results || []).length;
+
         }
 
       } catch (error) {
 
-        console.error("Results Error:", error);
+        console.error(
+          "Results Error:",
+          error
+        );
 
       }
+
     }
 
 
@@ -523,8 +787,19 @@
 
     function startTest(testId) {
 
+      if (!testId) {
+
+        alert(
+          "Test ID नहीं मिला।"
+        );
+
+        return;
+
+      }
+
       window.location.href =
-        "/test.html?id=" + encodeURIComponent(testId);
+        "/test.html?id=" +
+        encodeURIComponent(testId);
 
     }
 
@@ -533,31 +808,55 @@
     // LOGOUT
     // =====================================
 
-    logoutBtn.addEventListener("click", async function () {
+    logoutBtn.addEventListener(
+      "click",
+      async function () {
 
-      try {
+        try {
 
-        const response = await fetch("/api/auth/logout", {
-          method: "POST",
-          credentials: "include"
-        });
+          const response =
+            await fetch(
+              "/api/auth/logout",
+              {
+                method: "POST",
+                credentials: "include"
+              }
+            );
 
-        const data = await response.json();
 
-        if (data.success) {
-          window.location.href = "/login.html";
-        } else {
-          alert(data.message || "Logout failed");
+          const data =
+            await response.json();
+
+
+          if (data.success) {
+
+            window.location.href =
+              "/login.html";
+
+          } else {
+
+            alert(
+              data.message ||
+              "Logout failed"
+            );
+
+          }
+
+        } catch (error) {
+
+          console.error(
+            "Logout Error:",
+            error
+          );
+
+          alert(
+            "Logout नहीं हो पाया।"
+          );
+
         }
 
-      } catch (error) {
-
-        console.error("Logout Error:", error);
-
-        alert("Logout नहीं हो पाया।");
       }
-
-    });
+    );
 
 
     // =====================================
@@ -567,11 +866,32 @@
     function escapeHtml(value) {
 
       return String(value)
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
+
+        .replace(
+          /&/g,
+          "&amp;"
+        )
+
+        .replace(
+          /</g,
+          "&lt;"
+        )
+
+        .replace(
+          />/g,
+          "&gt;"
+        )
+
+        .replace(
+          /"/g,
+          "&quot;"
+        )
+
+        .replace(
+          /'/g,
+          "&#039;"
+        );
+
     }
 
 
@@ -579,9 +899,35 @@
     // INITIAL LOAD
     // =====================================
 
-    loadUser();
-    loadTests();
-    loadResults();
+    async function initDashboard() {
+
+      // पहले user/session check
+      const loggedIn =
+        await loadUser();
+
+
+      if (!loggedIn) {
+
+        return;
+
+      }
+
+
+      // फिर tests
+      await loadTests();
+
+
+      // फिर results
+      await loadResults();
+
+    }
+
+
+    // =====================================
+    // START DASHBOARD
+    // =====================================
+
+    initDashboard();
 
   </script>
 

@@ -18,7 +18,8 @@ const userSchema = new mongoose.Schema(
 
     mobile: {
       type: String,
-      trim: true
+      trim: true,
+      default: ""
     },
 
     password: {
@@ -47,4 +48,9 @@ const userSchema = new mongoose.Schema(
   }
 );
 
-module.exports = mongoose.model("User", userSchema);
+// IMPORTANT: explicitly use "users" collection
+module.exports = mongoose.model(
+  "User",
+  userSchema,
+  "users"
+);

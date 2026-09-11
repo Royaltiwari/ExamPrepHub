@@ -97,6 +97,11 @@ router.post("/login", async (req, res) => {
     const user = await User.findOne({
       email: normalizedEmail
     });
+console.log("LOGIN USER FROM DATABASE:", {
+  id: user?._id?.toString(),
+  email: user?.email,
+  role: user?.role
+});
 
     if (!user) {
       return res.status(401).json({
