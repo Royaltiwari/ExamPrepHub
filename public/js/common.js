@@ -8,13 +8,11 @@
    ===================================================== */
 
 const API = {
-  // GET request
   async get(url) {
     const r = await fetch(url, { credentials: "include" });
     return r.json();
   },
 
-  // POST request
   async post(url, data) {
     const r = await fetch(url, {
       method: "POST",
@@ -25,7 +23,6 @@ const API = {
     return r.json();
   },
 
-  // PUT request
   async put(url, data) {
     const r = await fetch(url, {
       method: "PUT",
@@ -36,7 +33,6 @@ const API = {
     return r.json();
   },
 
-  // DELETE request
   async del(url, data) {
     const r = await fetch(url, {
       method: "DELETE",
@@ -108,7 +104,6 @@ function bindLogoutButton() {
    ===================================================== */
 
 function showAlert(message, type = "info", duration = 3000) {
-  // Purane alert hatao
   document.querySelectorAll(".alert-floating").forEach(el => el.remove());
 
   const icons = {
@@ -199,7 +194,7 @@ function getQueryParam(name) {
 }
 
 /* =====================================================
-   8. DEBOUNCE (search ke liye)
+   8. DEBOUNCE
    ===================================================== */
 
 function debounce(fn, delay = 400) {
@@ -211,9 +206,106 @@ function debounce(fn, delay = 400) {
 }
 
 /* =====================================================
-   9. INIT - Auto logout button bind
+   9. PASSWORD SHOW/HIDE TOGGLE
+   Show (blue) → Hide (red) button
    ===================================================== */
 
-document.addEventListener("DOMContentLoaded", () => {
+function setupPasswordToggles() {
+  document.querySelectorAll('input[type="password"]').forEach(input => {
+    // Skip if already has toggle
+    if (input.dataset.hasToggle === "true") return;
+    input.dataset.hasToggle = "true";
+
+    // Wrapper
+    const wrapper = document.createElement("div");
+    wrapper.style.position = "relative";
+    wrapper.style.display = "block";
+    wrapper.style.width = "100%";
+
+    input.parentNode.insertBefore(wrapper, input);
+    wrapper.appendChild(input);
+
+    // Button
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.textContent = "Show";
+    btn.style.position = "absolute";
+    btn.style.right = "8px";
+    btn.style.top = "50%";
+    btn.style.transform = "translateY(-50%)";
+    btn.style.background = "#2563eb";
+    btn.style.color = "white";
+    btn.style.border = "none";
+    btn.style.cursor = "pointer";
+    btn.style.fontSize = "11px";
+    btn.style.fontWeight = "800";
+    btn.style.padding = "6px 12px";
+    btn.style.borderRadius = "6px";
+    btn.style.textTransform = "uppercase";
+    btn.style.letterSpacing = "0.5px";
+    btn.style.zIndex = "2";
+    btn.style.transition = "all 0.2s";
+    btn.style.minWidth = "60px";
+
+    btn.addEventListener("mouseenter", () => {
+      btn.style.transform = "translateY(-50%) scale(1.05)";
+    });
+
+    btn.addEventListener("mouseleave", () => {
+      btn.style.transform = "translateY(-50%) scale(1)";
+    });
+
+    btn.addEventListener("click", (e) => {
+      e.preventDefault();
+      if (input.type === "password") {
+        input.type = "text";
+        btn.textContent = "Hide";
+        btn.style.background = "#dc2626";
+      } else {
+        input.type = "password";
+        btn.textContent = "Show";
+        btn.style.background = "#2563eb";
+      }
+    });
+
+    wrapper.appendChild(btn);
+
+    // Input padding
+    input.style.paddingRight = "80px";
+  });
+}
+
+// Expose globally for dynamic content
+window.setupPasswordToggles = setupPasswordToggles;
+
+/* =====================================================
+   10. INIT - On DOM Ready
+   ===================================================== */
+
+function initCommon() {
   bindLogoutButton();
-});
+  setupPasswordToggles();
+}
+
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", initCommon);
+} else {
+  initCommon();
+}
+
+/* =====================================================
+   11. MUTATION OBSERVER - Auto-apply on new password fields
+   ===================================================== */
+
+if (window.MutationObserver) {
+  const observer = new MutationObserver(() => {
+    setupPasswordToggles();
+  });
+
+  document.addEventListener("DOMContentLoaded", () => {
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true
+    });
+  });
+}

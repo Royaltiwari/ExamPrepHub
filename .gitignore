@@ -1,7 +1,7 @@
 node_modules/
 .env
-*.env
-
-examprephub-backend/node_modules/
-examprephub-backend/.env
-examprephub-backend/uploads/
+*.log
+*.tmp
+.DS_Store
+uploads/payments/
+uploads/thumbnails/

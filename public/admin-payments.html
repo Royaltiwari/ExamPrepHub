@@ -1,0 +1,193 @@
+﻿<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Payment Requests - ExamPrepHub</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+  <header class="header">
+    <div class="header-inner">
+      <a href="/admin.html" class="logo">💳 Payment Requests</a>
+      <div class="header-actions">
+        <a href="/admin.html" class="btn-header">← Admin Home</a>
+        <button class="btn-header" id="logoutBtn">Logout</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="layout-full" style="padding: 25px 20px; max-width: 1100px; margin: auto;">
+
+    <h1 style="font-size: 24px; margin-bottom: 6px;">💳 Payment Requests</h1>
+    <p class="text-muted" style="margin-bottom: 25px;">Students ke payment verify karo aur access unlock karo</p>
+
+    <!-- FILTER TABS -->
+    <div style="display: flex; gap: 8px; margin-bottom: 20px; overflow-x: auto; padding-bottom: 8px;">
+      <button class="btn btn-sm btn-blue pay-tab active" data-status="">All</button>
+      <button class="btn btn-sm btn-outline pay-tab" data-status="pending">⏳ Pending</button>
+      <button class="btn btn-sm btn-outline pay-tab" data-status="approved">✅ Approved</button>
+      <button class="btn btn-sm btn-outline pay-tab" data-status="rejected">❌ Rejected</button>
+    </div>
+
+    <div id="paymentList">
+      <div class="loading-box">Loading payments...</div>
+    </div>
+
+  </div>
+
+  <script src="/js/common.js"></script>
+  <script>
+    let currentStatus = "";
+
+    async function loadPayments() {
+      const box = document.getElementById("paymentList");
+      box.innerHTML = '<div class="loading-box">Loading...</div>';
+
+      try {
+        const url = currentStatus 
+          ? `/api/payments/admin/all?status=${currentStatus}` 
+          : `/api/payments/admin/all`;
+
+        const r = await fetch(url, { credentials: "include" });
+        const data = await r.json();
+
+        if (!data.success) throw new Error(data.message);
+
+        const list = data.data || [];
+
+        if (!list.length) {
+          box.innerHTML = '<div class="empty-text">Koi payment request nahi hai.</div>';
+          return;
+        }
+
+        const statusColors = {
+          pending: "badge-yellow",
+          approved: "badge-green",
+          rejected: "badge-red"
+        };
+
+        const statusIcons = {
+          pending: "⏳",
+          approved: "✅",
+          rejected: "❌"
+        };
+
+        box.innerHTML = list.map(p => `
+          <div class="card" style="margin-bottom: 15px;">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 10px;">
+              <div style="flex: 1; min-width: 250px;">
+                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+                  <span class="badge ${statusColors[p.status]}">
+                    ${statusIcons[p.status]} ${p.status}
+                  </span>
+                  <span class="text-muted" style="font-size: 12px;">
+                    ${new Date(p.createdAt).toLocaleString("en-IN")}
+                  </span>
+                </div>
+
+                <h3 style="font-size: 16px; margin-bottom: 8px;">
+                  ${escapeHtml(p.itemTitle)}
+                </h3>
+
+                <div style="font-size: 13px; color: var(--text-light); line-height: 1.7;">
+                  <div><strong>User:</strong> ${escapeHtml(p.userId?.name || "Unknown")} (${escapeHtml(p.userId?.email || "")})</div>
+                  <div><strong>Mobile:</strong> ${escapeHtml(p.userId?.mobile || "-")}</div>
+                  <div><strong>Amount:</strong> ₹${p.amount}</div>
+                  <div><strong>UTR:</strong> <code style="background: var(--bg-alt); padding: 2px 6px; border-radius: 4px;">${escapeHtml(p.utrNumber)}</code></div>
+                  ${p.screenshotUrl ? `<div><strong>Screenshot:</strong> <a href="${escapeHtml(p.screenshotUrl)}" target="_blank" style="color: var(--primary);">📷 View</a></div>` : ""}
+                  ${p.rejectionReason ? `<div><strong>Reason:</strong> ${escapeHtml(p.rejectionReason)}</div>` : ""}
+                </div>
+              </div>
+
+              ${p.status === "pending" ? `
+                <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                  <button class="btn btn-green" onclick="approvePayment('${p._id}')">
+                    ✅ Approve
+                  </button>
+                  <button class="btn btn-red" onclick="rejectPayment('${p._id}')">
+                    ❌ Reject
+                  </button>
+                </div>
+              ` : ""}
+            </div>
+          </div>
+        `).join("");
+
+      } catch (e) {
+        box.innerHTML = `<div class="empty-text error">Failed: ${escapeHtml(e.message)}</div>`;
+      }
+    }
+
+    async function approvePayment(id) {
+      if (!confirm("Ye payment approve karni hai? Student ko access mil jayega.")) return;
+
+      try {
+        const r = await fetch(`/api/payments/${id}/approve`, {
+          method: "POST",
+          credentials: "include"
+        });
+        const data = await r.json();
+
+        if (data.success) {
+          showAlert("✅ Payment approved!", "success");
+          loadPayments();
+        } else {
+          showAlert(data.message || "Failed", "error");
+        }
+      } catch (e) {
+        showAlert("Server error", "error");
+      }
+    }
+
+    async function rejectPayment(id) {
+      const reason = prompt("Rejection reason (optional):");
+      if (reason === null) return;
+
+      try {
+        const r = await fetch(`/api/payments/${id}/reject`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({ reason: reason || "Invalid payment proof" })
+        });
+        const data = await r.json();
+
+        if (data.success) {
+          showAlert("❌ Payment rejected", "success");
+          loadPayments();
+        } else {
+          showAlert(data.message || "Failed", "error");
+        }
+      } catch (e) {
+        showAlert("Server error", "error");
+      }
+    }
+
+    document.querySelectorAll(".pay-tab").forEach(tab => {
+      tab.addEventListener("click", () => {
+        document.querySelectorAll(".pay-tab").forEach(t => {
+          t.classList.remove("active", "btn-blue");
+          t.classList.add("btn-outline");
+        });
+        tab.classList.remove("btn-outline");
+        tab.classList.add("active", "btn-blue");
+        currentStatus = tab.dataset.status;
+        loadPayments();
+      });
+    });
+
+    (async function() {
+      const user = await requireLogin();
+      if (!user) return;
+      if (user.role !== "admin") {
+        window.location.href = "/dashboard.html";
+        return;
+      }
+      loadPayments();
+    })();
+  </script>
+
+</body>
+</html>

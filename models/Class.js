@@ -87,7 +87,15 @@ const classSchema = new mongoose.Schema(
       enum: ["scheduled", "live", "recorded"],
       default: "scheduled"
     },
+  isPaid: {
+    type: Boolean,
+    default: false
+  },
 
+  price: {
+    type: Number,
+    default: 0
+  },
     visible: {
       type: Boolean,
       default: true

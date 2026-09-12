@@ -6,270 +6,61 @@
   <title>Test Management - ExamPrepHub</title>
 
   <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: Arial, sans-serif;
-    }
-
-    body {
-      background: #f1f5f9;
-      color: #1e293b;
-    }
-
-    header {
-      background: linear-gradient(135deg, #0f172a, #1e3a8a);
-      color: white;
-      padding: 16px 20px;
-    }
-
-    .header-inner {
-      max-width: 1100px;
-      margin: auto;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .logo {
-      font-size: 22px;
-      font-weight: 800;
-    }
-
-    .admin-badge {
-      background: #dc2626;
-      padding: 8px 14px;
-      border-radius: 20px;
-      font-size: 12px;
-      font-weight: bold;
-    }
-
-    main {
-      max-width: 1100px;
-      margin: auto;
-      padding: 28px 15px 60px;
-    }
-
-    .page-title,
-    .card,
-    #loading {
-      background: white;
-      border-radius: 16px;
-      box-shadow: 0 5px 20px rgba(15,23,42,.06);
-    }
-
-    .page-title {
-      padding: 25px;
-      margin-bottom: 20px;
-      border-left: 5px solid #2563eb;
-    }
-
-    .page-title h1 {
-      margin-bottom: 8px;
-      color: #0f172a;
-    }
-
-    .page-title p {
-      color: #64748b;
-    }
-
-    .card {
-      padding: 25px;
-      margin-bottom: 20px;
-    }
-
-    .card h2 {
-      color: #1e3a8a;
-      margin-bottom: 20px;
-    }
-
-    .form-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 18px;
-    }
-
-    .full {
-      grid-column: 1 / -1;
-    }
-
-    label {
-      display: block;
-      font-weight: 700;
-      margin-bottom: 8px;
-      font-size: 14px;
-    }
-
-    input,
-    select,
-    textarea {
-      width: 100%;
-      padding: 12px;
-      border: 1px solid #cbd5e1;
-      border-radius: 9px;
-      font-size: 15px;
-    }
-
-    textarea {
-      min-height: 100px;
-      resize: vertical;
-    }
-
-    .visibility {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 13px;
-      background: #f8fafc;
-      border-radius: 9px;
-    }
-
-    .visibility input {
-      width: auto;
-    }
-
-    .actions,
-    .test-actions {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      margin-top: 18px;
-    }
-
-    button {
-      border: none;
-      cursor: pointer;
-    }
-
-    .btn {
-      padding: 11px 17px;
-      border-radius: 9px;
-      color: white;
-      font-weight: 700;
-      font-size: 14px;
-    }
-
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: Arial, sans-serif; }
+    body { background: #f1f5f9; color: #1e293b; }
+    header { background: linear-gradient(135deg, #0f172a, #1e3a8a); color: white; padding: 16px 20px; }
+    .header-inner { max-width: 1100px; margin: auto; display: flex; justify-content: space-between; align-items: center; }
+    .logo { font-size: 22px; font-weight: 800; }
+    .admin-badge { background: #dc2626; padding: 8px 14px; border-radius: 20px; font-size: 12px; font-weight: bold; }
+    main { max-width: 1100px; margin: auto; padding: 28px 15px 60px; }
+    .page-title, .card, #loading { background: white; border-radius: 16px; box-shadow: 0 5px 20px rgba(15,23,42,.06); }
+    .page-title { padding: 25px; margin-bottom: 20px; border-left: 5px solid #2563eb; }
+    .page-title h1 { margin-bottom: 8px; color: #0f172a; }
+    .page-title p { color: #64748b; }
+    .card { padding: 25px; margin-bottom: 20px; }
+    .card h2 { color: #1e3a8a; margin-bottom: 20px; }
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+    .full { grid-column: 1 / -1; }
+    label { display: block; font-weight: 700; margin-bottom: 8px; font-size: 14px; }
+    input, select, textarea { width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 9px; font-size: 15px; }
+    textarea { min-height: 100px; resize: vertical; }
+    .visibility { display: flex; align-items: center; gap: 10px; padding: 13px; background: #f8fafc; border-radius: 9px; }
+    .visibility input { width: auto; }
+    .actions, .test-actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 18px; }
+    button { border: none; cursor: pointer; }
+    .btn { padding: 11px 17px; border-radius: 9px; color: white; font-weight: 700; font-size: 14px; }
     .blue { background: #2563eb; }
     .green { background: #16a34a; }
     .orange { background: #f59e0b; }
     .red { background: #dc2626; }
     .gray { background: #64748b; }
-
-    .btn:disabled {
-      opacity: .6;
-      cursor: not-allowed;
-    }
-
-    .message {
-      display: none;
-      padding: 13px;
-      border-radius: 9px;
-      margin-bottom: 15px;
-      font-weight: 700;
-    }
-
-    .success {
-      background: #dcfce7;
-      color: #166534;
-    }
-
-    .error {
-      background: #fee2e2;
-      color: #991b1b;
-    }
-
-    #loading {
-      padding: 35px;
-      text-align: center;
-    }
-
-    #pageContent {
-      display: none;
-    }
-
-    .test-item {
-      border: 1px solid #e2e8f0;
-      border-radius: 13px;
-      padding: 18px;
-      margin-bottom: 15px;
-    }
-
-    .test-item h3 {
-      color: #1e40af;
-      margin-bottom: 12px;
-    }
-
-    .test-info {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-    }
-
-    .tag {
-      background: #eff6ff;
-      color: #1d4ed8;
-      padding: 6px 9px;
-      border-radius: 7px;
-      font-size: 12px;
-      font-weight: 700;
-    }
-
-    .visible {
-      background: #dcfce7;
-      color: #166534;
-    }
-
-    .hidden {
-      background: #fee2e2;
-      color: #991b1b;
-    }
-
-    .description {
-      margin-top: 12px;
-      color: #64748b;
-    }
-
-    .empty {
-      text-align: center;
-      color: #64748b;
-      padding: 30px;
-    }
-
-    .note {
-      background: #eff6ff;
-      border: 1px solid #dbeafe;
-      color: #1e40af;
-      padding: 12px;
-      border-radius: 9px;
-      margin-bottom: 20px;
-      font-size: 13px;
-    }
-
+    .btn:disabled { opacity: .6; cursor: not-allowed; }
+    .message { display: none; padding: 13px; border-radius: 9px; margin-bottom: 15px; font-weight: 700; }
+    .success { background: #dcfce7; color: #166534; }
+    .error { background: #fee2e2; color: #991b1b; }
+    #loading { padding: 35px; text-align: center; }
+    #pageContent { display: none; }
+    .test-item { border: 1px solid #e2e8f0; border-radius: 13px; padding: 18px; margin-bottom: 15px; }
+    .test-item h3 { color: #1e40af; margin-bottom: 12px; }
+    .test-info { display: flex; flex-wrap: wrap; gap: 8px; }
+    .tag { background: #eff6ff; color: #1d4ed8; padding: 6px 9px; border-radius: 7px; font-size: 12px; font-weight: 700; }
+    .visible { background: #dcfce7; color: #166534; }
+    .hidden { background: #fee2e2; color: #991b1b; }
+    .free { background: #dcfce7; color: #166534; }
+    .paid { background: #fef3c7; color: #92400e; }
+    .description { margin-top: 12px; color: #64748b; }
+    .empty { text-align: center; color: #64748b; padding: 30px; }
+    .note { background: #eff6ff; border: 1px solid #dbeafe; color: #1e40af; padding: 12px; border-radius: 9px; margin-bottom: 20px; font-size: 13px; }
+    .type-toggle { display: flex; gap: 12px; padding: 13px; background: #f8fafc; border-radius: 9px; }
+    .type-toggle label { display: flex; align-items: center; gap: 6px; font-weight: 600; cursor: pointer; margin: 0; }
+    .type-toggle input { width: auto; }
     @media(max-width:700px) {
-      .form-grid {
-        grid-template-columns: 1fr;
-      }
-
-      .full {
-        grid-column: auto;
-      }
-
-      .card {
-        padding: 18px;
-      }
-
-      .header-inner {
-        gap: 10px;
-      }
-
-      .logo {
-        font-size: 18px;
-      }
-
-      .admin-badge {
-        font-size: 10px;
-      }
+      .form-grid { grid-template-columns: 1fr; }
+      .full { grid-column: auto; }
+      .card { padding: 18px; }
+      .header-inner { gap: 10px; }
+      .logo { font-size: 18px; }
+      .admin-badge { font-size: 10px; }
     }
   </style>
 </head>
@@ -300,7 +91,6 @@
     <div id="errorMessage" class="message error"></div>
 
     <!-- CREATE TEST -->
-
     <section class="card">
 
       <h2 id="formTitle">➕ Create New Test</h2>
@@ -315,16 +105,11 @@
 
           <div>
             <label>Test Name *</label>
-            <input
-              id="name"
-              type="text"
-              placeholder="SSC GD GK Mock Test 01"
-              required>
+            <input id="name" type="text" placeholder="SSC GD GK Mock Test 01" required>
           </div>
 
           <div>
             <label>Exam *</label>
-
             <select id="exam" required>
               <option value="">-- Select Exam --</option>
               <option>SSC CGL</option>
@@ -354,16 +139,11 @@
 
           <div>
             <label>Batch *</label>
-            <input
-              id="batch"
-              type="text"
-              placeholder="SSC GD 2026 Batch 01"
-              required>
+            <input id="batch" type="text" placeholder="SSC GD 2026 Batch 01" required>
           </div>
 
           <div>
             <label>Language *</label>
-
             <select id="language" required>
               <option value="Bilingual">🇮🇳 Hindi + 🇬🇧 English</option>
               <option value="Hindi">🇮🇳 Hindi</option>
@@ -373,63 +153,56 @@
 
           <div>
             <label>Duration (Minutes) *</label>
+            <input id="duration" type="number" value="30" min="1" max="300" required>
+          </div>
 
-            <input
-              id="duration"
-              type="number"
-              value="30"
-              min="1"
-              max="300"
-              required>
+          <!-- TEST TYPE - FREE / PAID -->
+          <div class="full">
+            <label>Test Type *</label>
+            <div class="type-toggle">
+              <label>
+                <input type="radio" name="testType" value="free" checked>
+                🆓 Free (सबके लिए)
+              </label>
+              <label>
+                <input type="radio" name="testType" value="paid">
+                💰 Paid (Unlock करना पड़ेगा)
+              </label>
+            </div>
+          </div>
+
+          <!-- PRICE - only if paid -->
+          <div class="full" id="priceField" style="display: none;">
+            <label>Price (₹) *</label>
+            <input id="price" type="number" value="10" min="1" max="10000">
+            <div style="font-size: 12px; color: #64748b; margin-top: 4px;">
+              जैसे: ₹5, ₹10, ₹50, ₹100
+            </div>
           </div>
 
           <div class="full">
             <label>Description</label>
-
-            <textarea
-              id="description"
-              placeholder="इस Test के बारे में जानकारी लिखें..."></textarea>
+            <textarea id="description" placeholder="इस Test के बारे में जानकारी लिखें..."></textarea>
           </div>
 
           <div class="full">
-
             <label>Test Visibility</label>
-
             <div class="visibility">
-
-              <input
-                type="checkbox"
-                id="visible">
-
-              <span>
-                👁️ Visible — Students को Test दिखाई देगा
-              </span>
-
+              <input type="checkbox" id="visible">
+              <span>👁️ Visible — Students को Test दिखाई देगा</span>
             </div>
-
           </div>
 
         </div>
 
         <div class="actions">
 
-          <button
-            type="submit"
-            id="saveButton"
-            class="btn blue">
-
+          <button type="submit" id="saveButton" class="btn blue">
             ➕ Create Test
-
           </button>
 
-          <button
-            type="button"
-            id="cancelButton"
-            class="btn gray"
-            style="display:none;">
-
+          <button type="button" id="cancelButton" class="btn gray" style="display:none;">
             Cancel Edit
-
           </button>
 
         </div>
@@ -440,17 +213,11 @@
 
 
     <!-- TEST LIST -->
-
     <section class="card">
-
       <h2>📚 All Tests</h2>
-
       <div id="testList">
-        <div class="empty">
-          🔄 Tests loading...
-        </div>
+        <div class="empty">🔄 Tests loading...</div>
       </div>
-
     </section>
 
   </div>
@@ -469,34 +236,23 @@ let editingTestId = null;
 // =====================================================
 
 async function apiRequest(url, options = {}) {
-
   const response = await fetch(url, {
     credentials: "include",
     ...options
   });
 
   const text = await response.text();
-
   let data;
 
   try {
     data = JSON.parse(text);
   } catch (error) {
-
     console.error("Non JSON API response:", text);
-
-    throw new Error(
-      `Server ने JSON response नहीं दिया. HTTP ${response.status}`
-    );
+    throw new Error(`Server ने JSON response नहीं दिया. HTTP ${response.status}`);
   }
 
   if (!response.ok) {
-
-    throw new Error(
-      data.message ||
-      data.error ||
-      `API Error: HTTP ${response.status}`
-    );
+    throw new Error(data.message || data.error || `API Error: HTTP ${response.status}`);
   }
 
   return data;
@@ -508,55 +264,51 @@ async function apiRequest(url, options = {}) {
 // =====================================================
 
 async function checkAdmin() {
-
   try {
-
     const data = await apiRequest("/api/auth/me");
-
     const user = data.user || data;
 
-    console.log("Logged in user:", user);
-
     if (!user || user.role !== "admin") {
-
       document.getElementById("loading").innerHTML = `
         <div class="error" style="display:block;">
-          ❌ Access Denied
-          <br><br>
-          केवल Admin इस page को access कर सकता है।
-          <br><br>
-          <a href="/login.html" class="btn blue">
-            Login
-          </a>
+          ❌ Access Denied<br><br>
+          केवल Admin इस page को access कर सकता है।<br><br>
+          <a href="/login.html" class="btn blue">Login</a>
         </div>
       `;
-
       return false;
     }
 
     document.getElementById("loading").style.display = "none";
-
     document.getElementById("pageContent").style.display = "block";
-
     return true;
 
   } catch (error) {
-
-    console.error("Admin Check Error:", error);
-
     document.getElementById("loading").innerHTML = `
       <div class="error" style="display:block;">
-        ❌ ${escapeHtml(error.message)}
-        <br><br>
-        <a href="/login.html" class="btn blue">
-          Login
-        </a>
+        ❌ ${escapeHtml(error.message)}<br><br>
+        <a href="/login.html" class="btn blue">Login</a>
       </div>
     `;
-
     return false;
   }
 }
+
+
+// =====================================================
+// TEST TYPE TOGGLE
+// =====================================================
+
+document.querySelectorAll('input[name="testType"]').forEach(radio => {
+  radio.addEventListener("change", function () {
+    const priceField = document.getElementById("priceField");
+    if (this.value === "paid") {
+      priceField.style.display = "block";
+    } else {
+      priceField.style.display = "none";
+    }
+  });
+});
 
 
 // =====================================================
@@ -564,43 +316,20 @@ async function checkAdmin() {
 // =====================================================
 
 async function loadTests() {
-
   const list = document.getElementById("testList");
-
-  list.innerHTML = `
-    <div class="empty">
-      🔄 Tests loading...
-    </div>
-  `;
+  list.innerHTML = `<div class="empty">🔄 Tests loading...</div>`;
 
   try {
-
     const data = await apiRequest("/api/admin/tests");
-
-    console.log("Admin tests API response:", data);
-
-    tests = Array.isArray(data.tests)
-      ? data.tests
-      : [];
-
+    tests = Array.isArray(data.tests) ? data.tests : [];
     renderTests();
-
   } catch (error) {
-
-    console.error("Load Tests Error:", error);
-
     list.innerHTML = `
       <div class="empty" style="color:#dc2626;">
-        ❌ ${escapeHtml(error.message)}
-        <br><br>
-        <button
-          class="btn blue"
-          onclick="loadTests()">
-          🔄 Retry
-        </button>
+        ❌ ${escapeHtml(error.message)}<br><br>
+        <button class="btn blue" onclick="loadTests()">🔄 Retry</button>
       </div>
     `;
-
     showError(error.message);
   }
 }
@@ -610,100 +339,68 @@ async function loadTests() {
 // CREATE / UPDATE TEST
 // =====================================================
 
-document.getElementById("testForm").addEventListener(
-  "submit",
-  async function(event) {
+document.getElementById("testForm").addEventListener("submit", async function (event) {
+  event.preventDefault();
 
-    event.preventDefault();
+  const saveButton = document.getElementById("saveButton");
 
-    const saveButton =
-      document.getElementById("saveButton");
+  const testType = document.querySelector('input[name="testType"]:checked').value;
+  const isPaid = testType === "paid";
+  const price = isPaid ? Number(document.getElementById("price").value) : 0;
 
-    const payload = {
-
-      name:
-        document.getElementById("name").value.trim(),
-
-      exam:
-        document.getElementById("exam").value,
-
-      batch:
-        document.getElementById("batch").value.trim(),
-
-      language:
-        document.getElementById("language").value,
-
-      duration:
-        Number(
-          document.getElementById("duration").value
-        ),
-
-      description:
-        document.getElementById("description").value.trim(),
-
-      visible:
-        document.getElementById("visible").checked
-    };
-
-    try {
-
-      saveButton.disabled = true;
-
-      saveButton.textContent =
-        editingTestId
-          ? "⏳ Updating..."
-          : "⏳ Creating...";
-
-      let url = "/api/admin/tests";
-      let method = "POST";
-
-      if (editingTestId) {
-
-        url =
-          `/api/admin/tests/${editingTestId}`;
-
-        method = "PUT";
-      }
-
-      await apiRequest(url, {
-
-        method,
-
-        headers: {
-          "Content-Type": "application/json"
-        },
-
-        body: JSON.stringify(payload)
-
-      });
-
-      showSuccess(
-        editingTestId
-          ? "✅ Test successfully updated!"
-          : "✅ Test successfully created!"
-      );
-
-      resetForm();
-
-      await loadTests();
-
-    } catch (error) {
-
-      console.error("Save Test Error:", error);
-
-      showError(error.message);
-
-    } finally {
-
-      saveButton.disabled = false;
-
-      saveButton.textContent =
-        editingTestId
-          ? "Update Test"
-          : "➕ Create Test";
-    }
+  if (isPaid && (!price || price < 1)) {
+    showError("Paid test के लिए price डालना ज़रूरी है");
+    return;
   }
-);
+
+  const payload = {
+    name: document.getElementById("name").value.trim(),
+    exam: document.getElementById("exam").value,
+    batch: document.getElementById("batch").value.trim(),
+    language: document.getElementById("language").value,
+    duration: Number(document.getElementById("duration").value),
+    description: document.getElementById("description").value.trim(),
+    visible: document.getElementById("visible").checked,
+    isPaid: isPaid,
+    price: price
+  };
+
+  try {
+    saveButton.disabled = true;
+    saveButton.textContent = editingTestId ? "⏳ Updating..." : "⏳ Creating...";
+
+    let url = "/api/admin/tests";
+    let method = "POST";
+
+    if (editingTestId) {
+      url = `/api/admin/tests/${editingTestId}`;
+      method = "PUT";
+    }
+
+    await apiRequest(url, {
+      method,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+
+    showSuccess(
+      editingTestId
+        ? "✅ Test successfully updated!"
+        : "✅ Test successfully created!"
+    );
+
+    resetForm();
+    await loadTests();
+
+  } catch (error) {
+    console.error("Save Test Error:", error);
+    showError(error.message);
+
+  } finally {
+    saveButton.disabled = false;
+    saveButton.textContent = editingTestId ? "Update Test" : "➕ Create Test";
+  }
+});
 
 
 // =====================================================
@@ -711,28 +408,16 @@ document.getElementById("testForm").addEventListener(
 // =====================================================
 
 function renderTests() {
-
-  const list =
-    document.getElementById("testList");
+  const list = document.getElementById("testList");
 
   if (!tests.length) {
-
-    list.innerHTML = `
-      <div class="empty">
-        अभी कोई Test नहीं बनाया गया।
-      </div>
-    `;
-
+    list.innerHTML = `<div class="empty">अभी कोई Test नहीं बनाया गया।</div>`;
     return;
   }
 
   list.innerHTML = tests.map(test => `
-
     <div class="test-item">
-
-      <h3>
-        📝 ${escapeHtml(test.name || "Untitled")}
-      </h3>
+      <h3>📝 ${escapeHtml(test.name || "Untitled")}</h3>
 
       <div class="test-info">
 
@@ -756,60 +441,24 @@ function renderTests() {
           ❓ ${test.totalQuestions || 0} Questions
         </span>
 
-        <span class="tag ${
-          test.visible ? "visible" : "hidden"
-        }">
+        <span class="tag ${test.isPaid ? "paid" : "free"}">
+          ${test.isPaid ? `💰 Paid ₹${test.price || 0}` : "🆓 Free"}
+        </span>
 
-          ${
-            test.visible
-              ? "👁️ Visible"
-              : "🚫 Non-visible"
-          }
-
+        <span class="tag ${test.visible ? "visible" : "hidden"}">
+          ${test.visible ? "👁️ Visible" : "🚫 Non-visible"}
         </span>
 
       </div>
 
-      ${
-        test.description
-          ? `
-            <div class="description">
-              ${escapeHtml(test.description)}
-            </div>
-          `
-          : ""
-      }
+      ${test.description ? `<div class="description">${escapeHtml(test.description)}</div>` : ""}
 
       <div class="test-actions">
-
-        <button
-          class="btn orange"
-          onclick="editTest('${test._id}')">
-
-          ✏️ Edit
-
-        </button>
-
-        <button
-          class="btn green"
-          onclick="manageQuestions('${test._id}')">
-
-          ❓ Questions
-
-        </button>
-
-        <button
-          class="btn red"
-          onclick="deleteTest('${test._id}')">
-
-          🗑️ Delete
-
-        </button>
-
+        <button class="btn orange" onclick="editTest('${test._id}')">✏️ Edit</button>
+        <button class="btn green" onclick="manageQuestions('${test._id}')">❓ Questions</button>
+        <button class="btn red" onclick="deleteTest('${test._id}')">🗑️ Delete</button>
       </div>
-
     </div>
-
   `).join("");
 }
 
@@ -819,53 +468,34 @@ function renderTests() {
 // =====================================================
 
 function editTest(id) {
-
-  const test =
-    tests.find(item => item._id === id);
+  const test = tests.find(item => item._id === id);
 
   if (!test) {
-
     showError("Test नहीं मिला।");
-
     return;
   }
 
   editingTestId = id;
 
-  document.getElementById("name").value =
-    test.name || "";
+  document.getElementById("name").value = test.name || "";
+  document.getElementById("exam").value = test.exam || "";
+  document.getElementById("batch").value = test.batch || "";
+  document.getElementById("language").value = test.language || "Bilingual";
+  document.getElementById("duration").value = test.duration || 30;
+  document.getElementById("description").value = test.description || "";
+  document.getElementById("visible").checked = Boolean(test.visible);
 
-  document.getElementById("exam").value =
-    test.exam || "";
+  // Test type + price
+  const isPaid = test.isPaid === true;
+  document.querySelector(`input[name="testType"][value="${isPaid ? "paid" : "free"}"]`).checked = true;
+  document.getElementById("price").value = test.price || 10;
+  document.getElementById("priceField").style.display = isPaid ? "block" : "none";
 
-  document.getElementById("batch").value =
-    test.batch || "";
+  document.getElementById("formTitle").textContent = "✏️ Edit Test";
+  document.getElementById("saveButton").textContent = "Update Test";
+  document.getElementById("cancelButton").style.display = "inline-block";
 
-  document.getElementById("language").value =
-    test.language || "Bilingual";
-
-  document.getElementById("duration").value =
-    test.duration || 30;
-
-  document.getElementById("description").value =
-    test.description || "";
-
-  document.getElementById("visible").checked =
-    Boolean(test.visible);
-
-  document.getElementById("formTitle").textContent =
-    "✏️ Edit Test";
-
-  document.getElementById("saveButton").textContent =
-    "Update Test";
-
-  document.getElementById("cancelButton").style.display =
-    "inline-block";
-
-  window.scrollTo({
-    top: 0,
-    behavior: "smooth"
-  });
+  window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
 
@@ -874,34 +504,14 @@ function editTest(id) {
 // =====================================================
 
 async function deleteTest(id) {
-
-  if (
-    !confirm(
-      "⚠️ क्या आप इस Test को Delete करना चाहते हैं?"
-    )
-  ) {
-    return;
-  }
+  if (!confirm("⚠️ क्या आप इस Test को Delete करना चाहते हैं?")) return;
 
   try {
-
-    await apiRequest(
-      `/api/admin/tests/${id}`,
-      {
-        method: "DELETE"
-      }
-    );
-
-    showSuccess(
-      "✅ Test successfully deleted!"
-    );
-
+    await apiRequest(`/api/admin/tests/${id}`, { method: "DELETE" });
+    showSuccess("✅ Test successfully deleted!");
     await loadTests();
-
   } catch (error) {
-
     console.error("Delete Error:", error);
-
     showError(error.message);
   }
 }
@@ -912,9 +522,7 @@ async function deleteTest(id) {
 // =====================================================
 
 function manageQuestions(id) {
-
-  window.location.href =
-    `/admin-questions.html?test=${encodeURIComponent(id)}`;
+  window.location.href = `/admin-questions.html?test=${encodeURIComponent(id)}`;
 }
 
 
@@ -922,28 +530,22 @@ function manageQuestions(id) {
 // RESET
 // =====================================================
 
-document.getElementById("cancelButton")
-  .addEventListener("click", resetForm);
+document.getElementById("cancelButton").addEventListener("click", resetForm);
 
 function resetForm() {
-
   editingTestId = null;
 
   document.getElementById("testForm").reset();
-
   document.getElementById("duration").value = 30;
+  document.getElementById("language").value = "Bilingual";
 
-  document.getElementById("language").value =
-    "Bilingual";
+  document.querySelector('input[name="testType"][value="free"]').checked = true;
+  document.getElementById("price").value = 10;
+  document.getElementById("priceField").style.display = "none";
 
-  document.getElementById("formTitle").textContent =
-    "➕ Create New Test";
-
-  document.getElementById("saveButton").textContent =
-    "➕ Create Test";
-
-  document.getElementById("cancelButton").style.display =
-    "none";
+  document.getElementById("formTitle").textContent = "➕ Create New Test";
+  document.getElementById("saveButton").textContent = "➕ Create Test";
+  document.getElementById("cancelButton").style.display = "none";
 }
 
 
@@ -952,34 +554,19 @@ function resetForm() {
 // =====================================================
 
 function showSuccess(message) {
-
-  const box =
-    document.getElementById("successMessage");
-
+  const box = document.getElementById("successMessage");
   box.textContent = message;
-
   box.style.display = "block";
+  document.getElementById("errorMessage").style.display = "none";
 
-  document.getElementById("errorMessage")
-    .style.display = "none";
-
-  setTimeout(() => {
-    box.style.display = "none";
-  }, 4000);
+  setTimeout(() => { box.style.display = "none"; }, 4000);
 }
 
-
 function showError(message) {
-
-  const box =
-    document.getElementById("errorMessage");
-
+  const box = document.getElementById("errorMessage");
   box.textContent = "❌ " + message;
-
   box.style.display = "block";
-
-  document.getElementById("successMessage")
-    .style.display = "none";
+  document.getElementById("successMessage").style.display = "none";
 }
 
 
@@ -988,7 +575,6 @@ function showError(message) {
 // =====================================================
 
 function escapeHtml(value) {
-
   return String(value)
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
@@ -1003,13 +589,8 @@ function escapeHtml(value) {
 // =====================================================
 
 async function startPage() {
-
   const isAdmin = await checkAdmin();
-
-  if (!isAdmin) {
-    return;
-  }
-
+  if (!isAdmin) return;
   await loadTests();
 }
 

@@ -3,246 +3,153 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
   <title>Login - ExamPrepHub</title>
-
-  <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: Arial, sans-serif;
-    }
-
-    body {
-      min-height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      background: linear-gradient(135deg, #eef2ff, #dbeafe);
-      padding: 20px;
-    }
-
-    .login-container {
-      width: 100%;
-      max-width: 420px;
-      background: #ffffff;
-      padding: 35px 30px;
-      border-radius: 18px;
-      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.12);
-    }
-
-    .logo {
-      text-align: center;
-      font-size: 30px;
-      font-weight: 800;
-      color: #2563eb;
-      margin-bottom: 8px;
-    }
-
-    .subtitle {
-      text-align: center;
-      color: #64748b;
-      margin-bottom: 28px;
-      font-size: 14px;
-    }
-
-    .form-group {
-      margin-bottom: 18px;
-    }
-
-    label {
-      display: block;
-      margin-bottom: 7px;
-      font-weight: 600;
-      color: #334155;
-      font-size: 14px;
-    }
-
-    input {
-      width: 100%;
-      padding: 13px 14px;
-      border: 1px solid #cbd5e1;
-      border-radius: 10px;
-      outline: none;
-      font-size: 15px;
-      transition: 0.2s;
-    }
-
-    input:focus {
-      border-color: #2563eb;
-      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
-    }
-
-    .login-btn {
-      width: 100%;
-      border: none;
-      padding: 14px;
-      border-radius: 10px;
-      background: #2563eb;
-      color: white;
-      font-size: 16px;
-      font-weight: 700;
-      cursor: pointer;
-      transition: 0.2s;
-    }
-
-    .login-btn:hover {
-      background: #1d4ed8;
-    }
-
-    .login-btn:disabled {
-      opacity: 0.7;
-      cursor: not-allowed;
-    }
-
-    #message {
-      display: none;
-      margin-bottom: 18px;
-      padding: 11px;
-      border-radius: 8px;
-      text-align: center;
-      font-size: 14px;
-    }
-
-    .register-link {
-      text-align: center;
-      margin-top: 22px;
-      color: #64748b;
-      font-size: 14px;
-    }
-
-    .register-link a {
-      color: #2563eb;
-      text-decoration: none;
-      font-weight: 700;
-    }
-
-    .home-link {
-      display: block;
-      text-align: center;
-      margin-top: 15px;
-      color: #475569;
-      text-decoration: none;
-      font-size: 14px;
-    }
-
-    @media (max-width: 480px) {
-      .login-container {
-        padding: 28px 20px;
-      }
-
-      .logo {
-        font-size: 26px;
-      }
-    }
-  </style>
+  <link rel="stylesheet" href="/css/style.css">
 </head>
-
 <body>
 
-  <div class="login-container">
-
-    <div class="logo">🏆 ExamPrepHub</div>
-
-    <div class="subtitle">
-      Login to your learning account
+  <!-- HEADER -->
+  <header class="header">
+    <div class="header-inner">
+      <a href="/index.html" class="logo">🏆 ExamPrepHub</a>
+      <div class="header-actions">
+        <a href="/index.html" class="btn-header">← Home</a>
+        <a href="/register.html" class="btn-header">Register</a>
+      </div>
     </div>
+  </header>
 
-    <div id="message"></div>
+  <!-- LOGIN FORM -->
+  <div style="min-height: calc(100vh - 70px); display: flex; align-items: center; justify-content: center; padding: 40px 20px;">
+    <div class="card" style="max-width: 420px; width: 100%;">
 
-    <form id="loginForm">
-
-      <div class="form-group">
-        <label for="email">Email Address</label>
-
-        <input
-          type="email"
-          id="email"
-          name="email"
-          placeholder="Enter your email"
-          required
-        >
+      <!-- BRAND -->
+      <div style="text-align: center; margin-bottom: 25px;">
+        <div style="font-size: 48px; margin-bottom: 10px;">🏆</div>
+        <h1 style="font-size: 26px; font-weight: 900; color: var(--primary); margin-bottom: 6px;">
+          ExamPrepHub
+        </h1>
+        <p class="text-muted" style="font-size: 14px;">
+          Login to your learning account
+        </p>
       </div>
 
-      <div class="form-group">
-        <label for="password">Password</label>
+      <!-- MESSAGE BOX -->
+      <div id="message" class="alert" style="display: none;"></div>
 
-        <input
-          type="password"
-          id="password"
-          name="password"
-          placeholder="Enter your password"
-          required
-        >
+      <!-- FORM -->
+      <form id="loginForm">
+
+        <div class="form-group">
+          <label for="email">Email Address</label>
+          <input
+            type="email"
+            id="email"
+            name="email"
+            class="form-input"
+            placeholder="Enter your email"
+            required
+            autocomplete="email"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input
+            type="password"
+            id="password"
+            name="password"
+            class="form-input"
+            placeholder="Enter your password"
+            required
+            autocomplete="current-password"
+          />
+        </div>
+
+        <!-- FORGOT PASSWORD LINK -->
+        <div style="text-align: right; margin-bottom: 18px;">
+          <a href="/forgot-password.html" style="font-size: 13px; color: var(--primary); font-weight: 700;">
+            Forgot Password?
+          </a>
+        </div>
+
+        <button type="submit" class="btn btn-blue btn-block btn-lg" id="loginBtn">
+          Login
+        </button>
+
+      </form>
+
+      <!-- DIVIDER -->
+      <div style="text-align: center; margin: 22px 0; color: var(--muted); font-size: 13px;">
+        — Don't have an account? —
       </div>
-      
 
-      <button type="submit" class="login-btn" id="loginBtn">
-        Login
-      </button>
+      <a href="/register.html" class="btn btn-outline btn-block">
+        Create Free Account
+      </a>
 
-    </form>
+      <!-- BACK TO HOME -->
+      <div style="text-align: center; margin-top: 20px;">
+        <a href="/index.html" style="font-size: 13px; color: var(--muted);">
+          ← Back to Home
+        </a>
+      </div>
 
-    <div class="register-link">
-      Don't have an account?
-      <a href="/register.html">Register</a>
     </div>
-
-    <a href="/" class="home-link">
-      ← Back to Home
-    </a>
-
   </div>
 
+  <!-- COMMON JS -->
+  <script src="/js/common.js"></script>
+
+  <!-- LOGIN LOGIC -->
   <script>
     const loginForm = document.getElementById("loginForm");
     const loginBtn = document.getElementById("loginBtn");
-    const message = document.getElementById("message");
+    const messageEl = document.getElementById("message");
 
-    function showMessage(text, success = false) {
-      message.textContent = text;
-      message.style.display = "block";
+    function showMessage(text, type = "error") {
+      messageEl.textContent = text;
+      messageEl.className = "alert alert-" + type;
+      messageEl.style.display = "flex";
+    }
 
-      if (success) {
-        message.style.background = "#dcfce7";
-        message.style.color = "#166534";
-      } else {
-        message.style.background = "#fee2e2";
-        message.style.color = "#991b1b";
-      }
+    function hideMessage() {
+      messageEl.style.display = "none";
     }
 
     loginForm.addEventListener("submit", async function (event) {
       event.preventDefault();
+      hideMessage();
 
       const email = document.getElementById("email").value.trim();
       const password = document.getElementById("password").value;
 
+      if (!email || !password) {
+        showMessage("Email aur password required hai", "error");
+        return;
+      }
+
       loginBtn.disabled = true;
-      loginBtn.textContent = "Logging in...";
+      loginBtn.innerHTML = '<span class="spinner"></span> Logging in...';
 
       try {
         const response = await fetch("/api/auth/login", {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
+          headers: { "Content-Type": "application/json" },
           credentials: "include",
-          body: JSON.stringify({
-            email,
-            password
-          })
+          body: JSON.stringify({ email, password })
         });
 
         const data = await response.json();
 
         if (!response.ok || !data.success) {
-          showMessage(data.message || "Login failed");
+          showMessage(data.message || "Login failed", "error");
+          loginBtn.disabled = false;
+          loginBtn.textContent = "Login";
           return;
         }
 
-        showMessage("Login successful! Redirecting...", true);
+        showMessage("Login successful! Redirecting...", "success");
 
         setTimeout(() => {
           window.location.href = "/dashboard.html";
@@ -250,8 +157,7 @@
 
       } catch (error) {
         console.error("Login Error:", error);
-        showMessage("Server से connection नहीं हो पाया।");
-      } finally {
+        showMessage("Server se connection nahi ho paya. Please try again.", "error");
         loginBtn.disabled = false;
         loginBtn.textContent = "Login";
       }

@@ -24,6 +24,9 @@ const liveRoutes = require("./routes/live");
 const examLinkRoutes = require("./routes/exam-links");
 const classRoutes = require("./routes/classes");
 const chatRoutes = require("./routes/chat");
+const settingsRoutes = require("./routes/settings");
+const paymentRoutes = require("./routes/payments");
+const purchaseRoutes = require("./routes/purchases");
 // =====================================================
 // MIDDLEWARE
 // =====================================================
@@ -108,6 +111,9 @@ app.use("/api/live", liveRoutes);
 app.use("/api/exam-links", examLinkRoutes);
 app.use("/api/classes", classRoutes);
 app.use("/api/chat", chatRoutes);
+app.use("/api/settings", settingsRoutes);
+app.use("/api/payments", paymentRoutes);
+app.use("/api/purchases", purchaseRoutes);
 // =====================================================
 // HOME
 // =====================================================

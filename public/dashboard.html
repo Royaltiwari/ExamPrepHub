@@ -240,6 +240,28 @@
       font-weight: 700;
     }
 
+    /* TEST GRID */
+    .test-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+
+    .test-card-box {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 16px;
+      cursor: pointer;
+      transition: all 0.25s;
+    }
+
+    .test-card-box:hover {
+      transform: translateY(-5px);
+      border-color: var(--primary);
+      box-shadow: var(--shadow-md);
+    }
+
     /* COURSE CARDS */
     .course-grid {
       display: grid;
@@ -369,10 +391,50 @@
       font-size: 14px;
     }
 
+    /* FILTER TABS */
+    .filter-tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 18px;
+      overflow-x: auto;
+      padding-bottom: 8px;
+    }
+
+    .filter-tab {
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      border: 2px solid var(--border);
+      background: var(--card-bg);
+      color: var(--text);
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+
+    .filter-tab:hover {
+      border-color: var(--primary);
+    }
+
+    .filter-tab.active {
+      background: var(--gradient-blue);
+      color: white;
+      border-color: transparent;
+    }
+
+    .filter-tab.free.active {
+      background: linear-gradient(135deg, #16a34a, #059669);
+    }
+
+    .filter-tab.paid.active {
+      background: linear-gradient(135deg, #f59e0b, #d97706);
+    }
+
     /* RESPONSIVE */
     @media (max-width: 1000px) {
       .stats-grid { grid-template-columns: repeat(2, 1fr); }
-      .course-grid { grid-template-columns: repeat(2, 1fr); }
+      .course-grid, .test-grid { grid-template-columns: repeat(2, 1fr); }
     }
 
     @media (max-width: 768px) {
@@ -394,7 +456,7 @@
 
     @media (max-width: 500px) {
       .stats-grid { grid-template-columns: 1fr; }
-      .course-grid { grid-template-columns: 1fr; }
+      .course-grid, .test-grid { grid-template-columns: 1fr; }
     }
   </style>
 </head>
@@ -429,7 +491,7 @@
       <a href="/home-class.html" class="side-link">
         <span class="icon">🏠</span> Home Class
       </a>
-      <a href="/exam-test.html" class="side-link">
+      <a href="#testSeries" class="side-link">
         <span class="icon">📝</span> Test Series
       </a>
       <a href="/home-class.html" class="side-link">
@@ -494,6 +556,34 @@
         </div>
       </div>
 
+      <!-- ============================================= -->
+      <!-- TEST SERIES WITH FREE/PAID FILTER            -->
+      <!-- ============================================= -->
+      <div class="dash-section" id="testSeries">
+        <div class="dash-section-head">
+          <h2>📝 Test Series</h2>
+          <a href="/home-class.html">View All →</a>
+        </div>
+
+        <!-- FILTER TABS -->
+        <div class="filter-tabs">
+          <button class="filter-tab active" data-filter="all">
+            All <span class="badge badge-blue" id="countAll">0</span>
+          </button>
+          <button class="filter-tab free" data-filter="free">
+            🆓 Free <span class="badge badge-green" id="countFree">0</span>
+          </button>
+          <button class="filter-tab paid" data-filter="paid">
+            💰 Paid <span class="badge badge-yellow" id="countPaid">0</span>
+          </button>
+        </div>
+
+        <!-- TEST GRID -->
+        <div class="test-grid" id="testGrid">
+          <div class="empty-box">Loading tests...</div>
+        </div>
+      </div>
+
       <!-- LIVE CLASSES -->
       <div class="dash-section">
         <div class="dash-section-head">
@@ -506,7 +596,7 @@
         </div>
       </div>
 
-      <!-- MY COURSES / EXAM LIBRARY -->
+      <!-- EXAM LIBRARY -->
       <div class="dash-section">
         <div class="dash-section-head">
           <h2>📚 Exam Library</h2>
@@ -538,6 +628,9 @@
   <script src="/js/common.js"></script>
 
   <script>
+    let allTests = [];
+    let currentTestFilter = "all";
+
     // ==========================================
     // LOAD USER
     // ==========================================
@@ -567,18 +660,104 @@
     }
 
     // ==========================================
-    // LOAD TESTS COUNT
+    // LOAD TESTS (with Free/Paid filter)
     // ==========================================
     async function loadTests() {
+      const grid = document.getElementById("testGrid");
+      grid.innerHTML = '<div class="empty-box">Loading tests...</div>';
+
       try {
         const r = await fetch("/api/tests", { credentials: "include" });
         const data = await r.json();
-        const count = (data.tests || []).length;
-        document.getElementById("testCount").textContent = count;
+
+        allTests = data.tests || [];
+
+        // Counts
+        const total = allTests.length;
+        const free = allTests.filter(t => !t.isPaid).length;
+        const paid = allTests.filter(t => t.isPaid).length;
+
+        document.getElementById("countAll").textContent = total;
+        document.getElementById("countFree").textContent = free;
+        document.getElementById("countPaid").textContent = paid;
+
+        const oldCount = document.getElementById("testCount");
+        if (oldCount) oldCount.textContent = total;
+
+        renderTests();
+
       } catch (e) {
-        document.getElementById("testCount").textContent = "0";
+        console.error("Tests Error:", e);
+        grid.innerHTML = '<div class="empty-box">Tests load nahi ho paye.</div>';
       }
     }
+
+    function renderTests() {
+      const grid = document.getElementById("testGrid");
+
+      let filtered = allTests;
+      if (currentTestFilter === "free") {
+        filtered = allTests.filter(t => !t.isPaid);
+      } else if (currentTestFilter === "paid") {
+        filtered = allTests.filter(t => t.isPaid);
+      }
+
+      if (!filtered.length) {
+        grid.innerHTML = '<div class="empty-box">Is category me koi test nahi hai.</div>';
+        return;
+      }
+
+      grid.innerHTML = filtered.map(test => `
+        <div class="test-card-box" onclick="handleTestClick('${test._id}', ${test.isPaid ? 'true' : 'false'}, '${escapeHtml(test.name || "")}', ${test.price || 0})">
+          <div style="display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 10px;">
+            <span class="badge badge-blue" style="font-size: 10px;">
+              ${escapeHtml(test.exam || "Exam")}
+            </span>
+            <span class="badge ${test.isPaid ? 'badge-yellow' : 'badge-green'}">
+              ${test.isPaid ? `💰 ₹${test.price || 0}` : '🆓 Free'}
+            </span>
+          </div>
+
+          <h3 style="font-size: 15px; margin-bottom: 10px; color: var(--text);">
+            ${escapeHtml(test.name || "Mock Test")}
+          </h3>
+
+          <div style="font-size: 12px; color: var(--muted); line-height: 1.7; margin-bottom: 12px;">
+            📚 ${escapeHtml(test.subject || "General")}<br>
+            ⏱️ ${Number(test.duration) || 0} min<br>
+            ❓ ${Number(test.totalQuestions) || 0} Q
+          </div>
+
+          ${test.isPaid ? `
+            <div class="btn btn-sm btn-red btn-block" style="pointer-events: none;">
+              🔒 Unlock ₹${test.price || 0}
+            </div>
+          ` : `
+            <div class="btn btn-sm btn-blue btn-block" style="pointer-events: none;">
+              ▶ Start Test
+            </div>
+          `}
+        </div>
+      `).join("");
+    }
+
+    function handleTestClick(id, isPaid, title, price) {
+      if (isPaid) {
+        window.location.href = `/payment.html?type=test&id=${encodeURIComponent(id)}&title=${encodeURIComponent(title)}&price=${price}`;
+      } else {
+        window.location.href = "/test-instructions.html?id=" + encodeURIComponent(id);
+      }
+    }
+
+    // Filter tabs
+    document.querySelectorAll(".filter-tab").forEach(tab => {
+      tab.addEventListener("click", () => {
+        document.querySelectorAll(".filter-tab").forEach(t => t.classList.remove("active"));
+        tab.classList.add("active");
+        currentTestFilter = tab.dataset.filter;
+        renderTests();
+      });
+    });
 
     // ==========================================
     // LOAD RESULTS COUNT
@@ -619,7 +798,6 @@
         document.getElementById("liveCount").textContent = live.length;
 
         if (!live.length) {
-          // Check upcoming
           const r2 = await fetch("/api/classes?status=scheduled", { credentials: "include" });
           const data2 = await r2.json();
           const upcoming = (data2.data || []).slice(0, 1);
@@ -654,7 +832,7 @@
           <div class="live-box">
             <div class="live-header">
               <span class="status"><span class="dot"></span> LIVE NOW</span>
-              <span style="font-size: 13px;">${escapeHtml(c.subject)} • ${escapeHtml(c.class)}</span>
+              <span style="font-size: 13px;">${escapeHtml(c.subject)}</span>
             </div>
             <div class="live-player">
               <iframe src="https://www.youtube.com/embed/${vid}?autoplay=1" allowfullscreen></iframe>

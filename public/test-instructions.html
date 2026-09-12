@@ -1,0 +1,213 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test Instructions - ExamPrepHub</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+  <header class="header">
+    <div class="header-inner">
+      <a href="/dashboard.html" class="logo">🏆 ExamPrepHub</a>
+      <div class="header-actions">
+        <a href="/dashboard.html" class="btn-header">← Dashboard</a>
+        <button class="btn-header" id="logoutBtn">Logout</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="layout-full" style="padding: 25px 20px; max-width: 900px; margin: auto;">
+
+    <div id="loadingBox" class="loading-box">Loading test...</div>
+
+    <div id="contentBox" style="display: none;">
+
+      <!-- HEADER -->
+      <div class="card" style="margin-bottom: 20px; border-left: 5px solid var(--primary);">
+        <h1 style="font-size: 24px; margin-bottom: 8px;">📋 Test Instructions</h1>
+        <p class="text-muted">Test shuru karne se pehle ye instructions dhyan se padho</p>
+      </div>
+
+      <!-- TEST INFO -->
+      <div class="card" style="margin-bottom: 20px;">
+        <h2 style="font-size: 20px; margin-bottom: 16px;" id="testName">-</h2>
+
+        <div class="test-summary-grid">
+          <div class="summary-item">
+            <span class="num" id="totalQ">0</span>
+            <div class="label">Questions</div>
+          </div>
+          <div class="summary-item">
+            <span class="num" id="duration">0</span>
+            <div class="label">Minutes</div>
+          </div>
+          <div class="summary-item">
+            <span class="num" id="examName">-</span>
+            <div class="label">Exam</div>
+          </div>
+          <div class="summary-item">
+            <span class="num" id="language">-</span>
+            <div class="label">Language</div>
+          </div>
+        </div>
+
+        <div style="display: grid; gap: 8px; font-size: 14px; margin-top: 15px;">
+          <div><strong>📦 Batch:</strong> <span id="batch">-</span></div>
+          <div><strong>📚 Subject:</strong> <span id="subject">-</span></div>
+          <div><strong>📖 Chapter:</strong> <span id="chapter">-</span></div>
+        </div>
+      </div>
+
+      <!-- DYNAMIC INSTRUCTIONS FROM ADMIN -->
+      <div class="card" style="margin-bottom: 20px;">
+        <h2 id="instrTitle" style="font-size: 18px; margin-bottom: 16px; color: var(--primary);">
+          📋 Important Instructions
+        </h2>
+        <div 
+          id="instrContent" 
+          style="white-space: pre-wrap; font-size: 14px; line-height: 1.8; color: var(--text-light); font-family: 'Segoe UI', Arial, sans-serif;"
+        >
+          Loading instructions...
+        </div>
+      </div>
+
+      <!-- LANGUAGE SELECTION -->
+      <div class="card" style="margin-bottom: 20px;">
+        <h2 style="font-size: 18px; margin-bottom: 16px;">🌐 Choose Language</h2>
+
+        <div class="language-selector" id="languageSelector">
+          <div class="lang-option active" data-lang="hindi">
+            🇮🇳 हिंदी (Hindi)
+          </div>
+          <div class="lang-option" data-lang="english">
+            🇬🇧 English
+          </div>
+          <div class="lang-option" data-lang="bilingual">
+            🌐 Bilingual (Both)
+          </div>
+        </div>
+      </div>
+
+      <!-- CONFIRM CHECKBOX -->
+      <div class="card" style="margin-bottom: 20px;">
+        <label class="checkbox-wrapper checkbox-confirm" style="display: flex; align-items: flex-start; gap: 10px; cursor: pointer;">
+          <input type="checkbox" id="agreeCheck" class="checkbox" style="margin-top: 4px;" />
+          <span style="font-size: 14px; color: var(--text);">
+            मैंने सभी निर्देशों को ध्यानपूर्वक पढ़ और समझ लिया है। मैं test पूरी ईमानदारी से दूँगा/दूँगी।<br>
+            <span style="color: var(--muted); font-size: 12px;">I have read and understood all the instructions carefully.</span>
+          </span>
+        </label>
+      </div>
+
+      <!-- BUTTONS -->
+      <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+        <button class="btn btn-red btn-lg" id="startBtn" disabled style="flex: 1; min-width: 200px;">
+          🚀 Start Test
+        </button>
+        <a href="/dashboard.html" class="btn btn-gray btn-lg" style="flex: 1; min-width: 200px;">
+          ❌ Cancel
+        </a>
+      </div>
+
+    </div>
+
+  </div>
+
+  <script src="/js/common.js"></script>
+  <script>
+    const testId = getQueryParam("id");
+    let selectedLanguage = "hindi";
+    let testData = null;
+
+    async function loadTest() {
+      if (!testId) {
+        document.getElementById("loadingBox").innerHTML = '<div class="error">Test ID nahi mila</div>';
+        return;
+      }
+
+      try {
+        const r = await fetch("/api/tests/" + testId);
+        const data = await r.json();
+
+        if (!data.success || !data.test) {
+          throw new Error(data.message || "Test not found");
+        }
+
+        testData = data.test;
+
+        document.getElementById("testName").textContent = testData.name || "Mock Test";
+        document.getElementById("totalQ").textContent = testData.totalQuestions || 0;
+        document.getElementById("duration").textContent = testData.duration || 0;
+        document.getElementById("examName").textContent = testData.exam || "-";
+        document.getElementById("language").textContent = testData.language || "Bilingual";
+        document.getElementById("batch").textContent = testData.batch || "-";
+        document.getElementById("subject").textContent = testData.subject || "-";
+        document.getElementById("chapter").textContent = testData.chapter || "-";
+
+        await loadInstructions();
+
+        document.getElementById("loadingBox").style.display = "none";
+        document.getElementById("contentBox").style.display = "block";
+
+      } catch (e) {
+        document.getElementById("loadingBox").innerHTML = '<div class="error">Test load nahi ho paya: ' + e.message + '</div>';
+      }
+    }
+
+    async function loadInstructions() {
+      const titleEl = document.getElementById("instrTitle");
+      const contentEl = document.getElementById("instrContent");
+
+      try {
+        const r = await fetch("/api/settings/instructions");
+        const data = await r.json();
+
+        if (data.success && data.data) {
+          titleEl.textContent = data.data.title || "📋 Important Instructions";
+
+          let content = data.data.content || "";
+          content = content.replace(/\[Total Questions\]/g, testData.totalQuestions || 0);
+          content = content.replace(/\[Duration\]/g, testData.duration || 0);
+          content = content.replace(/\[Type\]/g, testData.isPaid ? "Paid" : "Free");
+
+          contentEl.textContent = content;
+        } else {
+          contentEl.textContent = "Instructions available nahi hai. Kripya admin se contact karein.";
+        }
+      } catch (e) {
+        console.error("Instructions load error:", e);
+        contentEl.textContent = "Instructions load nahi ho payi. Kripya page refresh karein.";
+      }
+    }
+
+    document.querySelectorAll(".lang-option").forEach(opt => {
+      opt.addEventListener("click", () => {
+        document.querySelectorAll(".lang-option").forEach(o => o.classList.remove("active"));
+        opt.classList.add("active");
+        selectedLanguage = opt.dataset.lang;
+      });
+    });
+
+    document.getElementById("agreeCheck").addEventListener("change", (e) => {
+      document.getElementById("startBtn").disabled = !e.target.checked;
+    });
+
+    document.getElementById("startBtn").addEventListener("click", () => {
+      if (!document.getElementById("agreeCheck").checked) {
+        showAlert("Pehle instructions padhne ki confirm karo", "error");
+        return;
+      }
+      window.location.href = `/test.html?id=${encodeURIComponent(testId)}&lang=${selectedLanguage}`;
+    });
+
+    (async function() {
+      const user = await requireLogin();
+      if (!user) return;
+      loadTest();
+    })();
+  </script>
+
+</body>
+</html>

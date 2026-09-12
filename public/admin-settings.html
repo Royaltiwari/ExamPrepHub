@@ -1,0 +1,193 @@
+﻿<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Payment Settings - ExamPrepHub</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+  <header class="header">
+    <div class="header-inner">
+      <a href="/admin.html" class="logo">⚙️ Payment Settings</a>
+      <div class="header-actions">
+        <a href="/admin.html" class="btn-header">← Admin Home</a>
+        <button class="btn-header" id="logoutBtn">Logout</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="layout-full" style="padding: 25px 20px; max-width: 900px; margin: auto;">
+
+    <h1 style="font-size: 24px; margin-bottom: 6px;">💳 Payment Settings</h1>
+    <p class="text-muted" style="margin-bottom: 25px;">QR code aur bank details set karo — students ye dekhenge payment karte waqt</p>
+
+    <div id="message" class="alert" style="display: none;"></div>
+
+    <div class="card">
+      <div class="card-heading">
+        <div class="heading-icon">📱</div>
+        <h2>UPI / QR Code</h2>
+      </div>
+
+      <div class="form-group">
+        <label>UPI ID</label>
+        <input type="text" id="upiId" class="form-input" placeholder="yourname@paytm / yourname@upi" />
+      </div>
+
+      <div class="form-group">
+        <label>QR Code Image URL</label>
+        <input type="text" id="qrCodeUrl" class="form-input" placeholder="/uploads/payment/qr.png ya koi URL" />
+        <div style="font-size: 12px; color: var(--muted); margin-top: 4px;">
+          QR image ko <code>public/uploads/payment/qr.png</code> me save karo, phir yahan path likho: <code>/uploads/payment/qr.png</code>
+        </div>
+      </div>
+
+      <div id="qrPreview" style="display: none; margin-top: 12px;">
+        <div style="font-size: 12px; color: var(--muted); margin-bottom: 6px;">QR Preview:</div>
+        <img id="qrPreviewImg" src="" style="max-width: 200px; border-radius: 8px; border: 2px solid var(--border);" />
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-heading">
+        <div class="heading-icon">🏦</div>
+        <h2>Bank Account Details</h2>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Account Holder Name</label>
+          <input type="text" id="accountHolder" class="form-input" placeholder="Arun Kumar" />
+        </div>
+        <div class="form-group">
+          <label>Bank Name</label>
+          <input type="text" id="bankName" class="form-input" placeholder="State Bank of India" />
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Account Number</label>
+        <input type="text" id="accountNumber" class="form-input" placeholder="1234567890123" />
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>IFSC Code</label>
+          <input type="text" id="ifscCode" class="form-input" placeholder="SBIN0001234" />
+        </div>
+        <div class="form-group">
+          <label>Branch</label>
+          <input type="text" id="branch" class="form-input" placeholder="Gorakhpur" />
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-heading">
+        <div class="heading-icon">📝</div>
+        <h2>Instructions for Students</h2>
+      </div>
+
+      <div class="form-group">
+        <label>Instructions</label>
+        <textarea id="instructions" class="form-textarea" rows="4" placeholder="Payment ke baad UTR daalo..."></textarea>
+      </div>
+    </div>
+
+    <button class="btn btn-blue btn-lg" id="saveBtn" style="width: 100%;">
+      💾 Save Payment Settings
+    </button>
+
+  </div>
+
+  <script src="/js/common.js"></script>
+  <script>
+    async function loadSettings() {
+      try {
+        const r = await fetch("/api/settings/payment");
+        const data = await r.json();
+
+        if (!data.success) return;
+
+        const s = data.data;
+        document.getElementById("upiId").value = s.upiId || "";
+        document.getElementById("qrCodeUrl").value = s.qrCodeUrl || "";
+        document.getElementById("accountHolder").value = s.accountHolder || "";
+        document.getElementById("accountNumber").value = s.accountNumber || "";
+        document.getElementById("ifscCode").value = s.ifscCode || "";
+        document.getElementById("bankName").value = s.bankName || "";
+        document.getElementById("branch").value = s.branch || "";
+        document.getElementById("instructions").value = s.instructions || "";
+
+        if (s.qrCodeUrl) showQRPreview(s.qrCodeUrl);
+      } catch (e) {
+        console.error("Load error:", e);
+      }
+    }
+
+    function showQRPreview(url) {
+      document.getElementById("qrPreview").style.display = "block";
+      document.getElementById("qrPreviewImg").src = url;
+    }
+
+    document.getElementById("qrCodeUrl").addEventListener("input", (e) => {
+      const url = e.target.value.trim();
+      if (url) showQRPreview(url);
+      else document.getElementById("qrPreview").style.display = "none";
+    });
+
+    document.getElementById("saveBtn").addEventListener("click", async () => {
+      const btn = document.getElementById("saveBtn");
+      const orig = btn.innerHTML;
+      btn.innerHTML = '<span class="spinner"></span> Saving...';
+      btn.disabled = true;
+
+      const msg = document.getElementById("message");
+
+      try {
+        const r = await fetch("/api/settings/payment", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({
+            upiId: document.getElementById("upiId").value.trim(),
+            qrCodeUrl: document.getElementById("qrCodeUrl").value.trim(),
+            accountHolder: document.getElementById("accountHolder").value.trim(),
+            accountNumber: document.getElementById("accountNumber").value.trim(),
+            ifscCode: document.getElementById("ifscCode").value.trim(),
+            bankName: document.getElementById("bankName").value.trim(),
+            branch: document.getElementById("branch").value.trim(),
+            instructions: document.getElementById("instructions").value.trim()
+          })
+        });
+
+        const data = await r.json();
+
+        if (data.success) {
+          showAlert("✅ Settings saved!", "success");
+        } else {
+          showAlert(data.message || "Save failed", "error");
+        }
+      } catch (e) {
+        showAlert("Server error: " + e.message, "error");
+      } finally {
+        btn.innerHTML = orig;
+        btn.disabled = false;
+      }
+    });
+
+    (async function() {
+      const user = await requireLogin();
+      if (!user) return;
+      if (user.role !== "admin") {
+        window.location.href = "/dashboard.html";
+        return;
+      }
+      loadSettings();
+    })();
+  </script>
+
+</body>
+</html>

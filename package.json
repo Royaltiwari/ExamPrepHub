@@ -21,6 +21,7 @@
     "mammoth": "^1.12.2",
     "mongoose": "^9.9.5",
     "multer": "^2.3.0",
+    "nodemailer": "^10.0.9",
     "pdf-parse": "^2.4.5"
   }
 }

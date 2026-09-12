@@ -1,4 +1,4 @@
-const express = require("express");
+﻿const express = require("express");
 const Test = require("../models/Test");
 const requireAdmin = require("../middleware/admin");
 
@@ -21,7 +21,6 @@ router.get("/tests", requireAdmin, async (req, res) => {
 
   } catch (error) {
     console.error("Admin Get Tests Error:", error);
-
     res.status(500).json({
       success: false,
       message: "Unable to load tests"
@@ -43,7 +42,9 @@ router.post("/tests", requireAdmin, async (req, res) => {
       language,
       duration,
       description,
-      visible
+      visible,
+      isPaid,
+      price
     } = req.body;
 
     if (!name || !exam || !duration) {
@@ -62,6 +63,8 @@ router.post("/tests", requireAdmin, async (req, res) => {
       duration: Number(duration),
       description: description || "",
       visible: Boolean(visible),
+      isPaid: Boolean(isPaid),
+      price: isPaid ? (Number(price) || 0) : 0,
       createdBy: req.user._id
     });
 
@@ -73,7 +76,6 @@ router.post("/tests", requireAdmin, async (req, res) => {
 
   } catch (error) {
     console.error("Create Test Error:", error);
-
     res.status(500).json({
       success: false,
       message: "Unable to create test"
@@ -95,7 +97,9 @@ router.put("/tests/:id", requireAdmin, async (req, res) => {
       language,
       duration,
       description,
-      visible
+      visible,
+      isPaid,
+      price
     } = req.body;
 
     const test = await Test.findByIdAndUpdate(
@@ -108,7 +112,9 @@ router.put("/tests/:id", requireAdmin, async (req, res) => {
         language,
         duration: Number(duration),
         description,
-        visible: Boolean(visible)
+        visible: Boolean(visible),
+        isPaid: Boolean(isPaid),
+        price: isPaid ? (Number(price) || 0) : 0
       },
       {
         new: true,
@@ -131,7 +137,6 @@ router.put("/tests/:id", requireAdmin, async (req, res) => {
 
   } catch (error) {
     console.error("Update Test Error:", error);
-
     res.status(500).json({
       success: false,
       message: "Unable to update test"
@@ -161,7 +166,6 @@ router.delete("/tests/:id", requireAdmin, async (req, res) => {
 
   } catch (error) {
     console.error("Delete Test Error:", error);
-
     res.status(500).json({
       success: false,
       message: "Unable to delete test"

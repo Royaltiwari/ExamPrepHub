@@ -1,0 +1,283 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Payment - ExamPrepHub</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+  <header class="header">
+    <div class="header-inner">
+      <a href="/dashboard.html" class="logo">🏆 ExamPrepHub</a>
+      <div class="header-actions">
+        <a href="/dashboard.html" class="btn-header">← Dashboard</a>
+        <button class="btn-header" id="logoutBtn">Logout</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="layout-full" style="padding: 25px 20px; max-width: 700px; margin: auto;">
+
+    <h1 style="font-size: 24px; margin-bottom: 6px;">💳 Payment</h1>
+    <p class="text-muted" style="margin-bottom: 25px;">Pay Now click karo ya QR scan karo, phir UTR daalo</p>
+
+    <div id="message" class="alert" style="display: none;"></div>
+
+    <!-- ITEM INFO -->
+    <div class="card" style="margin-bottom: 20px;">
+      <h2 style="font-size: 18px; margin-bottom: 12px;">📝 Payment For</h2>
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <div>
+          <div style="font-weight: 800; font-size: 16px;" id="itemTitle">-</div>
+          <div class="text-muted" style="font-size: 13px;" id="itemType">-</div>
+        </div>
+        <div style="font-size: 28px; font-weight: 900; color: var(--primary);">
+          ₹<span id="itemPrice">0</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- PAY NOW BUTTON -->
+    <div class="card" style="margin-bottom: 20px;">
+      <h2 style="font-size: 18px; margin-bottom: 15px;">⚡ Quick Pay</h2>
+      <p class="text-muted" style="font-size: 13px; margin-bottom: 12px;">
+        Neeche button click karo — GPay / PhonePe / Paytm automatically khulega
+      </p>
+
+      <a id="payNowBtn" href="#" class="btn btn-green btn-lg btn-block" style="font-size: 16px; padding: 16px;">
+        💸 Pay ₹<span id="payAmount">0</span> Now
+      </a>
+
+      <div style="margin-top: 12px; text-align: center;">
+        <span class="text-muted" style="font-size: 12px;">Ya UPI ID copy karo:</span>
+        <div style="margin-top: 6px; display: flex; gap: 8px; align-items: center; justify-content: center;">
+          <code id="upiIdText" style="background: var(--bg-alt); padding: 6px 12px; border-radius: 6px; font-size: 13px;">-</code>
+          <button class="btn btn-sm btn-blue" id="copyUpiBtn">📋 Copy</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- QR CODE -->
+    <div class="card" style="margin-bottom: 20px;">
+      <h2 style="font-size: 18px; margin-bottom: 15px;">📱 Scan QR Code</h2>
+      <div id="qrBox" style="text-align: center;">
+        <div class="loading-box">Loading...</div>
+      </div>
+    </div>
+
+    <!-- BANK DETAILS -->
+    <div class="card" style="margin-bottom: 20px;">
+      <h2 style="font-size: 18px; margin-bottom: 15px;">🏦 Bank Details</h2>
+      <div id="bankBox">Loading...</div>
+    </div>
+
+    <!-- PAYMENT PROOF -->
+    <div class="card">
+      <h2 style="font-size: 18px; margin-bottom: 15px;">✅ Payment Proof</h2>
+
+      <div class="form-group">
+        <label>UTR / Transaction ID *</label>
+        <input type="text" id="utrNumber" class="form-input" placeholder="123456789012" />
+      </div>
+
+      <div class="form-group">
+        <label>Payment Screenshot (optional)</label>
+        <input type="file" id="screenshotFile" class="form-input" accept="image/*" style="padding: 8px;" />
+        <div style="font-size: 12px; color: var(--muted); margin-top: 4px;">
+          Max 5MB • JPG, PNG, WEBP
+        </div>
+        <div id="uploadStatus" style="margin-top: 8px; font-size: 13px;"></div>
+        <input type="hidden" id="screenshotUrl" />
+      </div>
+
+      <div id="previewBox" style="display: none; margin-bottom: 15px;">
+        <div style="font-size: 12px; color: var(--muted); margin-bottom: 6px;">Preview:</div>
+        <img id="previewImg" src="" style="max-width: 200px; border-radius: 8px; border: 2px solid var(--border);" />
+      </div>
+
+      <div id="instructionsBox" class="alert alert-info" style="display: none; margin-bottom: 15px;"></div>
+
+      <button class="btn btn-green btn-lg btn-block" id="submitBtn">
+        ✅ Submit Payment Proof
+      </button>
+
+      <p class="text-muted" style="text-align: center; font-size: 12px; margin-top: 12px;">
+        Admin 24 ghante me verify karega, fir aapko access mil jayega
+      </p>
+    </div>
+
+  </div>
+
+  <script src="/js/common.js"></script>
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const itemType = params.get("type") || "test";
+    const itemId = params.get("id");
+    const itemTitle = params.get("title") || "Unknown";
+    const itemPrice = Number(params.get("price")) || 0;
+
+    document.getElementById("itemTitle").textContent = itemTitle;
+    document.getElementById("itemType").textContent = itemType === "test" ? "📝 Test Series" : "🎥 Class";
+    document.getElementById("itemPrice").textContent = itemPrice;
+    document.getElementById("payAmount").textContent = itemPrice;
+
+    let settings = null;
+
+    async function loadSettings() {
+      try {
+        const r = await fetch("/api/settings/payment");
+        const data = await r.json();
+        if (!data.success) return;
+
+        settings = data.data;
+
+        // UPI
+        if (settings.upiId) {
+          document.getElementById("upiIdText").textContent = settings.upiId;
+
+          const upiLink = `upi://pay?pa=${encodeURIComponent(settings.upiId)}&pn=${encodeURIComponent(settings.accountHolder || "ExamPrepHub")}&am=${itemPrice}&cu=INR&tn=${encodeURIComponent("Payment for " + itemTitle)}`;
+          document.getElementById("payNowBtn").href = upiLink;
+
+          document.getElementById("payNowBtn").addEventListener("click", (e) => {
+            if (!/Android|iPhone|iPad|iPod/i.test(navigator.userAgent)) {
+              e.preventDefault();
+              showAlert("Mobile par ye link kaam karega. Ya QR scan karo.", "info");
+            }
+          });
+        } else {
+          document.getElementById("payNowBtn").style.display = "none";
+        }
+
+        // QR (auto-generate agar nahi hai)
+        const qrBox = document.getElementById("qrBox");
+        if (settings.qrCodeUrl) {
+          qrBox.innerHTML = `<img src="${escapeHtml(settings.qrCodeUrl)}" style="max-width: 250px; border-radius: 12px; border: 2px solid var(--border);" />`;
+        } else if (settings.upiId) {
+          const qrData = `upi://pay?pa=${encodeURIComponent(settings.upiId)}&pn=${encodeURIComponent(settings.accountHolder || "ExamPrepHub")}&am=${itemPrice}&cu=INR`;
+          qrBox.innerHTML = `
+            <img src="https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(qrData)}" style="max-width: 250px; border-radius: 12px; border: 2px solid var(--border);" />
+            <div style="font-size: 12px; color: var(--muted); margin-top: 8px;">Scan karke payment karo</div>
+          `;
+        } else {
+          qrBox.innerHTML = '<div class="empty-text">QR code set nahi kiya admin ne.</div>';
+        }
+
+        // Bank
+        const bankBox = document.getElementById("bankBox");
+        if (settings.accountNumber) {
+          bankBox.innerHTML = `
+            <div style="display: grid; gap: 8px; font-size: 14px;">
+              <div><strong>Account Holder:</strong> ${escapeHtml(settings.accountHolder || "-")}</div>
+              <div><strong>Account Number:</strong> ${escapeHtml(settings.accountNumber)}</div>
+              <div><strong>IFSC Code:</strong> ${escapeHtml(settings.ifscCode || "-")}</div>
+              <div><strong>Bank:</strong> ${escapeHtml(settings.bankName || "-")}</div>
+              <div><strong>Branch:</strong> ${escapeHtml(settings.branch || "-")}</div>
+            </div>
+          `;
+        } else {
+          bankBox.innerHTML = '<div class="empty-text">Bank details set nahi ki admin ne.</div>';
+        }
+
+        if (settings.instructions) {
+          const ib = document.getElementById("instructionsBox");
+          ib.textContent = "💡 " + settings.instructions;
+          ib.style.display = "flex";
+        }
+
+      } catch (e) {
+        console.error("Load settings error:", e);
+      }
+    }
+
+    document.getElementById("copyUpiBtn").addEventListener("click", () => {
+      if (!settings || !settings.upiId) return;
+      navigator.clipboard.writeText(settings.upiId);
+      showAlert("UPI ID copy ho gayi!", "success", 2000);
+    });
+
+    // Screenshot upload
+    document.getElementById("screenshotFile").addEventListener("change", async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const statusEl = document.getElementById("uploadStatus");
+
+      if (file.size > 5 * 1024 * 1024) {
+        statusEl.innerHTML = '<span style="color: var(--red);">❌ File 5MB se badi hai</span>';
+        return;
+      }
+
+      statusEl.innerHTML = '<span class="spinner spinner-dark"></span> Uploading...';
+
+      const formData = new FormData();
+      formData.append("screenshot", file);
+
+      try {
+        const r = await fetch("/api/payments/upload-screenshot", {
+          method: "POST",
+          credentials: "include",
+          body: formData
+        });
+        const data = await r.json();
+
+        if (data.success) {
+          statusEl.innerHTML = '<span style="color: var(--green);">✅ Uploaded!</span>';
+          document.getElementById("screenshotUrl").value = data.url;
+          document.getElementById("previewBox").style.display = "block";
+          document.getElementById("previewImg").src = data.url;
+        } else {
+          statusEl.innerHTML = '<span style="color: var(--red);">❌ ' + escapeHtml(data.message) + '</span>';
+        }
+      } catch (err) {
+        statusEl.innerHTML = '<span style="color: var(--red);">❌ Upload failed</span>';
+      }
+    });
+
+    document.getElementById("submitBtn").addEventListener("click", async () => {
+      const utrNumber = document.getElementById("utrNumber").value.trim();
+      const screenshotUrl = document.getElementById("screenshotUrl").value.trim();
+
+      if (!utrNumber) {
+        showAlert("UTR / Transaction ID daalo", "error");
+        return;
+      }
+
+      const btn = document.getElementById("submitBtn");
+      const orig = btn.innerHTML;
+      btn.innerHTML = '<span class="spinner"></span> Submitting...';
+      btn.disabled = true;
+
+      try {
+        const r = await fetch("/api/payments/submit", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({ itemType, itemId, utrNumber, screenshotUrl })
+        });
+        const data = await r.json();
+
+        if (data.success) {
+          showAlert("✅ Payment submit ho gaya! Admin verify karega.", "success", 3000);
+          setTimeout(() => { window.location.href = "/dashboard.html"; }, 2000);
+        } else {
+          showAlert(data.message || "Failed", "error");
+          btn.innerHTML = orig;
+          btn.disabled = false;
+        }
+      } catch (e) {
+        showAlert("Server error: " + e.message, "error");
+        btn.innerHTML = orig;
+        btn.disabled = false;
+      }
+    });
+
+    (async function() {
+      await requireLogin();
+      loadSettings();
+    })();
+  </script>
+
+</body>
+</html>
