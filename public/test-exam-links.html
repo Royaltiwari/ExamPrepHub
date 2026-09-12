@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <meta charset="UTF-8">
+  <title>Test - Exam Links</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+  <header class="header">
+    <div class="header-inner">
+      <a href="/" class="logo">🏆 ExamPrepHub</a>
+      <div class="header-actions">
+        <a href="/" class="btn-header">← Home</a>
+      </div>
+    </div>
+  </header>
+
+  <section class="section">
+    <h2 class="section-title">🎯 Exam Cards (Dynamic Test)</h2>
+    <p class="section-subtitle">Ye cards admin se aayenge</p>
+
+    <div class="grid grid-4" id="examGrid">
+      <div class="loading-box">Loading exams...</div>
+    </div>
+  </section>
+
+  <script src="/js/common.js"></script>
+  <script>
+    async function loadExams() {
+      const box = document.getElementById("examGrid");
+      try {
+        const r = await fetch("/api/exam-links");
+        const data = await r.json();
+
+        console.log("API Response:", data);
+
+        if (!data.success || !data.data || data.data.length === 0) {
+          box.innerHTML = '<div class="empty-text">Koi exam add nahi kiya abhi.</div>';
+          return;
+        }
+
+        box.innerHTML = data.data.map(e => `
+          <div class="card exam-card">
+            <div class="exam-icon">${escapeHtml(e.icon || "🏆")}</div>
+            <h3>${escapeHtml(e.examName)}</h3>
+            <p>${escapeHtml(e.description || "")}</p>
+
+            <div style="display: flex; gap: 6px; flex-wrap: wrap; margin-top: 12px;">
+              ${e.pdfUrl ? `<a href="${escapeHtml(e.pdfUrl)}" target="_blank" class="btn btn-sm btn-red">📄 PDF</a>` : ''}
+              ${e.testUrl ? `<a href="${escapeHtml(e.testUrl)}" class="btn btn-sm btn-blue">📝 Test</a>` : ''}
+              ${e.demoUrl ? `<a href="${escapeHtml(e.demoUrl)}" target="_blank" class="btn btn-sm btn-green">🎬 Demo</a>` : ''}
+            </div>
+          </div>
+        `).join("");
+      } catch (e) {
+        box.innerHTML = '<div class="empty-text error">Failed to load: ' + e.message + '</div>';
+      }
+    }
+
+    loadExams();
+  </script>
+
+</body>
+</html>

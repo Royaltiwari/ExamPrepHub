@@ -1,0 +1,258 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Home Class - ExamPrepHub</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+  <header class="header">
+    <div class="header-inner">
+      <a href="/dashboard.html" class="logo">🏆 ExamPrepHub</a>
+      <div class="header-actions">
+        <a href="/dashboard.html" class="btn-header">📊 Dashboard</a>
+        <button class="btn-header" id="logoutBtn">Logout</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="layout-full" style="padding: 25px 20px; max-width: 1300px; margin: auto;">
+
+    <h1 style="font-size: 26px; margin-bottom: 6px;">🏠 Home Class</h1>
+    <p class="text-muted" style="margin-bottom: 20px;">
+      Apni class aur exam chuno, phir classes dekho
+    </p>
+
+    <div style="display:flex; gap:8px; margin-bottom: 22px; overflow-x: auto; padding-bottom: 8px;" id="categoryTabs">
+      <button class="btn btn-sm btn-outline cat-btn" data-cat="Class 6">Class 6</button>
+      <button class="btn btn-sm btn-outline cat-btn" data-cat="Class 7">Class 7</button>
+      <button class="btn btn-sm btn-outline cat-btn" data-cat="Class 8">Class 8</button>
+      <button class="btn btn-sm btn-outline cat-btn" data-cat="Class 9">Class 9</button>
+      <button class="btn btn-sm btn-outline cat-btn" data-cat="Class 10">Class 10</button>
+      <button class="btn btn-sm btn-blue cat-btn active" data-cat="Class 11">Class 11</button>
+      <button class="btn btn-sm btn-outline cat-btn" data-cat="Class 12">Class 12</button>
+      <button class="btn btn-sm btn-outline cat-btn" data-cat="Competitive">Competitive</button>
+    </div>
+
+    <div id="examSection" style="margin-bottom: 22px;">
+      <h3 style="font-size: 16px; margin-bottom: 12px;">📋 Exams</h3>
+      <div style="display:flex; gap:8px; flex-wrap: wrap;" id="examList">
+        <div class="empty-text">Loading exams...</div>
+      </div>
+    </div>
+
+    <div style="display:flex; gap:8px; margin-bottom: 18px; overflow-x: auto; padding-bottom: 6px;" id="statusTabs">
+      <button class="btn btn-sm btn-blue status-btn active" data-status="">All</button>
+      <button class="btn btn-sm btn-outline status-btn" data-status="scheduled">📅 Scheduled</button>
+      <button class="btn btn-sm btn-outline status-btn" data-status="live">🔴 Live</button>
+      <button class="btn btn-sm btn-outline status-btn" data-status="recorded">📹 Recorded</button>
+    </div>
+
+    <div style="display:flex; gap:8px; margin-bottom: 22px; overflow-x: auto; padding-bottom: 6px;" id="subjectTabs">
+      <button class="btn btn-sm btn-blue subject-btn active" data-subject="">All Subjects</button>
+    </div>
+
+    <div class="grid grid-3" id="classGrid">
+      <div class="loading-box">Loading classes...</div>
+    </div>
+
+  </div>
+
+  <script src="/js/common.js"></script>
+  <script>
+    let currentCategory = "Class 11";
+    let currentExam = "";
+    let currentStatus = "";
+    let currentSubject = "";
+
+    async function loadExams() {
+      const box = document.getElementById("examList");
+      try {
+        const r = await fetch(`/api/classes/exams/${encodeURIComponent(currentCategory)}`);
+        const data = await r.json();
+
+        if (!data.success || !data.data || !data.data.length) {
+          box.innerHTML = '<div class="empty-text">Is category me koi exam nahi hai.</div>';
+          currentExam = "";
+          document.getElementById("subjectTabs").innerHTML = '<button class="btn btn-sm btn-blue subject-btn active" data-subject="">All Subjects</button>';
+          loadClasses();
+          return;
+        }
+
+        box.innerHTML = data.data.map(ex => {
+          const active = ex === currentExam ? "btn-blue active" : "btn-outline";
+          return `<button class="btn btn-sm ${active} exam-btn" data-exam="${escapeHtml(ex)}">${escapeHtml(ex)}</button>`;
+        }).join("");
+
+        if (!currentExam || !data.data.includes(currentExam)) {
+          currentExam = data.data[0];
+        }
+
+        document.querySelectorAll(".exam-btn").forEach(b => {
+          const isActive = b.dataset.exam === currentExam;
+          b.classList.toggle("active", isActive);
+          b.classList.toggle("btn-blue", isActive);
+          b.classList.toggle("btn-outline", !isActive);
+        });
+
+        bindExamClicks();
+        loadSubjects();
+        loadClasses();
+
+      } catch (e) {
+        box.innerHTML = '<div class="empty-text error">Exams load nahi ho payi.</div>';
+      }
+    }
+
+    function bindExamClicks() {
+      document.querySelectorAll(".exam-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
+          currentExam = btn.dataset.exam;
+          document.querySelectorAll(".exam-btn").forEach(b => {
+            const isActive = b.dataset.exam === currentExam;
+            b.classList.toggle("active", isActive);
+            b.classList.toggle("btn-blue", isActive);
+            b.classList.toggle("btn-outline", !isActive);
+          });
+          loadSubjects();
+          loadClasses();
+        });
+      });
+    }
+
+    async function loadSubjects() {
+      const box = document.getElementById("subjectTabs");
+      try {
+        const r = await fetch(
+          `/api/classes/subjects/${encodeURIComponent(currentCategory)}/${encodeURIComponent(currentExam)}`
+        );
+        const data = await r.json();
+        const subjects = data.data || [];
+
+        let html = `<button class="btn btn-sm ${currentSubject === "" ? "btn-blue active" : "btn-outline"} subject-btn" data-subject="">All Subjects</button>`;
+        subjects.forEach(s => {
+          const active = s === currentSubject;
+          html += `<button class="btn btn-sm ${active ? "btn-blue active" : "btn-outline"} subject-btn" data-subject="${escapeHtml(s)}">${escapeHtml(s)}</button>`;
+        });
+
+        box.innerHTML = html;
+
+        box.querySelectorAll(".subject-btn").forEach(btn => {
+          btn.addEventListener("click", () => {
+            currentSubject = btn.dataset.subject;
+            box.querySelectorAll(".subject-btn").forEach(b => {
+              const isActive = b.dataset.subject === currentSubject;
+              b.classList.toggle("active", isActive);
+              b.classList.toggle("btn-blue", isActive);
+              b.classList.toggle("btn-outline", !isActive);
+            });
+            loadClasses();
+          });
+        });
+      } catch (e) {
+        box.innerHTML = '<button class="btn btn-sm btn-blue subject-btn active" data-subject="">All Subjects</button>';
+      }
+    }
+
+    async function loadClasses() {
+      const grid = document.getElementById("classGrid");
+      try {
+        const params = new URLSearchParams();
+        params.append("category", currentCategory);
+        if (currentExam) params.append("examName", currentExam);
+        if (currentStatus) params.append("status", currentStatus);
+        if (currentSubject) params.append("subject", currentSubject);
+
+        const r = await fetch(`/api/classes?${params}`, { credentials: "include" });
+        const data = await r.json();
+        const list = data.data || [];
+
+        if (!list.length) {
+          grid.innerHTML = '<div class="empty-text">Koi class nahi mili. Filters change karo.</div>';
+          return;
+        }
+
+        const statusIcons = { scheduled: "📅", live: "🔴", recorded: "📹" };
+        const statusColors = { scheduled: "badge-yellow", live: "badge-red", recorded: "badge-green" };
+
+        grid.innerHTML = list.map(c => {
+          const thumb = c.thumbnail || "https://via.placeholder.com/400x200/1e293b/64748b?text=No+Thumbnail";
+          return `
+            <div class="card" style="padding: 0; overflow: hidden; cursor: pointer;" onclick="openClass('${c._id}')">
+              <div style="height: 140px; background-image: url('${escapeHtml(thumb)}'); background-size: cover; background-position: center; position: relative;">
+                <span class="badge ${statusColors[c.status]}" style="position: absolute; top: 10px; right: 10px;">
+                  ${statusIcons[c.status]} ${c.status}
+                </span>
+              </div>
+              <div style="padding: 15px;">
+                <h3 style="font-size: 15px; margin-bottom: 6px;">${escapeHtml(c.title)}</h3>
+                <p class="text-muted" style="font-size: 12px; margin-bottom: 10px;">
+                  ${escapeHtml(c.subject)}${c.topic ? " • " + escapeHtml(c.topic) : ""}${c.teacher ? " • " + escapeHtml(c.teacher) : ""}
+                </p>
+                <div style="display: flex; gap: 6px;">
+                  <button class="btn btn-sm btn-blue" style="flex: 1;">${c.status === "live" ? "🔴 Watch Live" : "▶ Watch"}</button>
+                  ${c.supportingPdf ? `<a href="${escapeHtml(c.supportingPdf)}" target="_blank" onclick="event.stopPropagation()" class="btn btn-sm btn-red">📄</a>` : ""}
+                </div>
+              </div>
+            </div>
+          `;
+        }).join("");
+
+      } catch (e) {
+        grid.innerHTML = '<div class="empty-text error">Classes load nahi ho payi.</div>';
+      }
+    }
+
+    function openClass(id) {
+      window.location.href = "/class-detail.html?id=" + encodeURIComponent(id);
+    }
+
+    document.querySelectorAll(".cat-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        document.querySelectorAll(".cat-btn").forEach(b => {
+          b.classList.remove("active", "btn-blue");
+          b.classList.add("btn-outline");
+        });
+        btn.classList.remove("btn-outline");
+        btn.classList.add("active", "btn-blue");
+
+        currentCategory = btn.dataset.cat;
+        currentExam = "";
+        currentSubject = "";
+        currentStatus = "";
+
+        document.querySelectorAll(".status-btn").forEach(b => {
+          b.classList.remove("active", "btn-blue");
+          b.classList.add("btn-outline");
+        });
+        const allStatus = document.querySelector(".status-btn[data-status='']");
+        if (allStatus) { allStatus.classList.add("active", "btn-blue"); allStatus.classList.remove("btn-outline"); }
+
+        loadExams();
+      });
+    });
+
+    document.querySelectorAll(".status-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        document.querySelectorAll(".status-btn").forEach(b => {
+          b.classList.remove("active", "btn-blue");
+          b.classList.add("btn-outline");
+        });
+        btn.classList.remove("btn-outline");
+        btn.classList.add("active", "btn-blue");
+        currentStatus = btn.dataset.status;
+        loadClasses();
+      });
+    });
+
+    (async function() {
+      const user = await requireLogin();
+      if (!user) return;
+      loadExams();
+    })();
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,602 @@
+﻿<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Classes Manager - ExamPrepHub</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+  <header class="header">
+    <div class="header-inner">
+      <a href="/admin.html" class="logo">⚙️ Classes Manager</a>
+      <div class="header-actions">
+        <a href="/admin.html" class="btn-header">← Admin Home</a>
+        <button class="btn-header" id="logoutBtn">Logout</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="layout-full" style="padding: 20px;">
+
+    <!-- HEADER -->
+    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 20px;">
+      <div>
+        <h1 style="font-size: 24px;">🎓 Classes Manager</h1>
+        <p class="text-muted">Live, Recorded, Scheduled classes manage karo</p>
+      </div>
+      <button class="btn btn-blue btn-lg" id="addNewBtn">➕ New Class</button>
+    </div>
+
+    <!-- FORM -->
+    <div class="card" id="formCard" style="display:none;">
+      <div class="card-heading">
+        <div class="heading-icon">📝</div>
+        <h2 id="formTitle">Add New Class</h2>
+      </div>
+
+      <form id="classForm">
+        <input type="hidden" id="classId" />
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Category *</label>
+            <select id="category" class="form-select" required>
+              <option value="Class 6">Class 6</option>
+              <option value="Class 7">Class 7</option>
+              <option value="Class 8">Class 8</option>
+              <option value="Class 9">Class 9</option>
+              <option value="Class 10">Class 10</option>
+              <option value="Class 11">Class 11</option>
+              <option value="Class 12">Class 12</option>
+              <option value="Competitive">Competitive</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Exam Name * (BSF HCM, UPSSSC PET, etc.)</label>
+            <input type="text" id="examName" class="form-input" placeholder="BSF HCM" required />
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Subject *</label>
+            <input type="text" id="subject" class="form-input" placeholder="Biology" required />
+          </div>
+
+          <div class="form-group">
+            <label>Topic (optional)</label>
+            <input type="text" id="topic" class="form-input" placeholder="Cell Structure" />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Title *</label>
+          <input type="text" id="title" class="form-input" placeholder="Cell Structure Class 1" required />
+        </div>
+
+        <div class="form-group">
+          <label>Description</label>
+          <textarea id="description" class="form-textarea" placeholder="Class ke baare me..."></textarea>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Teacher Name</label>
+            <input type="text" id="teacher" class="form-input" placeholder="Mr. Sharma" />
+          </div>
+
+          <div class="form-group">
+            <label>Duration (minutes)</label>
+            <input type="number" id="duration" class="form-input" value="60" />
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Scheduled Date</label>
+            <input type="date" id="scheduledDate" class="form-input" />
+          </div>
+
+          <div class="form-group">
+            <label>Scheduled Time</label>
+            <input type="text" id="scheduledTime" class="form-input" placeholder="05:00 PM" />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>🔴 Live Link (YouTube) — Sirf LIVE ke liye</label>
+          <input type="url" id="liveUrl" class="form-input" placeholder="https://youtube.com/watch?v=..." />
+        </div>
+
+        <div class="form-group">
+          <label>📹 Recorded Link (YouTube) — RECORDED ke liye</label>
+          <input type="url" id="recordedUrl" class="form-input" placeholder="https://youtube.com/watch?v=..." />
+        </div>
+
+        <div class="form-group">
+          <label>📄 Supporting PDF Link</label>
+          <input type="url" id="supportingPdf" class="form-input" placeholder="https://drive.google.com/..." />
+        </div>
+
+        <!-- ============================================ -->
+        <!-- THUMBNAIL SECTION - UPLOAD + URL -->
+        <!-- ============================================ -->
+        <div class="form-group">
+          <label>🖼️ Thumbnail</label>
+
+          <!-- Mode Tabs -->
+          <div style="display: flex; gap: 8px; margin-bottom: 10px;">
+            <button type="button" class="btn btn-sm btn-blue thumb-tab active" data-mode="upload">
+              📤 Upload
+            </button>
+            <button type="button" class="btn btn-sm btn-outline thumb-tab" data-mode="url">
+              🔗 URL
+            </button>
+          </div>
+
+          <!-- Upload Mode -->
+          <div id="thumbUploadMode">
+            <input
+              type="file"
+              id="thumbnailFile"
+              accept="image/*"
+              class="form-input"
+              style="padding: 8px;"
+            />
+            <div style="font-size: 12px; color: var(--muted); margin-top: 4px;">
+              Max 2MB • JPG, PNG, WEBP, GIF
+            </div>
+            <div id="uploadStatus" style="margin-top: 8px; font-size: 13px;"></div>
+          </div>
+
+          <!-- URL Mode -->
+          <div id="thumbUrlMode" style="display: none;">
+            <input
+              type="url"
+              id="thumbnailUrl"
+              class="form-input"
+              placeholder="https://example.com/image.jpg"
+            />
+          </div>
+
+          <!-- Hidden input -->
+          <input type="hidden" id="thumbnail" />
+
+          <!-- Preview -->
+          <div id="thumbPreview" style="margin-top: 12px; display: none;">
+            <div style="font-size: 12px; color: var(--muted); margin-bottom: 6px;">Preview:</div>
+            <img
+              id="thumbPreviewImg"
+              src=""
+              style="max-width: 220px; max-height: 140px; border-radius: 8px; border: 2px solid var(--border);"
+              alt="Thumbnail preview"
+            />
+            <button
+              type="button"
+              class="btn btn-sm btn-red"
+              id="removeThumbBtn"
+              style="margin-left: 10px;"
+            >
+              ✕ Remove
+            </button>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Status *</label>
+            <select id="status" class="form-select" required>
+              <option value="scheduled">📅 Scheduled</option>
+              <option value="live">🔴 Live</option>
+              <option value="recorded">📹 Recorded</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="checkbox-wrapper" style="margin-top: 30px;">
+              <input type="checkbox" id="visible" class="checkbox" checked />
+              <span>Visible (students ko dikhega)</span>
+            </label>
+          </div>
+        </div>
+
+        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+          <button type="submit" class="btn btn-blue" id="submitBtn">💾 Save Class</button>
+          <button type="button" class="btn btn-gray" id="cancelBtn">Cancel</button>
+        </div>
+      </form>
+    </div>
+
+    <!-- FILTERS -->
+    <div class="card">
+      <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+        <select id="filterCategory" class="form-select" style="flex: 1; min-width: 150px;">
+          <option value="">All Categories</option>
+          <option value="Class 6">Class 6</option>
+          <option value="Class 7">Class 7</option>
+          <option value="Class 8">Class 8</option>
+          <option value="Class 9">Class 9</option>
+          <option value="Class 10">Class 10</option>
+          <option value="Class 11">Class 11</option>
+          <option value="Class 12">Class 12</option>
+          <option value="Competitive">Competitive</option>
+        </select>
+
+        <select id="filterStatus" class="form-select" style="flex: 1; min-width: 150px;">
+          <option value="">All Status</option>
+          <option value="scheduled">Scheduled</option>
+          <option value="live">Live</option>
+          <option value="recorded">Recorded</option>
+        </select>
+
+        <button class="btn btn-gray" id="clearFilter">✕ Clear</button>
+      </div>
+    </div>
+
+    <!-- LIST -->
+    <div class="card">
+      <div class="card-heading">
+        <div class="heading-icon">📋</div>
+        <h2>All Classes</h2>
+        <span class="badge badge-blue" id="countBadge">0</span>
+      </div>
+
+      <div id="classList">
+        <div class="loading-box">Loading...</div>
+      </div>
+    </div>
+
+  </div>
+
+  <script src="/js/common.js"></script>
+  <script>
+    let classes = [];
+
+    // ==========================================
+    // LOAD
+    // ==========================================
+    async function loadClasses() {
+      const box = document.getElementById("classList");
+      try {
+        const cat = document.getElementById("filterCategory").value;
+        const stat = document.getElementById("filterStatus").value;
+
+        const r = await fetch("/api/classes/admin/all", { credentials: "include" });
+        const data = await r.json();
+
+        if (!data.success) throw new Error(data.message);
+
+        classes = data.data || [];
+
+        let filtered = classes;
+        if (cat) filtered = filtered.filter(c => c.category === cat);
+        if (stat) filtered = filtered.filter(c => c.status === stat);
+
+        document.getElementById("countBadge").textContent = filtered.length;
+        renderClasses(filtered);
+      } catch (e) {
+        box.innerHTML = '<div class="empty-text error">Failed: ' + e.message + '</div>';
+      }
+    }
+
+    // ==========================================
+    // RENDER
+    // ==========================================
+    function renderClasses(list) {
+      const box = document.getElementById("classList");
+
+      if (!list.length) {
+        box.innerHTML = '<div class="empty-text">Koi class nahi hai. "New Class" click karo.</div>';
+        return;
+      }
+
+      const statusColors = {
+        scheduled: "badge-yellow",
+        live: "badge-red",
+        recorded: "badge-green"
+      };
+
+      const statusIcons = {
+        scheduled: "📅",
+        live: "🔴",
+        recorded: "📹"
+      };
+
+      box.innerHTML = list.map(c => `
+        <div class="list-item">
+          <div style="flex: 1;">
+            <div class="list-item-title">
+              ${escapeHtml(c.title)}
+              <span class="badge ${statusColors[c.status] || "badge-gray"}" style="margin-left: 6px;">
+                ${statusIcons[c.status] || ""} ${c.status}
+              </span>
+              ${!c.visible ? '<span class="badge badge-gray" style="margin-left: 6px;">HIDDEN</span>' : ''}
+            </div>
+            <div class="list-item-sub">
+              <strong>${escapeHtml(c.category)}</strong> •
+              ${escapeHtml(c.examName)} •
+              ${escapeHtml(c.subject)}
+              ${c.topic ? " • " + escapeHtml(c.topic) : ""}
+            </div>
+            <div class="list-item-sub" style="margin-top: 4px;">
+              ${c.scheduledDate ? "📅 " + new Date(c.scheduledDate).toLocaleDateString("en-IN") : ""}
+              ${c.scheduledTime ? " • " + escapeHtml(c.scheduledTime) : ""}
+              ${c.liveUrl ? " • 🔴 Live ✓" : ""}
+              ${c.recordedUrl ? " • 📹 Recorded ✓" : ""}
+              ${c.supportingPdf ? " • 📄 PDF ✓" : ""}
+              ${c.thumbnail ? " • 🖼️ Thumb ✓" : ""}
+            </div>
+          </div>
+          <div style="display: flex; gap: 6px;">
+            <button class="btn btn-sm btn-blue" onclick="editClass('${c._id}')">✏️</button>
+            <button class="btn btn-sm btn-red" onclick="deleteClass('${c._id}')">🗑</button>
+          </div>
+        </div>
+      `).join("");
+    }
+
+    // ==========================================
+    // ADD NEW
+    // ==========================================
+    document.getElementById("addNewBtn").addEventListener("click", () => {
+      resetForm();
+      document.getElementById("formTitle").textContent = "Add New Class";
+      document.getElementById("formCard").style.display = "block";
+      document.getElementById("formCard").scrollIntoView({ behavior: "smooth" });
+    });
+
+    // ==========================================
+    // EDIT
+    // ==========================================
+    function editClass(id) {
+      const c = classes.find(x => x._id === id);
+      if (!c) return;
+
+      document.getElementById("classId").value = c._id;
+      document.getElementById("category").value = c.category || "Class 10";
+      document.getElementById("examName").value = c.examName || "";
+      document.getElementById("subject").value = c.subject || "";
+      document.getElementById("topic").value = c.topic || "";
+      document.getElementById("title").value = c.title || "";
+      document.getElementById("description").value = c.description || "";
+      document.getElementById("teacher").value = c.teacher || "";
+      document.getElementById("duration").value = c.duration || 60;
+      document.getElementById("scheduledDate").value = c.scheduledDate ? c.scheduledDate.split("T")[0] : "";
+      document.getElementById("scheduledTime").value = c.scheduledTime || "";
+      document.getElementById("liveUrl").value = c.liveUrl || "";
+      document.getElementById("recordedUrl").value = c.recordedUrl || "";
+      document.getElementById("supportingPdf").value = c.supportingPdf || "";
+      document.getElementById("status").value = c.status || "scheduled";
+      document.getElementById("visible").checked = c.visible !== false;
+
+      // Thumbnail
+      document.getElementById("thumbnail").value = c.thumbnail || "";
+      if (c.thumbnail) {
+        if (c.thumbnail.startsWith("http")) {
+          document.getElementById("thumbnailUrl").value = c.thumbnail;
+        } else {
+          document.getElementById("thumbnailUrl").value = "";
+        }
+        showThumbPreview(c.thumbnail);
+      } else {
+        document.getElementById("thumbnailUrl").value = "";
+        hideThumbPreview();
+      }
+
+      document.getElementById("formTitle").textContent = "Edit Class";
+      document.getElementById("formCard").style.display = "block";
+      document.getElementById("formCard").scrollIntoView({ behavior: "smooth" });
+    }
+
+    // ==========================================
+    // DELETE
+    // ==========================================
+    async function deleteClass(id) {
+      if (!confirm("Ye class delete karni hai?")) return;
+      try {
+        const r = await fetch("/api/classes/" + id, {
+          method: "DELETE",
+          credentials: "include"
+        });
+        const data = await r.json();
+        if (data.success) {
+          showAlert("Deleted", "success");
+          loadClasses();
+        }
+      } catch (e) {
+        showAlert("Delete failed", "error");
+      }
+    }
+
+    // ==========================================
+    // RESET
+    // ==========================================
+    function resetForm() {
+      document.getElementById("classForm").reset();
+      document.getElementById("classId").value = "";
+      document.getElementById("duration").value = 60;
+      document.getElementById("visible").checked = true;
+      document.getElementById("thumbnail").value = "";
+      document.getElementById("thumbnailUrl").value = "";
+      document.getElementById("thumbnailFile").value = "";
+      document.getElementById("uploadStatus").innerHTML = "";
+      hideThumbPreview();
+    }
+
+    document.getElementById("cancelBtn").addEventListener("click", () => {
+      document.getElementById("formCard").style.display = "none";
+      resetForm();
+    });
+
+    // ==========================================
+    // SUBMIT
+    // ==========================================
+    document.getElementById("classForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const id = document.getElementById("classId").value;
+
+      const payload = {
+        category: document.getElementById("category").value,
+        examName: document.getElementById("examName").value.trim(),
+        subject: document.getElementById("subject").value.trim(),
+        topic: document.getElementById("topic").value.trim(),
+        title: document.getElementById("title").value.trim(),
+        description: document.getElementById("description").value.trim(),
+        teacher: document.getElementById("teacher").value.trim(),
+        duration: Number(document.getElementById("duration").value) || 60,
+        scheduledDate: document.getElementById("scheduledDate").value || undefined,
+        scheduledTime: document.getElementById("scheduledTime").value.trim(),
+        liveUrl: document.getElementById("liveUrl").value.trim(),
+        recordedUrl: document.getElementById("recordedUrl").value.trim(),
+        supportingPdf: document.getElementById("supportingPdf").value.trim(),
+        thumbnail: document.getElementById("thumbnail").value.trim(),
+        status: document.getElementById("status").value,
+        visible: document.getElementById("visible").checked
+      };
+
+      const btn = document.getElementById("submitBtn");
+      const orig = btn.innerHTML;
+      btn.innerHTML = '<span class="spinner"></span> Saving...';
+      btn.disabled = true;
+
+      try {
+        const url = id ? "/api/classes/" + id : "/api/classes";
+        const method = id ? "PUT" : "POST";
+
+        const r = await fetch(url, {
+          method,
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify(payload)
+        });
+        const data = await r.json();
+
+        if (data.success) {
+          showAlert(id ? "Updated!" : "Created!", "success");
+          document.getElementById("formCard").style.display = "none";
+          resetForm();
+          loadClasses();
+        } else {
+          showAlert(data.message || "Failed", "error");
+        }
+      } catch (e) {
+        showAlert("Error: " + e.message, "error");
+      } finally {
+        btn.innerHTML = orig;
+        btn.disabled = false;
+      }
+    });
+
+    // ==========================================
+    // FILTERS
+    // ==========================================
+    document.getElementById("filterCategory").addEventListener("change", loadClasses);
+    document.getElementById("filterStatus").addEventListener("change", loadClasses);
+    document.getElementById("clearFilter").addEventListener("click", () => {
+      document.getElementById("filterCategory").value = "";
+      document.getElementById("filterStatus").value = "";
+      loadClasses();
+    });
+
+    // ==========================================
+    // THUMBNAIL UPLOAD
+    // ==========================================
+    let thumbMode = "upload";
+
+    document.querySelectorAll(".thumb-tab").forEach(tab => {
+      tab.addEventListener("click", () => {
+        document.querySelectorAll(".thumb-tab").forEach(t => {
+          t.classList.remove("active", "btn-blue");
+          t.classList.add("btn-outline");
+        });
+        tab.classList.remove("btn-outline");
+        tab.classList.add("active", "btn-blue");
+
+        thumbMode = tab.dataset.mode;
+
+        if (thumbMode === "upload") {
+          document.getElementById("thumbUploadMode").style.display = "block";
+          document.getElementById("thumbUrlMode").style.display = "none";
+        } else {
+          document.getElementById("thumbUploadMode").style.display = "none";
+          document.getElementById("thumbUrlMode").style.display = "block";
+        }
+      });
+    });
+
+    document.getElementById("thumbnailFile").addEventListener("change", async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const statusEl = document.getElementById("uploadStatus");
+
+      if (file.size > 2 * 1024 * 1024) {
+        statusEl.innerHTML = '<span style="color: var(--red);">❌ File 2MB se badi hai</span>';
+        return;
+      }
+
+      statusEl.innerHTML = '<span class="spinner spinner-dark"></span> Uploading...';
+
+      const formData = new FormData();
+      formData.append("thumbnail", file);
+
+      try {
+        const r = await fetch("/api/classes/upload-thumbnail", {
+          method: "POST",
+          credentials: "include",
+          body: formData
+        });
+        const data = await r.json();
+
+        if (data.success) {
+          statusEl.innerHTML = '<span style="color: var(--green);">✅ Uploaded!</span>';
+          document.getElementById("thumbnail").value = data.url;
+          showThumbPreview(data.url);
+        } else {
+          statusEl.innerHTML = '<span style="color: var(--red);">❌ ' + escapeHtml(data.message) + '</span>';
+        }
+      } catch (err) {
+        statusEl.innerHTML = '<span style="color: var(--red);">❌ Upload failed</span>';
+      }
+    });
+
+    document.getElementById("thumbnailUrl").addEventListener("input", (e) => {
+      const url = e.target.value.trim();
+      document.getElementById("thumbnail").value = url;
+      if (url) showThumbPreview(url);
+      else hideThumbPreview();
+    });
+
+    function showThumbPreview(url) {
+      document.getElementById("thumbPreview").style.display = "block";
+      document.getElementById("thumbPreviewImg").src = url;
+    }
+
+    function hideThumbPreview() {
+      document.getElementById("thumbPreview").style.display = "none";
+      document.getElementById("thumbPreviewImg").src = "";
+    }
+
+    document.getElementById("removeThumbBtn").addEventListener("click", () => {
+      document.getElementById("thumbnail").value = "";
+      document.getElementById("thumbnailFile").value = "";
+      document.getElementById("thumbnailUrl").value = "";
+      document.getElementById("uploadStatus").innerHTML = "";
+      hideThumbPreview();
+    });
+
+    // ==========================================
+    // INIT
+    // ==========================================
+    (async function() {
+      const user = await requireLogin();
+      if (!user) return;
+      loadClasses();
+    })();
+  </script>
+
+</body>
+</html>

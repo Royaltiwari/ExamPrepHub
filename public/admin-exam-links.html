@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Exam Links Manager - ExamPrepHub</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+  <header class="header">
+    <div class="header-inner">
+      <a href="/admin.html" class="logo">⚙️ Exam Links Manager</a>
+      <div class="header-actions">
+        <a href="/admin.html" class="btn-header">← Admin Home</a>
+        <button class="btn-header" id="logoutBtn">Logout</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="layout-full" style="padding: 20px;">
+
+    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 20px;">
+      <div>
+        <h1 style="font-size: 24px;">🔗 Exam Links Manager</h1>
+        <p class="text-muted">Har exam ke liye PDF, Test, Demo links manage karo.</p>
+      </div>
+      <button class="btn btn-blue btn-lg" id="addNewBtn">➕ Add New Exam</button>
+    </div>
+
+    <!-- FORM -->
+    <div class="card" id="formCard" style="display:none;">
+      <div class="card-heading">
+        <div class="heading-icon">📝</div>
+        <h2 id="formTitle">Add New Exam</h2>
+      </div>
+
+      <form id="examForm">
+        <input type="hidden" id="examId" />
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Exam Name *</label>
+            <input type="text" id="examName" class="form-input" placeholder="SSC CGL" required />
+          </div>
+
+          <div class="form-group">
+            <label>Category *</label>
+            <select id="category" class="form-select" required>
+              <option value="SSC">SSC</option>
+              <option value="Railway">Railway</option>
+              <option value="Defence">Defence</option>
+              <option value="Police">Police</option>
+              <option value="UPSSSC">UPSSSC</option>
+              <option value="Banking">Banking</option>
+              <option value="Teaching">Teaching</option>
+              <option value="State">State</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Icon (Emoji)</label>
+            <input type="text" id="icon" class="form-input" value="🏆" maxlength="4" />
+          </div>
+
+          <div class="form-group">
+            <label>Display Order (chhota = pehle)</label>
+            <input type="number" id="order" class="form-input" value="0" />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Short Description</label>
+          <input type="text" id="description" class="form-input" placeholder="CGL, CHSL, MTS..." />
+        </div>
+
+        <div class="form-group">
+          <label>📄 PDF Link (Google Drive ya direct PDF)</label>
+          <input type="url" id="pdfUrl" class="form-input" placeholder="https://drive.google.com/..." />
+        </div>
+
+        <div class="form-group">
+          <label>📝 Test Link (ya khaali chhodo)</label>
+          <input type="text" id="testUrl" class="form-input" placeholder="/exam-test.html?exam=SSC CGL" />
+        </div>
+
+        <div class="form-group">
+          <label>🎬 Demo Video Link (YouTube)</label>
+          <input type="url" id="demoUrl" class="form-input" placeholder="https://youtube.com/watch?v=..." />
+        </div>
+
+        <div class="form-group">
+          <label class="checkbox-wrapper">
+            <input type="checkbox" id="visible" class="checkbox" checked />
+            <span>Visible (public pe dikhega)</span>
+          </label>
+        </div>
+
+        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+          <button type="submit" class="btn btn-blue" id="submitBtn">💾 Save</button>
+          <button type="button" class="btn btn-gray" id="cancelBtn">Cancel</button>
+        </div>
+      </form>
+    </div>
+
+    <!-- LIST -->
+    <div class="card">
+      <div class="card-heading">
+        <div class="heading-icon">📋</div>
+        <h2>All Exams</h2>
+        <span class="badge badge-blue" id="countBadge">0</span>
+      </div>
+
+      <div id="examList">
+        <div class="loading-box">Loading...</div>
+      </div>
+    </div>
+
+  </div>
+
+  <script src="/js/common.js"></script>
+  <script>
+    let exams = [];
+
+    // ==========================================
+    // LOAD EXAMS
+    // ==========================================
+    async function loadExams() {
+      const box = document.getElementById("examList");
+      try {
+        const r = await fetch("/api/exam-links/admin/all", { credentials: "include" });
+        const data = await r.json();
+        if (!data.success) throw new Error(data.message);
+        exams = data.data || [];
+        document.getElementById("countBadge").textContent = exams.length;
+        renderExams();
+      } catch (e) {
+        box.innerHTML = '<div class="empty-text error">Failed to load: ' + e.message + '</div>';
+      }
+    }
+
+    // ==========================================
+    // RENDER
+    // ==========================================
+    function renderExams() {
+      const box = document.getElementById("examList");
+
+      if (!exams.length) {
+        box.innerHTML = '<div class="empty-text">Abhi koi exam add nahi kiya. "Add New Exam" click karo.</div>';
+        return;
+      }
+
+      box.innerHTML = exams.map(e => `
+        <div class="list-item">
+          <div style="flex: 1;">
+            <div class="list-item-title">
+              ${escapeHtml(e.icon || "🏆")} ${escapeHtml(e.examName)}
+              <span class="badge badge-purple" style="margin-left: 6px;">${escapeHtml(e.category)}</span>
+              ${!e.visible ? '<span class="badge badge-red" style="margin-left: 6px;">HIDDEN</span>' : ''}
+            </div>
+            <div class="list-item-sub">
+              ${e.pdfUrl ? '📄 PDF ✓ ' : ''}
+              ${e.testUrl ? '📝 Test ✓ ' : ''}
+              ${e.demoUrl ? '🎬 Demo ✓' : ''}
+              ${e.description ? '• ' + escapeHtml(e.description) : ''}
+            </div>
+          </div>
+          <div style="display: flex; gap: 6px;">
+            <button class="btn btn-sm btn-blue" onclick="editExam('${e._id}')">✏️ Edit</button>
+            <button class="btn btn-sm btn-red" onclick="deleteExam('${e._id}')">🗑</button>
+          </div>
+        </div>
+      `).join("");
+    }
+
+    // ==========================================
+    // ADD NEW
+    // ==========================================
+    document.getElementById("addNewBtn").addEventListener("click", () => {
+      resetForm();
+      document.getElementById("formTitle").textContent = "Add New Exam";
+      document.getElementById("formCard").style.display = "block";
+      document.getElementById("formCard").scrollIntoView({ behavior: "smooth" });
+    });
+
+    // ==========================================
+    // EDIT
+    // ==========================================
+    function editExam(id) {
+      const e = exams.find(x => x._id === id);
+      if (!e) return;
+
+      document.getElementById("examId").value = e._id;
+      document.getElementById("examName").value = e.examName || "";
+      document.getElementById("category").value = e.category || "SSC";
+      document.getElementById("icon").value = e.icon || "🏆";
+      document.getElementById("order").value = e.order || 0;
+      document.getElementById("description").value = e.description || "";
+      document.getElementById("pdfUrl").value = e.pdfUrl || "";
+      document.getElementById("testUrl").value = e.testUrl || "";
+      document.getElementById("demoUrl").value = e.demoUrl || "";
+      document.getElementById("visible").checked = e.visible !== false;
+
+      document.getElementById("formTitle").textContent = "Edit Exam";
+      document.getElementById("formCard").style.display = "block";
+      document.getElementById("formCard").scrollIntoView({ behavior: "smooth" });
+    }
+
+    // ==========================================
+    // DELETE
+    // ==========================================
+    async function deleteExam(id) {
+      if (!confirm("Ye exam delete karna hai?")) return;
+      try {
+        const r = await fetch("/api/exam-links/" + id, {
+          method: "DELETE",
+          credentials: "include"
+        });
+        const data = await r.json();
+        if (data.success) {
+          showAlert("Deleted", "success");
+          loadExams();
+        }
+      } catch (e) {
+        showAlert("Delete failed", "error");
+      }
+    }
+
+    // ==========================================
+    // RESET FORM
+    // ==========================================
+    function resetForm() {
+      document.getElementById("examForm").reset();
+      document.getElementById("examId").value = "";
+      document.getElementById("icon").value = "🏆";
+      document.getElementById("order").value = 0;
+      document.getElementById("visible").checked = true;
+    }
+
+    document.getElementById("cancelBtn").addEventListener("click", () => {
+      document.getElementById("formCard").style.display = "none";
+      resetForm();
+    });
+
+    // ==========================================
+    // SUBMIT
+    // ==========================================
+    document.getElementById("examForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const id = document.getElementById("examId").value;
+
+      const payload = {
+        examName: document.getElementById("examName").value.trim(),
+        category: document.getElementById("category").value,
+        icon: document.getElementById("icon").value.trim() || "🏆",
+        order: Number(document.getElementById("order").value) || 0,
+        description: document.getElementById("description").value.trim(),
+        pdfUrl: document.getElementById("pdfUrl").value.trim(),
+        testUrl: document.getElementById("testUrl").value.trim(),
+        demoUrl: document.getElementById("demoUrl").value.trim(),
+        visible: document.getElementById("visible").checked
+      };
+
+      const btn = document.getElementById("submitBtn");
+      const orig = btn.innerHTML;
+      btn.innerHTML = '<span class="spinner"></span> Saving...';
+      btn.disabled = true;
+
+      try {
+        const url = id ? "/api/exam-links/" + id : "/api/exam-links";
+        const method = id ? "PUT" : "POST";
+
+        const r = await fetch(url, {
+          method,
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify(payload)
+        });
+        const data = await r.json();
+
+        if (data.success) {
+          showAlert(id ? "Updated!" : "Created!", "success");
+          document.getElementById("formCard").style.display = "none";
+          resetForm();
+          loadExams();
+        } else {
+          showAlert(data.message || "Failed", "error");
+        }
+      } catch (e) {
+        showAlert("Error: " + e.message, "error");
+      } finally {
+        btn.innerHTML = orig;
+        btn.disabled = false;
+      }
+    });
+
+    // ==========================================
+    // INIT
+    // ==========================================
+    (async function() {
+      const user = await requireLogin();
+      if (!user) return;
+      loadExams();
+    })();
+  </script>
+
+</body>
+</html>

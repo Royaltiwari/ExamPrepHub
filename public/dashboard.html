@@ -1,935 +1,773 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
-  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5549920292609346" crossorigin="anonymous"></script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
   <title>Dashboard - ExamPrepHub</title>
-
+  <link rel="stylesheet" href="/css/style.css">
   <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: Arial, sans-serif;
-    }
-
-    body {
-      min-height: 100vh;
-      background: #f1f5f9;
-      color: #1e293b;
-    }
-
-    /* =========================
-       HEADER
-    ========================= */
-
-    header {
-      background: #2563eb;
-      color: white;
-      padding: 16px 20px;
-      box-shadow: 0 3px 12px rgba(0, 0, 0, 0.12);
-    }
-
-    .header-inner {
-      max-width: 1100px;
-      margin: auto;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 15px;
-    }
-
-    .logo {
-      font-size: 22px;
-      font-weight: 800;
-    }
-
-    .header-actions {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    /* =========================
-       LOGOUT BUTTON
-    ========================= */
-
-    .logout-btn {
-      border: 1px solid rgba(255, 255, 255, 0.7);
-      background: transparent;
-      color: white;
-      padding: 9px 15px;
-      border-radius: 8px;
-      cursor: pointer;
-      font-weight: 600;
-    }
-
-    .logout-btn:hover {
-      background: white;
-      color: #2563eb;
-    }
-
-    /* =========================
-       ADMIN BUTTON
-    ========================= */
-
-    .admin-btn {
-      display: none;
-      border: none;
-      background: #dc2626;
-      color: white;
-      padding: 9px 15px;
-      border-radius: 8px;
-      cursor: pointer;
-      font-weight: 700;
-      text-decoration: none;
-      white-space: nowrap;
-    }
-
-    .admin-btn:hover {
-      background: #b91c1c;
-    }
-
-    /* =========================
-       MAIN
-    ========================= */
-
-    main {
-      max-width: 1100px;
-      margin: auto;
-      padding: 25px 20px 50px;
-    }
-
-    /* =========================
-       WELCOME
-    ========================= */
-
-    .welcome-card {
-      background: white;
-      padding: 25px;
-      border-radius: 16px;
-      box-shadow: 0 5px 20px rgba(0, 0, 0, 0.06);
-      margin-bottom: 25px;
-    }
-
-    .welcome-card h1 {
-      font-size: 26px;
-      margin-bottom: 8px;
-    }
-
-    .welcome-card p {
-      color: #64748b;
-    }
-
-    /* =========================
-       STATS
-    ========================= */
-
-    .stats {
+    /* Dashboard-specific styles */
+    .dash-layout {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 18px;
-      margin-bottom: 30px;
+      grid-template-columns: 240px 1fr;
+      min-height: calc(100vh - 70px);
     }
 
-    .stat-card {
-      background: white;
-      padding: 22px;
-      border-radius: 14px;
+    /* SIDEBAR */
+    .dash-sidebar {
+      background: var(--card-bg);
+      border-right: 1px solid var(--border);
+      padding: 20px 12px;
+      position: sticky;
+      top: 70px;
+      height: calc(100vh - 70px);
+      overflow-y: auto;
+    }
+
+    .dash-sidebar .brand {
       text-align: center;
-      box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+      padding: 10px 0 20px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 15px;
     }
 
-    .stat-icon {
+    .dash-sidebar .brand-logo {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background: var(--gradient-blue);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
       font-size: 28px;
       margin-bottom: 8px;
     }
 
-    .stat-number {
-      font-size: 25px;
-      font-weight: 800;
-      color: #2563eb;
+    .dash-sidebar .brand-name {
+      font-size: 16px;
+      font-weight: 900;
+      color: var(--text);
+      display: block;
     }
 
-    .stat-title {
-      color: #64748b;
+    .dash-sidebar .brand-sub {
+      font-size: 10px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .side-link {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 11px 14px;
+      border-radius: 10px;
+      color: var(--text-light);
+      font-weight: 600;
       font-size: 14px;
-      margin-top: 5px;
+      margin-bottom: 4px;
+      transition: all 0.2s;
+      text-decoration: none;
     }
 
-    /* =========================
-       TEST SECTION
-    ========================= */
-
-    .section-title {
-      font-size: 22px;
-      margin-bottom: 18px;
+    .side-link:hover {
+      background: var(--card-hover);
+      color: var(--primary);
+      transform: translateX(3px);
     }
 
-    #testsContainer {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 20px;
+    .side-link.active {
+      background: var(--gradient-blue);
+      color: white;
+      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
     }
 
-    .test-card {
+    .side-link .icon {
+      font-size: 18px;
+      width: 22px;
+      text-align: center;
+    }
+
+    /* MAIN CONTENT */
+    .dash-main {
+      padding: 25px 30px;
+      overflow-x: hidden;
+    }
+
+    .dash-header {
+      margin-bottom: 25px;
+    }
+
+    .dash-header .greet {
+      font-size: 14px;
+      color: var(--muted);
+      margin-bottom: 4px;
+    }
+
+    .dash-header h1 {
+      font-size: 26px;
+      font-weight: 900;
+      color: var(--text);
+    }
+
+    /* HERO BANNER */
+    .hero-banner {
+      background: linear-gradient(135deg, #1e1b4b, #312e81, #4c1d95);
+      border-radius: 20px;
+      padding: 40px 30px;
+      margin-bottom: 25px;
+      position: relative;
+      overflow: hidden;
+      color: white;
+    }
+
+    .hero-banner::before {
+      content: "";
+      position: absolute;
+      width: 300px;
+      height: 300px;
+      background: rgba(255,255,255,0.06);
+      border-radius: 50%;
+      top: -100px;
+      right: -100px;
+    }
+
+    .hero-banner h2 {
+      font-size: 28px;
+      margin-bottom: 8px;
+      position: relative;
+    }
+
+    .hero-banner p {
+      color: #c7d2fe;
+      font-size: 15px;
+      position: relative;
+      max-width: 500px;
+    }
+
+    .hero-banner .cta {
+      margin-top: 18px;
+      display: inline-block;
       background: white;
-      padding: 20px;
-      border-radius: 14px;
-      box-shadow: 0 5px 20px rgba(0, 0, 0, 0.06);
+      color: #312e81;
+      padding: 12px 24px;
+      border-radius: 10px;
+      font-weight: 800;
+      text-decoration: none;
+      position: relative;
       transition: transform 0.2s;
     }
 
-    .test-card:hover {
+    .hero-banner .cta:hover {
       transform: translateY(-3px);
     }
 
-    .test-card h3 {
-      font-size: 18px;
-      margin-bottom: 10px;
+    /* STATS CARDS */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 15px;
+      margin-bottom: 25px;
     }
 
-    .test-exam {
-      display: inline-block;
-      background: #dbeafe;
-      color: #1d4ed8;
-      padding: 5px 9px;
-      border-radius: 6px;
+    .stat-box {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 18px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      transition: all 0.2s;
+    }
+
+    .stat-box:hover {
+      transform: translateY(-3px);
+      border-color: var(--primary);
+    }
+
+    .stat-box .icon-box {
+      width: 46px;
+      height: 46px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      flex-shrink: 0;
+    }
+
+    .stat-box.blue .icon-box { background: #1e3a8a; color: #93c5fd; }
+    .stat-box.green .icon-box { background: #14532d; color: #86efac; }
+    .stat-box.orange .icon-box { background: #78350f; color: #fcd34d; }
+    .stat-box.purple .icon-box { background: #4c1d95; color: #c4b5fd; }
+
+    .stat-box .num {
+      font-size: 24px;
+      font-weight: 900;
+      color: var(--text);
+      line-height: 1;
+    }
+
+    .stat-box .label {
       font-size: 12px;
-      font-weight: 700;
-      margin-bottom: 12px;
+      color: var(--muted);
+      margin-top: 4px;
     }
 
-    .test-info {
-      color: #64748b;
-      font-size: 14px;
-      line-height: 1.8;
+    /* SECTION */
+    .dash-section {
+      margin-bottom: 30px;
+    }
+
+    .dash-section-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
       margin-bottom: 15px;
     }
 
-    .start-btn {
-      display: block;
-      width: 100%;
-      padding: 11px;
-      border: none;
-      border-radius: 8px;
-      background: #2563eb;
-      color: white;
+    .dash-section-head h2 {
+      font-size: 18px;
+      font-weight: 900;
+      color: var(--text);
+    }
+
+    .dash-section-head a {
+      font-size: 13px;
+      color: var(--primary);
       font-weight: 700;
+    }
+
+    /* COURSE CARDS */
+    .course-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+
+    .course-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      overflow: hidden;
       cursor: pointer;
+      transition: all 0.25s;
     }
 
-    .start-btn:hover {
-      background: #1d4ed8;
+    .course-card:hover {
+      transform: translateY(-5px);
+      border-color: var(--primary);
+      box-shadow: var(--shadow-md);
     }
 
-    /* =========================
-       EMPTY / ERROR
-    ========================= */
+    .course-thumb {
+      height: 130px;
+      background-size: cover;
+      background-position: center;
+      background-color: var(--bg-alt);
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 42px;
+    }
 
-    .message-box {
+    .course-body {
+      padding: 14px;
+    }
+
+    .course-body h3 {
+      font-size: 15px;
+      font-weight: 800;
+      color: var(--text);
+      margin-bottom: 6px;
+    }
+
+    .course-body p {
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 10px;
+    }
+
+    /* LIVE PLAYER */
+    .live-box {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      overflow: hidden;
+    }
+
+    .live-header {
+      padding: 12px 18px;
+      background: linear-gradient(90deg, #dc2626, #b91c1c);
+      color: white;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .live-header .status {
+      font-weight: 900;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .live-header .dot {
+      width: 10px;
+      height: 10px;
       background: white;
-      padding: 25px;
-      border-radius: 12px;
+      border-radius: 50%;
+      animation: pulse 1.5s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+
+    .live-player {
+      position: relative;
+      padding-bottom: 45%;
+      background: black;
+    }
+
+    .live-player iframe {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      border: 0;
+    }
+
+    .live-info {
+      padding: 15px 18px;
+    }
+
+    .live-info h3 {
+      font-size: 16px;
+      margin-bottom: 6px;
+      color: var(--text);
+    }
+
+    .live-info p {
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    /* EMPTY */
+    .empty-box {
+      padding: 40px 20px;
       text-align: center;
-      color: #64748b;
-      grid-column: 1 / -1;
+      color: var(--muted);
+      background: var(--card-bg);
+      border: 1px dashed var(--border);
+      border-radius: 14px;
+      font-size: 14px;
     }
 
-    .error {
-      color: #b91c1c;
+    /* RESPONSIVE */
+    @media (max-width: 1000px) {
+      .stats-grid { grid-template-columns: repeat(2, 1fr); }
+      .course-grid { grid-template-columns: repeat(2, 1fr); }
     }
 
-    /* =========================
-       RESPONSIVE
-    ========================= */
-
-    @media (max-width: 800px) {
-
-      #testsContainer {
-        grid-template-columns: repeat(2, 1fr);
-      }
-
-    }
-
-    @media (max-width: 600px) {
-
-      .header-inner {
-        align-items: center;
-      }
-
-      .header-actions {
+    @media (max-width: 768px) {
+      .dash-layout { grid-template-columns: 1fr; }
+      .dash-sidebar {
+        position: static;
+        height: auto;
+        display: flex;
+        overflow-x: auto;
+        padding: 10px;
         gap: 6px;
       }
-
-      .logo {
-        font-size: 18px;
-      }
-
-      .admin-btn,
-      .logout-btn {
-        padding: 8px 10px;
-        font-size: 12px;
-      }
-
-      .stats {
-        grid-template-columns: 1fr;
-      }
-
-      #testsContainer {
-        grid-template-columns: 1fr;
-      }
-
-      .welcome-card h1 {
-        font-size: 22px;
-      }
-
+      .dash-sidebar .brand { display: none; }
+      .side-link { white-space: nowrap; margin-bottom: 0; }
+      .dash-main { padding: 18px; }
+      .hero-banner { padding: 25px 20px; }
+      .hero-banner h2 { font-size: 22px; }
     }
 
-    @media (max-width: 430px) {
-
-      .header-inner {
-        flex-direction: column;
-        align-items: stretch;
-      }
-
-      .header-actions {
-        justify-content: flex-end;
-      }
-
+    @media (max-width: 500px) {
+      .stats-grid { grid-template-columns: 1fr; }
+      .course-grid { grid-template-columns: 1fr; }
     }
-
   </style>
 </head>
-
 <body>
 
-  <!-- =========================
-       HEADER
-  ========================== -->
-
-  <header>
-
+  <!-- HEADER -->
+  <header class="header">
     <div class="header-inner">
-
-      <div class="logo">
-        🏆 ExamPrepHub
-      </div>
-
+      <a href="/dashboard.html" class="logo">🏆 ExamPrepHub</a>
       <div class="header-actions">
-
-        <!-- ADMIN BUTTON
-             केवल admin को दिखाई देगा -->
-        <a
-          href="/admin.html"
-          class="admin-btn"
-          id="adminBtn"
-        >
-          👑 Admin Panel
-        </a>
-
-        <!-- LOGOUT -->
-        <button
-          class="logout-btn"
-          id="logoutBtn"
-        >
-          Logout
-        </button>
-
+        <a href="/admin.html" class="btn-header" id="adminBtn" style="display:none;">👑 Admin</a>
+        <span class="btn-header" id="userGreet" style="cursor:default;">👤 Student</span>
+        <button class="btn-header" id="logoutBtn">Logout</button>
       </div>
-
     </div>
-
   </header>
 
+  <!-- DASHBOARD LAYOUT -->
+  <div class="dash-layout">
 
-  <!-- =========================
-       MAIN
-  ========================== -->
-
-  <main>
-
-    <!-- WELCOME -->
-
-    <section class="welcome-card">
-
-      <h1>
-        Welcome,
-        <span id="userName">Student</span>
-        👋
-      </h1>
-
-      <p>
-        Prepare better with free mock tests and practice exams.
-      </p>
-
-    </section>
-
-
-    <!-- =========================
-         STATS
-    ========================== -->
-
-    <section class="stats">
-
-      <!-- AVAILABLE TESTS -->
-
-      <div class="stat-card">
-
-        <div class="stat-icon">
-          📝
-        </div>
-
-        <div
-          class="stat-number"
-          id="testCount"
-        >
-          0
-        </div>
-
-        <div class="stat-title">
-          Available Tests
-        </div>
-
+    <!-- SIDEBAR -->
+    <aside class="dash-sidebar">
+      <div class="brand">
+        <div class="brand-logo">🏆</div>
+        <span class="brand-name">ExamPrepHub</span>
+        <span class="brand-sub">Learn • Practice • Win</span>
       </div>
 
+      <a href="/dashboard.html" class="side-link active">
+        <span class="icon">📊</span> Dashboard
+      </a>
+      <a href="/home-class.html" class="side-link">
+        <span class="icon">🏠</span> Home Class
+      </a>
+      <a href="/exam-test.html" class="side-link">
+        <span class="icon">📝</span> Test Series
+      </a>
+      <a href="/home-class.html" class="side-link">
+        <span class="icon">📺</span> Live Classes
+      </a>
+      <a href="/home-class.html" class="side-link">
+        <span class="icon">📚</span> Study Material
+      </a>
+      <a href="/results.html" class="side-link">
+        <span class="icon">📈</span> My Results
+      </a>
+    </aside>
 
-      <!-- RESULTS -->
+    <!-- MAIN -->
+    <main class="dash-main">
 
-      <div class="stat-card">
-
-        <div class="stat-icon">
-          📊
-        </div>
-
-        <div
-          class="stat-number"
-          id="resultCount"
-        >
-          0
-        </div>
-
-        <div class="stat-title">
-          My Results
-        </div>
-
+      <!-- HEADER -->
+      <div class="dash-header">
+        <div class="greet">Hello <span id="userName">Student</span>, Welcome Back!</div>
+        <h1>Your Dashboard Today</h1>
       </div>
 
-
-      <!-- PLATFORM -->
-
-      <div class="stat-card">
-
-        <div class="stat-icon">
-          🎯
-        </div>
-
-        <div class="stat-number">
-          Free
-        </div>
-
-        <div class="stat-title">
-          Learning Platform
-        </div>
-
+      <!-- HERO BANNER -->
+      <div class="hero-banner">
+        <h2>🎯 Free Mock Tests & Study Material</h2>
+        <p>SSC, Railway, Defence, Police, UPSSSC — sabhi exams ke liye taiyari karo. Live classes, notes, aur tests — sab ek jagah!</p>
+        <a href="/home-class.html" class="cta">🚀 Start Learning →</a>
       </div>
 
-    </section>
-
-
-    <!-- =========================
-         TESTS
-    ========================== -->
-
-    <section>
-
-      <h2 class="section-title">
-        Available Mock Tests
-      </h2>
-
-      <div id="testsContainer">
-
-        <div class="message-box">
-          Loading tests...
+      <!-- STATS -->
+      <div class="stats-grid">
+        <div class="stat-box blue">
+          <div class="icon-box">📝</div>
+          <div>
+            <div class="num" id="testCount">0</div>
+            <div class="label">Available Tests</div>
+          </div>
         </div>
 
+        <div class="stat-box green">
+          <div class="icon-box">📚</div>
+          <div>
+            <div class="num" id="notesCount">0</div>
+            <div class="label">PDF Notes</div>
+          </div>
+        </div>
+
+        <div class="stat-box orange">
+          <div class="icon-box">🔴</div>
+          <div>
+            <div class="num" id="liveCount">0</div>
+            <div class="label">Live Classes</div>
+          </div>
+        </div>
+
+        <div class="stat-box purple">
+          <div class="icon-box">📈</div>
+          <div>
+            <div class="num" id="resultCount">0</div>
+            <div class="label">My Results</div>
+          </div>
+        </div>
       </div>
 
-    </section>
+      <!-- LIVE CLASSES -->
+      <div class="dash-section">
+        <div class="dash-section-head">
+          <h2>📺 Live Classes</h2>
+          <a href="/home-class.html">View All →</a>
+        </div>
 
-  </main>
+        <div id="liveBox">
+          <div class="empty-box">Abhi koi live class nahi chal rahi.</div>
+        </div>
+      </div>
 
+      <!-- MY COURSES / EXAM LIBRARY -->
+      <div class="dash-section">
+        <div class="dash-section-head">
+          <h2>📚 Exam Library</h2>
+          <a href="/home-class.html">View All →</a>
+        </div>
 
-  <!-- =========================
-       JAVASCRIPT
-  ========================== -->
+        <div class="course-grid" id="examGrid">
+          <div class="empty-box">Loading exams...</div>
+        </div>
+      </div>
+
+      <!-- RECENT CLASSES -->
+      <div class="dash-section">
+        <div class="dash-section-head">
+          <h2>🎓 Recent Classes</h2>
+          <a href="/home-class.html">View All →</a>
+        </div>
+
+        <div class="course-grid" id="recentClasses">
+          <div class="empty-box">Loading classes...</div>
+        </div>
+      </div>
+
+    </main>
+
+  </div>
+
+  <!-- COMMON JS -->
+  <script src="/js/common.js"></script>
 
   <script>
-
-    // =====================================
-    // ELEMENTS
-    // =====================================
-
-    const userName =
-      document.getElementById("userName");
-
-    const testCount =
-      document.getElementById("testCount");
-
-    const resultCount =
-      document.getElementById("resultCount");
-
-    const testsContainer =
-      document.getElementById("testsContainer");
-
-    const logoutBtn =
-      document.getElementById("logoutBtn");
-
-    const adminBtn =
-      document.getElementById("adminBtn");
-
-
-    // =====================================
-    // LOAD CURRENT USER
-    // =====================================
-
+    // ==========================================
+    // LOAD USER
+    // ==========================================
     async function loadUser() {
-
       try {
-
-        const response = await fetch(
-          "/api/auth/me",
-          {
-            credentials: "include"
-          }
-        );
-
+        const response = await fetch("/api/auth/me", { credentials: "include" });
         const data = await response.json();
 
-        console.log("Current User:", data);
-
-
-        // ---------------------------------
-        // LOGIN CHECK
-        // ---------------------------------
-
-        if (
-          !response.ok ||
-          !data.success ||
-          !data.user
-        ) {
-
-          window.location.href =
-            "/login.html";
-
+        if (!response.ok || !data.success || !data.user) {
+          window.location.href = "/login.html";
           return false;
-
         }
 
+        const name = data.user.name || "Student";
+        document.getElementById("userName").textContent = name;
+        document.getElementById("userGreet").textContent = "👤 " + name;
 
-        // ---------------------------------
-        // USER NAME
-        // ---------------------------------
-
-        userName.textContent =
-          data.user.name || "Student";
-
-
-        // ---------------------------------
-        // ADMIN CHECK
-        // ---------------------------------
-
-        if (
-          String(data.user.role || "")
-            .trim()
-            .toLowerCase() === "admin"
-        ) {
-
-          adminBtn.style.display =
-            "inline-block";
-
-        } else {
-
-          adminBtn.style.display =
-            "none";
-
+        if (String(data.user.role || "").trim().toLowerCase() === "admin") {
+          document.getElementById("adminBtn").style.display = "inline-flex";
         }
-
 
         return true;
-
       } catch (error) {
-
-        console.error(
-          "User Error:",
-          error
-        );
-
-        window.location.href =
-          "/login.html";
-
+        window.location.href = "/login.html";
         return false;
-
       }
-
     }
 
-
-    // =====================================
-    // LOAD TESTS
-    // =====================================
-
+    // ==========================================
+    // LOAD TESTS COUNT
+    // ==========================================
     async function loadTests() {
-
       try {
+        const r = await fetch("/api/tests", { credentials: "include" });
+        const data = await r.json();
+        const count = (data.tests || []).length;
+        document.getElementById("testCount").textContent = count;
+      } catch (e) {
+        document.getElementById("testCount").textContent = "0";
+      }
+    }
 
-        const response = await fetch(
-          "/api/tests",
-          {
-            credentials: "include"
-          }
-        );
+    // ==========================================
+    // LOAD RESULTS COUNT
+    // ==========================================
+    async function loadResults() {
+      try {
+        const r = await fetch("/api/results", { credentials: "include" });
+        const data = await r.json();
+        document.getElementById("resultCount").textContent = (data.results || []).length;
+      } catch (e) {
+        document.getElementById("resultCount").textContent = "0";
+      }
+    }
 
-        const data =
-          await response.json();
+    // ==========================================
+    // LOAD NOTES COUNT
+    // ==========================================
+    async function loadNotes() {
+      try {
+        const r = await fetch("/api/notes", { credentials: "include" });
+        const data = await r.json();
+        document.getElementById("notesCount").textContent = (data.data || []).length;
+      } catch (e) {
+        document.getElementById("notesCount").textContent = "0";
+      }
+    }
 
-        console.log(
-          "Tests Response:",
-          data
-        );
+    // ==========================================
+    // LOAD LIVE CLASSES
+    // ==========================================
+    async function loadLive() {
+      const box = document.getElementById("liveBox");
+      try {
+        const r = await fetch("/api/classes?status=live", { credentials: "include" });
+        const data = await r.json();
+        const live = data.data || [];
 
+        document.getElementById("liveCount").textContent = live.length;
 
-        if (
-          !response.ok ||
-          !data.success
-        ) {
+        if (!live.length) {
+          // Check upcoming
+          const r2 = await fetch("/api/classes?status=scheduled", { credentials: "include" });
+          const data2 = await r2.json();
+          const upcoming = (data2.data || []).slice(0, 1);
 
-          throw new Error(
-            data.message ||
-            "Unable to load tests"
-          );
-
-        }
-
-
-        const tests =
-          data.tests || [];
-
-
-        // TEST COUNT
-
-        testCount.textContent =
-          tests.length;
-
-
-        // NO TESTS
-
-        if (tests.length === 0) {
-
-          testsContainer.innerHTML = `
-
-            <div class="message-box">
-
-              अभी कोई visible test उपलब्ध नहीं है।
-
-            </div>
-
-          `;
-
-          return;
-
-        }
-
-
-        // ---------------------------------
-        // RENDER TESTS
-        // ---------------------------------
-
-        testsContainer.innerHTML =
-          tests.map(test => `
-
-            <div class="test-card">
-
-              <span class="test-exam">
-
-                ${escapeHtml(
-                  test.exam || "Exam"
-                )}
-
-              </span>
-
-
-              <h3>
-
-                ${escapeHtml(
-                  test.name || "Mock Test"
-                )}
-
-              </h3>
-
-
-              <div class="test-info">
-
-                📚 Subject:
-
-                ${escapeHtml(
-                  test.subject || "General"
-                )}
-
-                <br>
-
-
-                ⏱️ Duration:
-
-                ${Number(
-                  test.duration
-                ) || 0}
-
-                Minutes
-
-                <br>
-
-
-                ❓ Questions:
-
-                ${Number(
-                  test.totalQuestions
-                ) || 0}
-
+          if (upcoming.length) {
+            const c = upcoming[0];
+            box.innerHTML = `
+              <div class="live-box">
+                <div style="padding: 20px; text-align: center;">
+                  <div style="font-size: 32px; margin-bottom: 10px;">📅</div>
+                  <h3 style="margin-bottom: 8px;">${escapeHtml(c.title)}</h3>
+                  <p class="text-muted" style="font-size: 13px;">
+                    ${escapeHtml(c.subject)} • ${escapeHtml(c.teacher || "")}<br>
+                    ${c.scheduledDate ? new Date(c.scheduledDate).toLocaleDateString("en-IN") : ""}
+                    ${c.scheduledTime ? " • " + escapeHtml(c.scheduledTime) : ""}
+                  </p>
+                  <a href="/class-detail.html?id=${c._id}" class="btn btn-blue" style="margin-top: 12px;">
+                    🔔 Remind Me
+                  </a>
+                </div>
               </div>
+            `;
+          } else {
+            box.innerHTML = '<div class="empty-box">🔴 Abhi koi live class nahi chal rahi.</div>';
+          }
+          return;
+        }
 
-
-              <button
-                class="start-btn"
-                onclick="startTest('${test._id}')"
-              >
-
-                Start Test
-
-              </button>
-
+        const c = live[0];
+        const vid = getYouTubeId(c.liveUrl || "");
+        box.innerHTML = `
+          <div class="live-box">
+            <div class="live-header">
+              <span class="status"><span class="dot"></span> LIVE NOW</span>
+              <span style="font-size: 13px;">${escapeHtml(c.subject)} • ${escapeHtml(c.class)}</span>
             </div>
-
-          `).join("");
-
-      } catch (error) {
-
-        console.error(
-          "Tests Error:",
-          error
-        );
-
-
-        testsContainer.innerHTML = `
-
-          <div class="message-box error">
-
-            Tests load नहीं हो पाए।
-
-            <br>
-
-            कृपया server और MongoDB connection check करें।
-
+            <div class="live-player">
+              <iframe src="https://www.youtube.com/embed/${vid}?autoplay=1" allowfullscreen></iframe>
+            </div>
+            <div class="live-info">
+              <h3>${escapeHtml(c.title)}</h3>
+              <p>${escapeHtml(c.examName || "")} ${c.teacher ? "• " + escapeHtml(c.teacher) : ""}</p>
+              <a href="/class-detail.html?id=${c._id}" class="btn btn-red" style="margin-top: 10px;">
+                💬 Join Class
+              </a>
+            </div>
           </div>
-
         `;
 
+      } catch (e) {
+        box.innerHTML = '<div class="empty-box">Live classes load nahi ho payi.</div>';
       }
-
     }
 
-
-    // =====================================
-    // LOAD MY RESULTS
-    // =====================================
-
-    async function loadResults() {
-
+    // ==========================================
+    // LOAD EXAM LIBRARY
+    // ==========================================
+    async function loadExamLibrary() {
+      const grid = document.getElementById("examGrid");
       try {
+        const r = await fetch("/api/exam-links", { credentials: "include" });
+        const data = await r.json();
+        const exams = (data.data || []).slice(0, 6);
 
-        const response = await fetch(
-          "/api/results",
-          {
-            credentials: "include"
-          }
-        );
-
-        const data =
-          await response.json();
-
-
-        if (
-          response.ok &&
-          data.success
-        ) {
-
-          resultCount.textContent =
-            (data.results || []).length;
-
+        if (!exams.length) {
+          grid.innerHTML = '<div class="empty-box">Koi exam add nahi kiya abhi.</div>';
+          return;
         }
 
-      } catch (error) {
+        grid.innerHTML = exams.map(e => `
+          <div class="course-card" onclick="window.location.href='/home-class.html'">
+            <div class="course-thumb" style="${e.thumbnail ? `background-image: url('${escapeHtml(e.thumbnail)}')` : ""}">
+              ${!e.thumbnail ? escapeHtml(e.icon || "🏆") : ""}
+            </div>
+            <div class="course-body">
+              <h3>${escapeHtml(e.examName)}</h3>
+              <p>${escapeHtml(e.description || e.category || "")}</p>
+              <div style="display:flex; gap:6px;">
+                ${e.pdfUrl ? `<a href="${escapeHtml(e.pdfUrl)}" target="_blank" onclick="event.stopPropagation()" class="btn btn-sm btn-red">📄</a>` : ""}
+                ${e.testUrl ? `<a href="${escapeHtml(e.testUrl)}" onclick="event.stopPropagation()" class="btn btn-sm btn-blue">📝</a>` : ""}
+                ${e.demoUrl ? `<a href="${escapeHtml(e.demoUrl)}" target="_blank" onclick="event.stopPropagation()" class="btn btn-sm btn-green">🎬</a>` : ""}
+              </div>
+            </div>
+          </div>
+        `).join("");
 
-        console.error(
-          "Results Error:",
-          error
-        );
-
+      } catch (e) {
+        grid.innerHTML = '<div class="empty-box">Exams load nahi ho payi.</div>';
       }
-
     }
 
+    // ==========================================
+    // LOAD RECENT CLASSES
+    // ==========================================
+    async function loadRecentClasses() {
+      const grid = document.getElementById("recentClasses");
+      try {
+        const r = await fetch("/api/classes", { credentials: "include" });
+        const data = await r.json();
+        const classes = (data.data || []).slice(0, 6);
 
-    // =====================================
-    // START TEST
-    // =====================================
-
-    function startTest(testId) {
-
-      if (!testId) {
-
-        alert(
-          "Test ID नहीं मिला।"
-        );
-
-        return;
-
-      }
-
-      window.location.href =
-        "/test.html?id=" +
-        encodeURIComponent(testId);
-
-    }
-
-
-    // =====================================
-    // LOGOUT
-    // =====================================
-
-    logoutBtn.addEventListener(
-      "click",
-      async function () {
-
-        try {
-
-          const response =
-            await fetch(
-              "/api/auth/logout",
-              {
-                method: "POST",
-                credentials: "include"
-              }
-            );
-
-
-          const data =
-            await response.json();
-
-
-          if (data.success) {
-
-            window.location.href =
-              "/login.html";
-
-          } else {
-
-            alert(
-              data.message ||
-              "Logout failed"
-            );
-
-          }
-
-        } catch (error) {
-
-          console.error(
-            "Logout Error:",
-            error
-          );
-
-          alert(
-            "Logout नहीं हो पाया।"
-          );
-
+        if (!classes.length) {
+          grid.innerHTML = '<div class="empty-box">Koi class available nahi hai.</div>';
+          return;
         }
 
+        const statusColors = { scheduled: "badge-yellow", live: "badge-red", recorded: "badge-green" };
+        const statusIcons = { scheduled: "📅", live: "🔴", recorded: "📹" };
+
+        grid.innerHTML = classes.map(c => `
+          <div class="course-card" onclick="window.location.href='/class-detail.html?id=${c._id}'">
+            <div class="course-thumb" style="${c.thumbnail ? `background-image: url('${escapeHtml(c.thumbnail)}')` : "font-size: 32px;"}">
+              ${!c.thumbnail ? "📹" : ""}
+              <span class="badge ${statusColors[c.status]}" style="position: absolute; top: 10px; right: 10px;">
+                ${statusIcons[c.status]} ${c.status}
+              </span>
+            </div>
+            <div class="course-body">
+              <h3>${escapeHtml(c.title)}</h3>
+              <p>${escapeHtml(c.subject)}${c.topic ? " • " + escapeHtml(c.topic) : ""}</p>
+              <div class="btn btn-sm btn-blue btn-block">▶ Watch</div>
+            </div>
+          </div>
+        `).join("");
+
+      } catch (e) {
+        grid.innerHTML = '<div class="empty-box">Classes load nahi ho payi.</div>';
       }
-    );
-
-
-    // =====================================
-    // HTML SECURITY HELPER
-    // =====================================
-
-    function escapeHtml(value) {
-
-      return String(value)
-
-        .replace(
-          /&/g,
-          "&amp;"
-        )
-
-        .replace(
-          /</g,
-          "&lt;"
-        )
-
-        .replace(
-          />/g,
-          "&gt;"
-        )
-
-        .replace(
-          /"/g,
-          "&quot;"
-        )
-
-        .replace(
-          /'/g,
-          "&#039;"
-        );
-
     }
 
+    // ==========================================
+    // INIT
+    // ==========================================
+    async function init() {
+      const ok = await loadUser();
+      if (!ok) return;
 
-    // =====================================
-    // INITIAL LOAD
-    // =====================================
-
-    async function initDashboard() {
-
-      // पहले user/session check
-      const loggedIn =
-        await loadUser();
-
-
-      if (!loggedIn) {
-
-        return;
-
-      }
-
-
-      // फिर tests
-      await loadTests();
-
-
-      // फिर results
-      await loadResults();
-
+      await Promise.all([
+        loadTests(),
+        loadResults(),
+        loadNotes(),
+        loadLive(),
+        loadExamLibrary(),
+        loadRecentClasses()
+      ]);
     }
 
-
-    // =====================================
-    // START DASHBOARD
-    // =====================================
-
-    initDashboard();
-
+    init();
   </script>
 
 </body>

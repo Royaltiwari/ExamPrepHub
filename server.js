@@ -18,6 +18,12 @@ const questionRoutes = require("./routes/questions");
 const adminRoutes = require("./routes/admin");
 const testRoutes = require("./routes/test");
 const resultRoutes = require("./routes/results");
+const noteRoutes = require("./routes/notes");
+const announcementRoutes = require("./routes/announcements");
+const liveRoutes = require("./routes/live");
+const examLinkRoutes = require("./routes/exam-links");
+const classRoutes = require("./routes/classes");
+const chatRoutes = require("./routes/chat");
 // =====================================================
 // MIDDLEWARE
 // =====================================================
@@ -96,6 +102,12 @@ app.use("/api/admin", adminRoutes);
 app.use("/api/tests", testRoutes);
 
 app.use("/api/results", resultRoutes);
+app.use("/api/notes", noteRoutes);
+app.use("/api/announcements", announcementRoutes);
+app.use("/api/live", liveRoutes);
+app.use("/api/exam-links", examLinkRoutes);
+app.use("/api/classes", classRoutes);
+app.use("/api/chat", chatRoutes);
 // =====================================================
 // HOME
 // =====================================================
