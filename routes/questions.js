@@ -267,11 +267,34 @@ function extractAnswer(block) {
 function extractGenericOptions(block) {
   const options = { A: "", B: "", C: "", D: "" };
 
-  const regex = /(?:^|\n|\s)([ABCD])\s*[\.\)\:]\s+/gi;
+  // ⚡ STEP 1: Answer/Explanation/Subject/Chapter lines alag karo
+  // taaki options me na ghusein
+  let cleanBlock = block;
+
+  // "Answer:" ke baad sab kuch hataao
+  cleanBlock = cleanBlock.replace(/\n\s*Answer\s*[:\-][\s\S]*$/i, "");
+  cleanBlock = cleanBlock.replace(/\n\s*Ans\s*[:\-][\s\S]*$/i, "");
+  cleanBlock = cleanBlock.replace(/\n\s*Correct\s*[:\-][\s\S]*$/i, "");
+
+  // "Explanation:" ke baad sab kuch hataao
+  cleanBlock = cleanBlock.replace(/\n\s*Explanation\s*[:\-][\s\S]*$/i, "");
+  cleanBlock = cleanBlock.replace(/\n\s*Exp\s*[:\-][\s\S]*$/i, "");
+  cleanBlock = cleanBlock.replace(/\n\s*व्याख्या\s*[:\-][\s\S]*$/i, "");
+
+  // "Hindi Explanation:" aur "English Explanation:"
+  cleanBlock = cleanBlock.replace(/\n\s*Hindi Explanation\s*[:\-][\s\S]*$/i, "");
+  cleanBlock = cleanBlock.replace(/\n\s*English Explanation\s*[:\-][\s\S]*$/i, "");
+
+  // Subject/Chapter
+  cleanBlock = cleanBlock.replace(/\n\s*Subject\s*[:\-][\s\S]*$/i, "");
+  cleanBlock = cleanBlock.replace(/\n\s*Chapter\s*[:\-][\s\S]*$/i, "");
+
+  // ⚡ STEP 2: Ab options nikaalo cleanBlock se
+  const regex = /(?:^|\n)\s*([ABCD])\s*[\.\)\:]\s+/gi;
   const matches = [];
   let match;
 
-  while ((match = regex.exec(block)) !== null) {
+  while ((match = regex.exec(cleanBlock)) !== null) {
     matches.push({
       letter: match[1].toUpperCase(),
       contentStart: regex.lastIndex,
@@ -284,16 +307,21 @@ function extractGenericOptions(block) {
   for (let i = 0; i < matches.length; i++) {
     const current = matches[i];
     const next = matches[i + 1];
-    const end = next ? next.markerStart : block.length;
+    const end = next ? next.markerStart : cleanBlock.length;
 
-    let value = block.slice(current.contentStart, end);
+    let value = cleanBlock.slice(current.contentStart, end);
 
+    // Extra safety
     value = value.replace(
-      /\s*(?:Answer|Ans|Correct|Hindi Explanation|English Explanation|Explanation|Subject|Chapter)\s*:.*$/is,
+      /\s*(?:Answer|Ans|Correct|Explanation|Hindi Explanation|English Explanation|Subject|Chapter)\s*:.*$/is,
       ""
     );
 
     value = clean(value);
+
+    // Sirf ek line me rakho
+    value = value.split("\n")[0].trim();
+
     if (!options[current.letter]) options[current.letter] = value;
   }
 
@@ -301,20 +329,36 @@ function extractGenericOptions(block) {
 }
 
 // ======================================================
-// BILINGUAL SPLITTER
+// BILINGUAL SPLITTER (Universal)
 // ======================================================
 
 function splitBilingualValue(value) {
   const text = clean(value);
   if (!text) return { hindi: "", english: "" };
 
+  // Try multiple separators
   const parts = text.split(/\s*\/\s*/);
+
   if (parts.length >= 2) {
     return {
       hindi: clean(parts[0]),
       english: clean(parts.slice(1).join(" / "))
     };
   }
+
+  // Agar slash nahi mila, language detect karo
+  const hasHindi = /[\u0900-\u097F]/.test(text);
+  const hasEnglish = /[a-zA-Z]{2,}/.test(text);
+
+  if (hasHindi && hasEnglish) {
+    const match = text.match(/^([\u0900-\u097F\s\?।\.\,\-\(\)]+)\s*([a-zA-Z].+)$/);
+    if (match) {
+      return { hindi: clean(match[1]), english: clean(match[2]) };
+    }
+  }
+
+  if (hasHindi) return { hindi: text, english: "" };
+  if (hasEnglish) return { hindi: "", english: text };
 
   return { hindi: text, english: text };
 }
@@ -336,6 +380,66 @@ function parseOptions(block) {
 }
 
 // ======================================================
+// BILINGUAL EXPLANATION EXTRACTOR (KEY FIX)
+// ======================================================
+
+function extractBilingualExplanation(block) {
+  let hindi = "";
+  let english = "";
+
+  // ⚡ METHOD 1: Explicit "Hindi Explanation:" / "English Explanation:"
+  const hMatch = block.match(/^\s*Hindi Explanation\s*[:\-]\s*(.+?)$/im);
+  const eMatch = block.match(/^\s*English Explanation\s*[:\-]\s*(.+?)$/im);
+
+  if (hMatch) hindi = clean(hMatch[1]);
+  if (eMatch) english = clean(eMatch[1]);
+
+  if (hindi || english) {
+    return { hindi, english };
+  }
+
+  // ⚡ METHOD 2: "Explanation: ..." (multi-line) — slash split
+  // Explanation line ke baad se next question tak ka sab text
+  const expMatch = block.match(
+    /^\s*(?:Explanation|Exp|व्याख्या)\s*[:\-]\s*([\s\S]+?)(?=\n\s*(?:Q(?:uestion)?\s*\.?\s*)?\d+\s*[\.\)]|\s*$)/im
+  );
+
+  if (expMatch) {
+    const raw = clean(expMatch[1].replace(/\n/g, " ").trim());
+
+    if (raw) {
+      // Slash se split
+      if (raw.includes("/")) {
+        const parts = raw.split(/\s*\/\s*/);
+        hindi = clean(parts[0] || "");
+        english = clean(parts.slice(1).join(" / ") || "");
+      } else {
+        // Language detect
+        const hasHindi = /[\u0900-\u097F]/.test(raw);
+        const hasEnglish = /[a-zA-Z]{3,}/.test(raw);
+
+        if (hasHindi && hasEnglish) {
+          const m = raw.match(/^([\u0900-\u097F\s\?।\.\,\-\(\)।]+)\s+([a-zA-Z].+)$/);
+          if (m) {
+            hindi = clean(m[1]);
+            english = clean(m[2]);
+          } else {
+            hindi = raw;
+            english = raw;
+          }
+        } else if (hasHindi) {
+          hindi = raw;
+        } else if (hasEnglish) {
+          english = raw;
+        }
+      }
+    }
+  }
+
+  return { hindi, english };
+}
+
+// ======================================================
 // PARSE QUESTION BLOCK (FINAL)
 // ======================================================
 
@@ -343,13 +447,17 @@ function parseQuestionBlock(block, number) {
   let hindiQuestion = extractField(block, "Hindi Question");
   let englishQuestion = extractField(block, "English Question");
 
-  const hindiExplanation = extractField(block, "Hindi Explanation");
-  const englishExplanation = extractField(block, "English Explanation");
+  // ⚡ Explanation — bilingual split
+  const expResult = extractBilingualExplanation(block);
+  const hindiExplanation = expResult.hindi;
+  const englishExplanation = expResult.english;
+
   const subject = extractSubject(block);
   const chapter = extractChapter(block);
   const answer = extractAnswer(block);
   const parsedOptions = parseOptions(block);
 
+  // Agar explicit "Hindi Question" / "English Question" nahi hain
   if (!hindiQuestion && !englishQuestion) {
     const lines = block.split("\n").map(l => l.trim()).filter(Boolean);
 
@@ -363,36 +471,33 @@ function parseQuestionBlock(block, number) {
     const questionLines = lines.slice(0, endIdx);
     const qText = questionLines.join(" ").trim();
 
-    const hasHindi = /[\u0900-\u097F]/.test(qText);
-    const hasEnglish = /[a-zA-Z]{3,}/.test(qText);
-
-    if (hasHindi && hasEnglish) {
-      let hindiPart = "";
-      let englishPart = "";
-
-      const questionMarkMatch = qText.match(/^(.+?[\?।])\s*(.+)$/);
-      if (questionMarkMatch) {
-        hindiPart = questionMarkMatch[1].trim();
-        englishPart = questionMarkMatch[2].trim();
-      } else {
-        const splitMatch = qText.match(/^([\u0900-\u097F\s\?।\.\,\-]+)\s+(.+)$/);
-        if (splitMatch) {
-          hindiPart = splitMatch[1].trim();
-          englishPart = splitMatch[2].trim();
-        } else {
-          hindiPart = qText;
-          englishPart = qText;
-        }
+    // Slash split
+    if (qText.includes("/")) {
+      const parts = qText.split(/\s*\/\s*/);
+      if (parts.length >= 2) {
+        hindiQuestion = clean(parts[0]);
+        englishQuestion = clean(parts.slice(1).join(" / "));
       }
+    } else {
+      const hasHindi = /[\u0900-\u097F]/.test(qText);
+      const hasEnglish = /[a-zA-Z]{3,}/.test(qText);
 
-      hindiQuestion = hindiPart;
-      englishQuestion = englishPart;
-    } else if (hasHindi) {
-      hindiQuestion = qText;
-      englishQuestion = "";
-    } else if (hasEnglish) {
-      englishQuestion = qText;
-      hindiQuestion = "";
+      if (hasHindi && hasEnglish) {
+        const match = qText.match(/^([\u0900-\u097F\s\?।\.\,\-\(\)]+)\s+([a-zA-Z].+)$/);
+        if (match) {
+          hindiQuestion = clean(match[1]);
+          englishQuestion = clean(match[2]);
+        } else {
+          hindiQuestion = qText;
+          englishQuestion = qText;
+        }
+      } else if (hasHindi) {
+        hindiQuestion = qText;
+        englishQuestion = "";
+      } else if (hasEnglish) {
+        englishQuestion = qText;
+        hindiQuestion = "";
+      }
     }
   }
 
@@ -439,7 +544,11 @@ function parseQuestionBlock(block, number) {
     ],
     questionText: hindiQuestion || englishQuestion,
     question: hindiQuestion || englishQuestion,
-    explanation: hindiExplanation || englishExplanation,
+    explanationHindi: hindiExplanation,
+    explanationEnglish: englishExplanation,
+    explanation: hindiExplanation && englishExplanation
+      ? `${hindiExplanation}\n\n${englishExplanation}`
+      : (hindiExplanation || englishExplanation),
     correctAnswer: ["A", "B", "C", "D"].indexOf(answer)
   };
 }
@@ -652,15 +761,12 @@ router.post(
       for (let i = 0; i < questions.length; i++) {
         const q = questions[i] || {};
 
-        // ---------- UNIVERSAL QUESTION TEXT ----------
         const questionHindi = clean(q.hindiQuestion || q.questionHindi || "");
         const questionEnglish = clean(q.englishQuestion || q.questionEnglish || "");
 
-        // ---------- UNIVERSAL OPTIONS ----------
         let hindiArr = ["", "", "", ""];
         let englishArr = ["", "", "", ""];
 
-        // Priority 1: q.optionsHindi[] / q.optionsEnglish[]
         if (Array.isArray(q.optionsHindi) && q.optionsHindi.length) {
           hindiArr = [
             q.optionsHindi[0] || "",
@@ -678,7 +784,6 @@ router.post(
           ];
         }
 
-        // Priority 2: q.options.hindi.A / q.options.english.A
         if (q.options && typeof q.options === "object" && !Array.isArray(q.options)) {
           const h = q.options.hindi || {};
           const e = q.options.english || {};
@@ -686,7 +791,6 @@ router.post(
           if (!englishArr.some(o => o)) englishArr = [e.A || "", e.B || "", e.C || "", e.D || ""];
         }
 
-        // Priority 3: q.options[] (combined)
         if (Array.isArray(q.options) && q.options.length) {
           if (!hindiArr.some(o => o) && !englishArr.some(o => o)) {
             hindiArr = [
@@ -711,7 +815,6 @@ router.post(
           combinedOptions.push(combined);
         }
 
-        // ---------- CORRECT ANSWER ----------
         let correctAnswer = q.correctAnswer;
 
         if (typeof correctAnswer === "string") {
@@ -734,7 +837,7 @@ router.post(
 
         correctAnswer = Number(correctAnswer);
 
-        // ---------- EXPLANATION ----------
+        // ⚡ Explanation — dono formats support
         const explanationHindi = clean(q.hindiExplanation || q.explanationHindi || "");
         const explanationEnglish = clean(q.englishExplanation || q.explanationEnglish || "");
 
@@ -752,7 +855,6 @@ router.post(
           combinedExplanation = explanationHindi || explanationEnglish || clean(q.explanation || "");
         }
 
-        // ---------- VALIDATION ----------
         if (!combinedQuestion) {
           return res.status(400).json({
             success: false,
@@ -772,7 +874,6 @@ router.post(
           });
         }
 
-        // ---------- BUILD DOC ----------
         docs.push({
           testId: test._id,
           questionNumber: Number(q.questionNumber) || i + 1,
