@@ -23,38 +23,17 @@ const Test = require("../models/Test");
 
 const upload = multer({
   storage: multer.memoryStorage(),
-
-  limits: {
-    fileSize: 10 * 1024 * 1024
-  },
-
+  limits: { fileSize: 10 * 1024 * 1024 },
   fileFilter: (req, file, cb) => {
-    const allowedMimeTypes = [
-      "application/pdf",
-      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-      "application/msword"
-    ];
-
-    const fileName = String(
-      file.originalname || ""
-    ).toLowerCase();
-
-    const allowedExtension =
+    const fileName = String(file.originalname || "").toLowerCase();
+    if (
       fileName.endsWith(".pdf") ||
       fileName.endsWith(".docx") ||
-      fileName.endsWith(".doc");
-
-    if (
-      allowedMimeTypes.includes(file.mimetype) ||
-      allowedExtension
+      fileName.endsWith(".doc")
     ) {
       cb(null, true);
     } else {
-      cb(
-        new Error(
-          "Only PDF, DOC or DOCX files are allowed."
-        )
-      );
+      cb(new Error("Only PDF, DOC or DOCX files are allowed."));
     }
   }
 });
@@ -65,24 +44,16 @@ const upload = multer({
 
 function adminOnly(req, res, next) {
   if (!req.session || !req.session.user) {
-    return res.status(401).json({
-      success: false,
-      message: "Login required"
-    });
+    return res.status(401).json({ success: false, message: "Login required" });
   }
-
   if (req.session.user.role !== "admin") {
-    return res.status(403).json({
-      success: false,
-      message: "Admin access required"
-    });
+    return res.status(403).json({ success: false, message: "Admin access required" });
   }
-
   next();
 }
 
 // ======================================================
-// CLEAN TEXT
+// HELPERS
 // ======================================================
 
 function clean(text) {
@@ -93,78 +64,38 @@ function clean(text) {
     .trim();
 }
 
-// ======================================================
-// NORMALIZE TEXT
-// ======================================================
-
 function normalizeText(text) {
-  return clean(text)
-    .replace(/\n{3,}/g, "\n\n")
-    .trim();
+  return clean(text).replace(/\n{3,}/g, "\n\n").trim();
 }
 
-// ======================================================
-// LANGUAGE
-// ======================================================
-
 function normalizeLanguage(language) {
-  const value = String(language || "bilingual")
-    .trim()
-    .toLowerCase();
-
-  if (value === "hindi") {
-    return "hindi";
-  }
-
-  if (value === "english") {
-    return "english";
-  }
-
+  const value = String(language || "bilingual").trim().toLowerCase();
+  if (value === "hindi") return "hindi";
+  if (value === "english") return "english";
   return "bilingual";
 }
 
 // ======================================================
-// QUESTION HEADING
-//
-// Supports:
-//
-// QUESTION 1
-// QUESTION 10
-// QUESTION 1:
-// QUESTION 1.
-// QUESTION 1)
-// QUESTION 1 -
-// Q1
-// Q.1
-// ======================================================
-
-function isQuestionHeading(line) {
-  return /^\s*(?:QUESTION|Q)\s*\.?\s*\d+\s*[\.\):\-]?\s*$/i.test(
-    clean(line)
-  );
-}
-
-// ======================================================
-// QUESTION NUMBER
+// QUESTION NUMBER DETECTOR
 // ======================================================
 
 function getQuestionNumber(line) {
-  const match = clean(line).match(
-    /^\s*(?:QUESTION|Q)\s*\.?\s*(\d+)\s*[\.\):\-]?\s*$/i
-  );
-
-  if (!match) {
-    return null;
+  const l = clean(line);
+  const patterns = [
+    /^QUESTION\s*[\.\:\-\)]?\s*(\d+)/i,
+    /^Q\s*[\.\:\-\)]?\s*(\d+)/i,
+    /^प्रश्न\s*[\.\:\-\)]?\s*(\d+)/,
+    /^(\d+)\s*[\.\)\:]/
+  ];
+  for (const p of patterns) {
+    const m = l.match(p);
+    if (m) return Number(m[1]);
   }
-
-  return Number(match[1]);
+  return null;
 }
 
 // ======================================================
-// SPLIT DOCUMENT INTO QUESTION BLOCKS
-//
-// IMPORTANT:
-// This works with line-based Word/PDF extraction.
+// SPLIT INTO QUESTION BLOCKS
 // ======================================================
 
 function splitIntoQuestionBlocks(text) {
@@ -173,75 +104,49 @@ function splitIntoQuestionBlocks(text) {
     .replace(/\r/g, "\n")
     .replace(/\u00A0/g, " ");
 
-  const lines = normalized
-    .split("\n")
-    .map(line => line.trim());
-
+  const lines = normalized.split("\n").map(l => l.trim());
   const blocks = [];
-
   let currentNumber = null;
   let currentLines = [];
 
   function saveCurrent() {
-    if (
-      currentNumber !== null &&
-      currentLines.length
-    ) {
-      const blockText = currentLines
-        .join("\n")
-        .trim();
-
+    if (currentNumber !== null && currentLines.length) {
+      const blockText = currentLines.join("\n").trim();
       if (blockText) {
-        blocks.push({
-          number: currentNumber,
-          text: blockText
-        });
+        blocks.push({ number: currentNumber, text: blockText });
       }
     }
   }
 
   for (const line of lines) {
     if (!line) {
-      if (currentNumber !== null) {
-        currentLines.push("");
-      }
-
+      if (currentNumber !== null) currentLines.push("");
       continue;
     }
 
     const number = getQuestionNumber(line);
 
     if (number !== null) {
-      saveCurrent();
+      const afterHeading = line.replace(
+        /^(?:QUESTION|Q|प्रश्न)\s*[\.\:\-\)]?\s*\d+\s*[\.\)\:\-]?\s*/i,
+        ""
+      ).trim();
 
-      currentNumber = number;
-      currentLines = [];
+      const numericHeading = line.match(/^(\d+)\s*[\.\)]\s*(.*)$/);
 
-      continue;
-    }
+      if (afterHeading || numericHeading) {
+        saveCurrent();
+        currentNumber = number;
 
-    /*
-      Also support:
-      1.
-      2.
-      3.
-      10.
-    */
-
-    const numericHeading = line.match(
-      /^(\d+)\s*[\.\)]\s*$/
-    );
-
-    if (numericHeading) {
-      saveCurrent();
-
-      currentNumber = Number(
-        numericHeading[1]
-      );
-
-      currentLines = [];
-
-      continue;
+        if (afterHeading) {
+          currentLines = [afterHeading];
+        } else if (numericHeading && numericHeading[2]) {
+          currentLines = [numericHeading[2].trim()];
+        } else {
+          currentLines = [];
+        }
+        continue;
+      }
     }
 
     if (currentNumber !== null) {
@@ -251,94 +156,46 @@ function splitIntoQuestionBlocks(text) {
 
   saveCurrent();
 
-  /*
-    FALLBACK:
-    Sometimes PDF extraction removes line breaks
-    and gives:
-
-    QUESTION 1 Subject: ...
-    QUESTION 2 Subject: ...
-
-    So if normal parsing found zero blocks,
-    use regex based splitting.
-  */
-
-  if (blocks.length === 0) {
-    return splitQuestionBlocksFallback(normalized);
+  if (blocks.length > 0) {
+    return blocks;
   }
 
-  return blocks;
+  console.log("⚠️  Normal split failed → trying fallback...");
+  return splitQuestionBlocksFallback(normalized);
 }
 
 // ======================================================
-// FALLBACK QUESTION BLOCK SPLITTER
+// FALLBACK SPLITTER
 // ======================================================
 
 function splitQuestionBlocksFallback(text) {
-  const source = String(text || "")
-    .replace(/\r/g, "")
-    .replace(/\u00A0/g, " ");
+  const source = String(text || "").replace(/\r/g, "").replace(/\u00A0/g, " ");
 
-  const regex =
-    /(?:^|\s)(QUESTION|Q)\s*\.?\s*(\d+)\s*[\.\):\-]?\s*/gi;
+  const regex = /(?:^|\s)(?:QUESTION|Q|प्रश्न)\s*[\.\:\-\)]?\s*(\d+)\s*[\.\)\:\-]?\s*/gi;
 
   const matches = [];
-
   let match;
 
-  while (
-    (match = regex.exec(source)) !== null
-  ) {
-    matches.push({
-      number: Number(match[2]),
-      start: regex.lastIndex
-    });
+  while ((match = regex.exec(source)) !== null) {
+    matches.push({ number: Number(match[1]), start: regex.lastIndex });
   }
 
-  const blocks = [];
+  console.log(`📦 Fallback found ${matches.length} headings`);
 
+  const blocks = [];
   for (let i = 0; i < matches.length; i++) {
     const current = matches[i];
+    const next = matches[i + 1];
+    const end = next ? next.start : source.length;
 
-    const next =
-      matches[i + 1];
-
-    const end = next
-      ? next.start -
-        (
-          next.start -
-          source.lastIndexOf(
-            "\n",
-            next.start - 1
-          )
-        )
-      : source.length;
-
-    let blockText = source
-      .substring(
-        current.start,
-        end
-      )
-      .trim();
-
-    /*
-      Extra safety:
-      remove accidental QUESTION heading
-      from the end of previous block.
-    */
+    let blockText = source.substring(current.start, end).trim();
 
     blockText = blockText
-      .replace(
-        /\s+(?:QUESTION|Q)\s*\.?\s*\d+\s*[\.\):\-]?\s*$/i,
-        ""
-      )
+      .replace(/\s+(?:QUESTION|Q|प्रश्न)\s*[\.\:\-\)]?\s*\d+\s*[\.\)\:\-]?\s*$/i, "")
       .trim();
 
     if (blockText) {
-      blocks.push({
-        number: current.number,
-        text: blockText
-      });
+      blocks.push({ number: current.number, text: blockText });
     }
   }
 
@@ -347,689 +204,266 @@ function splitQuestionBlocksFallback(text) {
 
 // ======================================================
 // FIELD EXTRACTION
-//
-// Exact fields:
-//
-// Hindi Question:
-// English Question:
-// Hindi Explanation:
-// English Explanation:
 // ======================================================
 
 function extractField(block, fieldName) {
-  const escaped =
-    fieldName.replace(
-      /[.*+?^${}()|[\]\\]/g,
-      "\\$&"
-    );
-
-  const regex = new RegExp(
-    "^\\s*" +
-      escaped +
-      "\\s*:\\s*(.*)$",
-    "im"
-  );
-
+  const escaped = fieldName.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const regex = new RegExp("^\\s*" + escaped + "\\s*:\\s*(.*)$", "im");
   const match = block.match(regex);
 
-  if (!match) {
-    return "";
-  }
+  if (!match) return "";
 
-  const start =
-    match.index + match[0].length;
-
-  const remaining =
-    block.slice(start);
-
-  /*
-    IMPORTANT:
-    Options are included here as stop points.
-    This fixes the old parser problem.
-  */
+  const start = match.index + match[0].length;
+  const remaining = block.slice(start);
 
   const stopPatterns = [
     /^Hindi Question\s*:/im,
     /^English Question\s*:/im,
-
     /^Hindi Option\s+[A-D]\s*:/im,
     /^English Option\s+[A-D]\s*:/im,
-
     /^Option\s+[A-D]\s*:/im,
-
     /^Answer\s*:/im,
-
     /^Hindi Explanation\s*:/im,
     /^English Explanation\s*:/im,
-
     /^Subject\s*:/im,
-    /^Chapter\s*:/im,
-
-    /^(?:QUESTION|Q)\s*\.?\s*\d+\s*[\.\):\-]?\s*$/im
+    /^Chapter\s*:/im
   ];
 
-  let end =
-    remaining.length;
-
-  for (
-    const pattern of stopPatterns
-  ) {
-    const found =
-      remaining.search(pattern);
-
-    if (
-      found !== -1 &&
-      found < end
-    ) {
-      end = found;
-    }
+  let end = remaining.length;
+  for (const pattern of stopPatterns) {
+    const found = remaining.search(pattern);
+    if (found !== -1 && found < end) end = found;
   }
 
-  const value =
-    match[1] +
-    " " +
-    remaining.slice(
-      0,
-      end
-    );
-
-  return clean(value);
+  return clean(match[1] + " " + remaining.slice(0, end));
 }
 
-// ======================================================
-// SUBJECT
-// ======================================================
-
-function extractSubject(block) {
-  return extractField(
-    block,
-    "Subject"
-  );
-}
+function extractSubject(block) { return extractField(block, "Subject"); }
+function extractChapter(block) { return extractField(block, "Chapter"); }
 
 // ======================================================
-// CHAPTER
-// ======================================================
-
-function extractChapter(block) {
-  return extractField(
-    block,
-    "Chapter"
-  );
-}
-
-// ======================================================
-// ANSWER
-//
-// Supports:
-// Answer: A
-// Answer: B
-// Answer: C
-// Answer: D
-// Answer: 1
-// Answer: 2
-// Answer: 3
-// Answer: 4
+// ANSWER EXTRACTION
 // ======================================================
 
 function extractAnswer(block) {
-  const match =
-    block.match(
-      /^\s*Answer\s*:\s*([A-Da-d1-4])\s*$/im
-    );
+  const match = block.match(
+    /^\s*(?:Answer|Ans|Correct|उत्तर|सही उत्तर)\s*[:\-]\s*\(?\s*([A-Da-d1-4])\s*\)?\s*$/im
+  );
 
-  if (!match) {
-    return "";
-  }
+  if (!match) return "";
 
-  const value =
-    match[1]
-      .trim()
-      .toUpperCase();
+  const value = match[1].trim().toUpperCase();
 
-  if (
-    ["A", "B", "C", "D"].includes(value)
-  ) {
-    return value;
-  }
+  if (["A", "B", "C", "D"].includes(value)) return value;
 
-  const numericMap = {
-    "1": "A",
-    "2": "B",
-    "3": "C",
-    "4": "D"
-  };
-
+  const numericMap = { "1": "A", "2": "B", "3": "C", "4": "D" };
   return numericMap[value] || "";
 }
 
 // ======================================================
-// EXPLICIT HINDI OPTIONS
-//
-// Hindi Option A:
-// Hindi Option B:
-// Hindi Option C:
-// Hindi Option D:
+// OPTIONS EXTRACTION
 // ======================================================
 
-function extractExplicitOptions(
-  block,
-  language
-) {
-  const options = {
-    A: "",
-    B: "",
-    C: "",
-    D: ""
-  };
+function extractGenericOptions(block) {
+  const options = { A: "", B: "", C: "", D: "" };
 
-  const prefix =
-    language === "hindi"
-      ? "Hindi Option"
-      : "English Option";
-
-  for (
-    const letter of ["A", "B", "C", "D"]
-  ) {
-    const escapedPrefix =
-      prefix.replace(
-        /[.*+?^${}()|[\]\\]/g,
-        "\\$&"
-      );
-
-    const regex =
-      new RegExp(
-        "^\\s*" +
-          escapedPrefix +
-          "\\s+" +
-          letter +
-          "\\s*:\\s*(.*)$",
-        "im"
-      );
-
-    const match =
-      block.match(regex);
-
-    if (!match) {
-      continue;
-    }
-
-    const start =
-      match.index +
-      match[0].length;
-
-    const remaining =
-      block.slice(start);
-
-    const stopPatterns = [
-      new RegExp(
-        "^\\s*" +
-          escapedPrefix +
-          "\\s+[ABCD]\\s*:",
-        "im"
-      ),
-
-      /^Hindi Option\s+[ABCD]\s*:/im,
-      /^English Option\s+[ABCD]\s*:/im,
-
-      /^Answer\s*:/im,
-
-      /^Hindi Explanation\s*:/im,
-      /^English Explanation\s*:/im,
-
-      /^Subject\s*:/im,
-      /^Chapter\s*:/im
-    ];
-
-    let end =
-      remaining.length;
-
-    for (
-      const pattern of stopPatterns
-    ) {
-      const found =
-        remaining.search(pattern);
-
-      if (
-        found !== -1 &&
-        found < end
-      ) {
-        end = found;
-      }
-    }
-
-    options[letter] =
-      clean(
-        match[1] +
-        " " +
-        remaining.slice(
-          0,
-          end
-        )
-      );
-  }
-
-  return options;
-}
-
-// ======================================================
-// GENERIC OPTIONS
-//
-// Supports:
-//
-// A. text
-// B. text
-// C. text
-// D. text
-//
-// A) text
-// B) text
-// C) text
-// D) text
-//
-// Also works when options are in one paragraph.
-// ======================================================
-
-function extractGenericOptions(
-  block
-) {
-  const options = {
-    A: "",
-    B: "",
-    C: "",
-    D: ""
-  };
-
-  const regex =
-    /(?:^|\n|\s)([ABCD])\s*[\.\)]\s+/gi;
-
+  const regex = /(?:^|\n|\s)([ABCD])\s*[\.\)\:]\s+/gi;
   const matches = [];
-
   let match;
 
-  while (
-    (match = regex.exec(block)) !== null
-  ) {
+  while ((match = regex.exec(block)) !== null) {
     matches.push({
-      letter:
-        match[1].toUpperCase(),
-
-      contentStart:
-        regex.lastIndex,
-
-      markerStart:
-        match.index
+      letter: match[1].toUpperCase(),
+      contentStart: regex.lastIndex,
+      markerStart: match.index
     });
   }
 
-  if (!matches.length) {
-    return options;
-  }
+  if (!matches.length) return options;
 
-  for (
-    let i = 0;
-    i < matches.length;
-    i++
-  ) {
-    const current =
-      matches[i];
+  for (let i = 0; i < matches.length; i++) {
+    const current = matches[i];
+    const next = matches[i + 1];
+    const end = next ? next.markerStart : block.length;
 
-    const next =
-      matches[i + 1];
+    let value = block.slice(current.contentStart, end);
 
-    let end =
-      next
-        ? next.markerStart
-        : block.length;
+    value = value.replace(
+      /\s*(?:Answer|Ans|Correct|Hindi Explanation|English Explanation|Explanation|Subject|Chapter)\s*:.*$/is,
+      ""
+    );
 
-    let value =
-      block.slice(
-        current.contentStart,
-        end
-      );
-
-    /*
-      Remove metadata if it became part
-      of option D.
-    */
-
-    value =
-      value.replace(
-        /\s*(?:Answer|Hindi Explanation|English Explanation)\s*:.*$/is,
-        ""
-      );
-
-    value =
-      clean(value);
-
-    /*
-      Only keep first occurrence of A-D.
-    */
-
-    if (
-      !options[current.letter]
-    ) {
-      options[current.letter] =
-        value;
-    }
+    value = clean(value);
+    if (!options[current.letter]) options[current.letter] = value;
   }
 
   return options;
 }
 
 // ======================================================
-// BILINGUAL OPTION SPLITTER
-//
-// Example:
-//
-// नई दिल्ली / New Delhi
-//
-// => Hindi: नई दिल्ली
-// => English: New Delhi
+// BILINGUAL SPLITTER
 // ======================================================
 
-function splitBilingualOption(
-  value
-) {
-  const text =
-    clean(value);
+function splitBilingualValue(value) {
+  const text = clean(value);
+  if (!text) return { hindi: "", english: "" };
 
-  if (!text) {
-    return {
-      hindi: "",
-      english: ""
-    };
-  }
-
-  const parts =
-    text.split(
-      /\s*\/\s*/
-    );
-
+  const parts = text.split(/\s*\/\s*/);
   if (parts.length >= 2) {
     return {
-      hindi:
-        clean(parts[0]),
-
-      english:
-        clean(
-          parts
-            .slice(1)
-            .join(" / ")
-        )
+      hindi: clean(parts[0]),
+      english: clean(parts.slice(1).join(" / "))
     };
   }
 
-  return {
-    hindi: text,
-    english: text
-  };
+  return { hindi: text, english: text };
 }
-
-// ======================================================
-// PARSE OPTIONS
-// ======================================================
 
 function parseOptions(block) {
-  const hindiExplicit =
-    extractExplicitOptions(
-      block,
-      "hindi"
-    );
+  const generic = extractGenericOptions(block);
+  const hindi = { A: "", B: "", C: "", D: "" };
+  const english = { A: "", B: "", C: "", D: "" };
 
-  const englishExplicit =
-    extractExplicitOptions(
-      block,
-      "english"
-    );
-
-  const generic =
-    extractGenericOptions(block);
-
-  const hindi = {
-    A: "",
-    B: "",
-    C: "",
-    D: ""
-  };
-
-  const english = {
-    A: "",
-    B: "",
-    C: "",
-    D: ""
-  };
-
-  for (
-    const letter of
-      ["A", "B", "C", "D"]
-  ) {
-    /*
-      First preference:
-      explicit Hindi / English fields
-    */
-
-    hindi[letter] =
-      hindiExplicit[letter] ||
-      "";
-
-    english[letter] =
-      englishExplicit[letter] ||
-      "";
-
-    /*
-      If explicit options don't exist,
-      use generic A/B/C/D.
-    */
-
-    if (
-      !hindi[letter] &&
-      !english[letter] &&
-      generic[letter]
-    ) {
-      const split =
-        splitBilingualOption(
-          generic[letter]
-        );
-
-      hindi[letter] =
-        split.hindi;
-
-      english[letter] =
-        split.english;
+  for (const letter of ["A", "B", "C", "D"]) {
+    if (generic[letter]) {
+      const split = splitBilingualValue(generic[letter]);
+      hindi[letter] = split.hindi;
+      english[letter] = split.english;
     }
   }
 
-  /*
-    If only Hindi options exist,
-    use Hindi text as fallback for combined
-    English option field.
-
-    If only English options exist,
-    use English text as fallback for combined
-    Hindi option field.
-
-    This is useful for Hindi-only / English-only
-    imports.
-  */
-
-  for (
-    const letter of
-      ["A", "B", "C", "D"]
-  ) {
-    if (
-      !hindi[letter] &&
-      english[letter]
-    ) {
-      hindi[letter] =
-        english[letter];
-    }
-
-    if (
-      !english[letter] &&
-      hindi[letter]
-    ) {
-      english[letter] =
-        hindi[letter];
-    }
-  }
-
-  return {
-    hindi,
-    english
-  };
+  return { hindi, english };
 }
 
 // ======================================================
-// PARSE QUESTION BLOCK
+// PARSE QUESTION BLOCK (FINAL)
 // ======================================================
 
-function parseQuestionBlock(
-  block,
-  number
-) {
-  const hindiQuestion =
-    extractField(
-      block,
-      "Hindi Question"
-    );
+function parseQuestionBlock(block, number) {
+  let hindiQuestion = extractField(block, "Hindi Question");
+  let englishQuestion = extractField(block, "English Question");
 
-  const englishQuestion =
-    extractField(
-      block,
-      "English Question"
-    );
+  const hindiExplanation = extractField(block, "Hindi Explanation");
+  const englishExplanation = extractField(block, "English Explanation");
+  const subject = extractSubject(block);
+  const chapter = extractChapter(block);
+  const answer = extractAnswer(block);
+  const parsedOptions = parseOptions(block);
 
-  const hindiExplanation =
-    extractField(
-      block,
-      "Hindi Explanation"
-    );
+  if (!hindiQuestion && !englishQuestion) {
+    const lines = block.split("\n").map(l => l.trim()).filter(Boolean);
 
-  const englishExplanation =
-    extractField(
-      block,
-      "English Explanation"
-    );
+    const firstOptionIdx = lines.findIndex(l => /^[ABCD]\s*[\.\)\:]\s+/i.test(l));
+    const firstAnswerIdx = lines.findIndex(l => /^(?:Answer|Ans|Correct|उत्तर)\s*[:\-]/i.test(l));
 
-  const subject =
-    extractSubject(block);
+    let endIdx = lines.length;
+    if (firstOptionIdx > 0) endIdx = firstOptionIdx;
+    if (firstAnswerIdx > 0 && firstAnswerIdx < endIdx) endIdx = firstAnswerIdx;
 
-  const chapter =
-    extractChapter(block);
+    const questionLines = lines.slice(0, endIdx);
+    const qText = questionLines.join(" ").trim();
 
-  const answer =
-    extractAnswer(block);
+    const hasHindi = /[\u0900-\u097F]/.test(qText);
+    const hasEnglish = /[a-zA-Z]{3,}/.test(qText);
 
-  const parsedOptions =
-    parseOptions(block);
+    if (hasHindi && hasEnglish) {
+      let hindiPart = "";
+      let englishPart = "";
 
-  const rawOptions = {
-    A: "",
-    B: "",
-    C: "",
-    D: ""
-  };
+      const questionMarkMatch = qText.match(/^(.+?[\?।])\s*(.+)$/);
+      if (questionMarkMatch) {
+        hindiPart = questionMarkMatch[1].trim();
+        englishPart = questionMarkMatch[2].trim();
+      } else {
+        const splitMatch = qText.match(/^([\u0900-\u097F\s\?।\.\,\-]+)\s+(.+)$/);
+        if (splitMatch) {
+          hindiPart = splitMatch[1].trim();
+          englishPart = splitMatch[2].trim();
+        } else {
+          hindiPart = qText;
+          englishPart = qText;
+        }
+      }
 
-  for (
-    const letter of
-      ["A", "B", "C", "D"]
-  ) {
-    if (
-      parsedOptions.hindi[letter] &&
-      parsedOptions.english[letter] &&
-      parsedOptions.hindi[letter] !==
-        parsedOptions.english[letter]
-    ) {
-      rawOptions[letter] =
-        `${parsedOptions.hindi[letter]} / ${parsedOptions.english[letter]}`;
-    } else {
-      rawOptions[letter] =
-        parsedOptions.hindi[letter] ||
-        parsedOptions.english[letter] ||
-        "";
+      hindiQuestion = hindiPart;
+      englishQuestion = englishPart;
+    } else if (hasHindi) {
+      hindiQuestion = qText;
+      englishQuestion = "";
+    } else if (hasEnglish) {
+      englishQuestion = qText;
+      hindiQuestion = "";
     }
   }
 
+  const rawOptions = { A: "", B: "", C: "", D: "" };
+  for (const letter of ["A", "B", "C", "D"]) {
+    const h = parsedOptions.hindi[letter];
+    const e = parsedOptions.english[letter];
+    if (h && e && h !== e) {
+      rawOptions[letter] = `${h} / ${e}`;
+    } else {
+      rawOptions[letter] = h || e || "";
+    }
+  }
+
+  // ⚡ UNIVERSAL OUTPUT: dono naming conventions
   return {
-    questionNumber:
-      Number(number) || 0,
-
+    questionNumber: Number(number) || 0,
     subject,
-
     chapter,
 
+    // Original parser fields
     hindiQuestion,
-
     englishQuestion,
-
-    options:
-      parsedOptions,
-
+    options: parsedOptions,
     answer,
-
     hindiExplanation,
-
     englishExplanation,
+    rawOptions,
 
-    rawOptions
+    // Frontend-compatible aliases
+    questionHindi: hindiQuestion,
+    questionEnglish: englishQuestion,
+    optionsHindi: [
+      parsedOptions.hindi.A || "",
+      parsedOptions.hindi.B || "",
+      parsedOptions.hindi.C || "",
+      parsedOptions.hindi.D || ""
+    ],
+    optionsEnglish: [
+      parsedOptions.english.A || "",
+      parsedOptions.english.B || "",
+      parsedOptions.english.C || "",
+      parsedOptions.english.D || ""
+    ],
+    questionText: hindiQuestion || englishQuestion,
+    question: hindiQuestion || englishQuestion,
+    explanation: hindiExplanation || englishExplanation,
+    correctAnswer: ["A", "B", "C", "D"].indexOf(answer)
   };
 }
 
 // ======================================================
-// VALIDATE QUESTION
+// VALIDATE
 // ======================================================
 
-function validateQuestion(
-  question
-) {
+function validateQuestion(question) {
   const errors = [];
 
-  if (
-    !question.hindiQuestion &&
-    !question.englishQuestion
-  ) {
-    errors.push(
-      "Question text missing"
-    );
+  if (!question.hindiQuestion && !question.englishQuestion) {
+    errors.push("Question text missing");
   }
 
   if (!question.answer) {
-    errors.push(
-      "Answer missing"
-    );
+    errors.push("Answer missing");
   }
 
-  if (
-    question.answer &&
-    !["A", "B", "C", "D"].includes(
-      question.answer
-    )
-  ) {
-    errors.push(
-      "Invalid answer"
-    );
-  }
-
-  for (
-    const letter of
-      ["A", "B", "C", "D"]
-  ) {
-    const hindi =
-      question.options?.hindi?.[letter] ||
-      "";
-
-    const english =
-      question.options?.english?.[letter] ||
-      "";
-
-    if (
-      !clean(hindi) &&
-      !clean(english)
-    ) {
-      errors.push(
-        `Option ${letter} missing`
-      );
+  for (const letter of ["A", "B", "C", "D"]) {
+    const h = question.options?.hindi?.[letter] || "";
+    const e = question.options?.english?.[letter] || "";
+    if (!clean(h) && !clean(e)) {
+      errors.push(`Option ${letter} missing`);
     }
   }
 
@@ -1037,165 +471,65 @@ function validateQuestion(
 }
 
 // ======================================================
-// EXTRACT DOCX
+// EXTRACT DOCX / PDF
 // ======================================================
 
-async function extractDocx(
-  buffer
-) {
-  const result =
-    await mammoth.extractRawText({
-      buffer
-    });
-
-  return normalizeText(
-    result.value || ""
-  );
+async function extractDocx(buffer) {
+  const result = await mammoth.extractRawText({ buffer });
+  return normalizeText(result.value || "");
 }
 
-// ======================================================
-// EXTRACT PDF
-// ======================================================
-
-async function extractPdf(
-  buffer
-) {
+async function extractPdf(buffer) {
   if (!pdfParse) {
-    throw new Error(
-      "pdf-parse package is not installed. Run: npm install pdf-parse"
-    );
+    throw new Error("pdf-parse not installed. Run: npm install pdf-parse");
   }
-
-  /*
-    pdf-parse v2
-  */
 
   try {
-    if (
-      typeof pdfParse.PDFParse ===
-      "function"
-    ) {
-      const parser =
-        new pdfParse.PDFParse({
-          data: buffer
-        });
-
-      const result =
-        await parser.getText();
-
-      if (
-        parser &&
-        typeof parser.destroy ===
-          "function"
-      ) {
-        await parser.destroy();
-      }
-
-      const text =
-        result?.text || "";
-
-      if (text.trim()) {
-        return normalizeText(text);
-      }
+    if (typeof pdfParse.PDFParse === "function") {
+      const parser = new pdfParse.PDFParse({ data: buffer });
+      const result = await parser.getText();
+      if (parser && typeof parser.destroy === "function") await parser.destroy();
+      const text = result?.text || "";
+      if (text.trim()) return normalizeText(text);
     }
   } catch (error) {
-    console.log(
-      "PDF v2 parser failed:",
-      error.message
-    );
+    console.log("PDF v2 parser failed:", error.message);
   }
-
-  /*
-    Older pdf-parse versions
-  */
 
   try {
-    if (
-      typeof pdfParse ===
-      "function"
-    ) {
-      const result =
-        await pdfParse(buffer);
-
-      const text =
-        result?.text || "";
-
-      if (text.trim()) {
-        return normalizeText(text);
-      }
+    if (typeof pdfParse === "function") {
+      const result = await pdfParse(buffer);
+      const text = result?.text || "";
+      if (text.trim()) return normalizeText(text);
     }
   } catch (error) {
-    console.log(
-      "Old PDF parser failed:",
-      error.message
-    );
+    console.log("Old PDF parser failed:", error.message);
   }
 
-  throw new Error(
-    "Unable to read PDF text. If this is a scanned/image PDF, OCR is required."
-  );
+  throw new Error("Unable to read PDF text.");
 }
 
-// ======================================================
-// READ UPLOADED FILE
-// ======================================================
+async function extractFileText(file) {
+  const name = String(file.originalname || "").toLowerCase();
 
-async function extractFileText(
-  file
-) {
-  const name =
-    String(
-      file.originalname || ""
-    ).toLowerCase();
+  if (name.endsWith(".docx")) return extractDocx(file.buffer);
 
-  if (
-    name.endsWith(".docx")
-  ) {
-    return extractDocx(
-      file.buffer
-    );
+  if (name.endsWith(".doc")) {
+    throw new Error("Old .DOC not supported. Save as .DOCX and try again.");
   }
 
-  /*
-    .doc is NOT reliably supported by mammoth.
-    Tell user clearly instead of silently failing.
-  */
+  if (name.endsWith(".pdf")) return extractPdf(file.buffer);
 
-  if (
-    name.endsWith(".doc")
-  ) {
-    throw new Error(
-      "Old .DOC format is not supported reliably. Please save the file as .DOCX and upload again."
-    );
-  }
-
-  if (
-    name.endsWith(".pdf")
-  ) {
-    return extractPdf(
-      file.buffer
-    );
-  }
-
-  throw new Error(
-    "Unsupported file type"
-  );
+  throw new Error("Unsupported file type");
 }
 
 // ======================================================
 // HEALTH
 // ======================================================
 
-router.get(
-  "/health",
-  (req, res) => {
-    res.json({
-      success: true,
-      message:
-        "Questions route is working"
-    });
-  }
-);
+router.get("/health", (req, res) => {
+  res.json({ success: true, message: "Questions route is working" });
+});
 
 // ======================================================
 // BULK PREVIEW
@@ -1205,985 +539,369 @@ router.post(
   "/bulk/preview",
   adminOnly,
   upload.single("pdfFile"),
-
   async (req, res) => {
     try {
-      // ----------------------------------------------
-      // FILE CHECK
-      // ----------------------------------------------
-
       if (!req.file) {
         return res.status(400).json({
           success: false,
-          message:
-            "Please upload a PDF or DOCX file."
+          message: "Please upload a PDF or DOCX file."
         });
       }
 
-      // ----------------------------------------------
-      // FORM DATA
-      // ----------------------------------------------
+      const language = normalizeLanguage(req.body.language);
+      const selectedSubject = clean(req.body.subject);
+      const selectedChapter = clean(req.body.chapter);
 
-      const language =
-        normalizeLanguage(
-          req.body.language
-        );
+      const text = await extractFileText(req.file);
 
-      const selectedSubject =
-        clean(
-          req.body.subject
-        );
-
-      const selectedChapter =
-        clean(
-          req.body.chapter
-        );
-
-      // ----------------------------------------------
-      // EXTRACT TEXT
-      // ----------------------------------------------
-
-      const text =
-        await extractFileText(
-          req.file
-        );
-
-      console.log(
-        "------------------------------------------"
-      );
-
-      console.log(
-        "BULK FILE:",
-        req.file.originalname
-      );
-
-      console.log(
-        "EXTRACTED TEXT LENGTH:",
-        text.length
-      );
-
-      console.log(
-        "EXTRACTED TEXT PREVIEW:"
-      );
-
-      console.log(
-        text.substring(0, 2000)
-      );
-
-      console.log(
-        "------------------------------------------"
-      );
-
-      // ----------------------------------------------
-      // EMPTY FILE
-      // ----------------------------------------------
+      console.log("═══════════════════════════════════════════════════════");
+      console.log("BULK FILE:", req.file.originalname);
+      console.log("TEXT LENGTH:", text.length);
+      console.log("───────────────────────────────────────────────────────");
+      console.log("EXTRACTED TEXT (first 2000 chars):");
+      console.log(text.substring(0, 2000));
+      console.log("═══════════════════════════════════════════════════════");
 
       if (!text.trim()) {
         return res.status(400).json({
           success: false,
-          message:
-            "File से text नहीं मिला। अगर PDF scanned/image PDF है तो OCR PDF चाहिए।"
+          message: "File से text नहीं मिला।"
         });
       }
 
-      // ----------------------------------------------
-      // SPLIT QUESTIONS
-      // ----------------------------------------------
-
-      const blocks =
-        splitIntoQuestionBlocks(
-          text
-        );
-
-      console.log(
-        "QUESTION BLOCKS FOUND:",
-        blocks.length
-      );
-
-      // ----------------------------------------------
-      // NO QUESTIONS
-      // ----------------------------------------------
+      const blocks = splitIntoQuestionBlocks(text);
+      console.log("✅ QUESTION BLOCKS FOUND:", blocks.length);
 
       if (!blocks.length) {
         return res.status(400).json({
           success: false,
-
-          message:
-            "No questions found. File में QUESTION 1, QUESTION 2... जैसा heading होना चाहिए.",
-
-          diagnostic: {
-            fileName:
-              req.file.originalname,
-
-            textLength:
-              text.length,
-
-            textPreview:
-              text.substring(
-                0,
-                3000
-              )
-          }
+          message: "No questions found. File में QUESTION 1 जैसा heading होना चाहिए."
         });
       }
-
-      // ----------------------------------------------
-      // PARSE
-      // ----------------------------------------------
 
       const validQuestions = [];
       const invalidQuestions = [];
 
-      for (
-        const block of blocks
-      ) {
-        const question =
-          parseQuestionBlock(
-            block.text,
-            block.number
-          );
+      for (const block of blocks) {
+        const question = parseQuestionBlock(block.text, block.number);
 
-        /*
-          UI-selected subject/chapter
-          has priority if selected.
-        */
+        question.subject = selectedSubject || question.subject || "General";
+        question.chapter = selectedChapter || question.chapter || "General";
+        question.language = language;
 
-        question.subject =
-          selectedSubject ||
-          question.subject ||
-          "General";
-
-        question.chapter =
-          selectedChapter ||
-          question.chapter ||
-          "General";
-
-        question.language =
-          language;
-
-        const errors =
-          validateQuestion(
-            question
-          );
+        const errors = validateQuestion(question);
 
         if (errors.length) {
           invalidQuestions.push({
-            questionNumber:
-              block.number,
-
+            questionNumber: block.number,
             errors,
-
             question,
-
-            rawBlock:
-              block.text
+            rawBlock: block.text
           });
         } else {
-          validQuestions.push(
-            question
-          );
+          validQuestions.push(question);
         }
       }
 
-      // ----------------------------------------------
-      // RESPONSE
-      // ----------------------------------------------
-
       return res.json({
         success: true,
-
-        message:
-          `${validQuestions.length} questions detected successfully.`,
-
-        totalDetected:
-          blocks.length,
-
-        validQuestions:
-          validQuestions.length,
-
-        invalidQuestions:
-          invalidQuestions.length,
-
-        questions:
-          validQuestions,
-
-        errors:
-          invalidQuestions
+        message: `${validQuestions.length} questions detected.`,
+        totalDetected: blocks.length,
+        validQuestions: validQuestions.length,
+        invalidQuestions: invalidQuestions.length,
+        questions: validQuestions,
+        errors: invalidQuestions
       });
     } catch (error) {
-      console.error(
-        "Bulk Preview Error:",
-        error
-      );
-
+      console.error("Bulk Preview Error:", error);
       return res.status(500).json({
         success: false,
-
-        message:
-          error.message ||
-          "Preview failed"
+        message: error.message || "Preview failed"
       });
     }
   }
 );
 
 // ======================================================
-// BULK IMPORT
-//
-// IMPORTANT:
-// NO DELETE.
-// NO deleteMany.
-// ONLY insertMany.
+// BULK IMPORT (UNIVERSAL - NO DELETE)
 // ======================================================
 
 router.post(
   "/bulk/import",
   adminOnly,
-
   async (req, res) => {
     try {
-      const {
-        testId,
-        language,
-        subject,
-        chapter,
-        questions
-      } = req.body;
-
-      // ----------------------------------------------
-      // TEST ID
-      // ----------------------------------------------
+      const { testId, language, subject, chapter, questions } = req.body;
 
       if (!testId) {
-        return res.status(400).json({
-          success: false,
-          message:
-            "Test ID is required"
-        });
+        return res.status(400).json({ success: false, message: "Test ID is required" });
       }
 
-      // ----------------------------------------------
-      // QUESTIONS
-      // ----------------------------------------------
-
-      if (
-        !Array.isArray(questions) ||
-        !questions.length
-      ) {
-        return res.status(400).json({
-          success: false,
-          message:
-            "No questions found for import"
-        });
+      if (!Array.isArray(questions) || !questions.length) {
+        return res.status(400).json({ success: false, message: "No questions to import" });
       }
 
-      // ----------------------------------------------
-      // CHECK TEST
-      // ----------------------------------------------
-
-      const test =
-        await Test.findById(
-          testId
-        );
-
+      const test = await Test.findById(testId);
       if (!test) {
-        return res.status(404).json({
-          success: false,
-          message:
-            "Test not found"
-        });
+        return res.status(404).json({ success: false, message: "Test not found" });
       }
 
-      // ----------------------------------------------
-      // LANGUAGE
-      // ----------------------------------------------
-
-      const selectedLanguage =
-        normalizeLanguage(
-          language
-        );
-
-      // ----------------------------------------------
-      // BUILD DOCUMENTS
-      // ----------------------------------------------
-
+      const selectedLanguage = normalizeLanguage(language);
       const docs = [];
 
-      for (
-        let i = 0;
-        i < questions.length;
-        i++
-      ) {
-        const q =
-          questions[i] || {};
+      for (let i = 0; i < questions.length; i++) {
+        const q = questions[i] || {};
 
-        // --------------------------------------------
-        // QUESTION
-        // --------------------------------------------
+        // ---------- UNIVERSAL QUESTION TEXT ----------
+        const questionHindi = clean(q.hindiQuestion || q.questionHindi || "");
+        const questionEnglish = clean(q.englishQuestion || q.questionEnglish || "");
 
-        const questionHindi =
-          clean(
-            q.hindiQuestion ||
-            q.questionHindi ||
-            q.question?.hindi ||
-            ""
-          );
+        // ---------- UNIVERSAL OPTIONS ----------
+        let hindiArr = ["", "", "", ""];
+        let englishArr = ["", "", "", ""];
 
-        const questionEnglish =
-          clean(
-            q.englishQuestion ||
-            q.questionEnglish ||
-            q.question?.english ||
-            ""
-          );
+        // Priority 1: q.optionsHindi[] / q.optionsEnglish[]
+        if (Array.isArray(q.optionsHindi) && q.optionsHindi.length) {
+          hindiArr = [
+            q.optionsHindi[0] || "",
+            q.optionsHindi[1] || "",
+            q.optionsHindi[2] || "",
+            q.optionsHindi[3] || ""
+          ];
+        }
+        if (Array.isArray(q.optionsEnglish) && q.optionsEnglish.length) {
+          englishArr = [
+            q.optionsEnglish[0] || "",
+            q.optionsEnglish[1] || "",
+            q.optionsEnglish[2] || "",
+            q.optionsEnglish[3] || ""
+          ];
+        }
 
-        // --------------------------------------------
-        // OPTIONS
-        // --------------------------------------------
+        // Priority 2: q.options.hindi.A / q.options.english.A
+        if (q.options && typeof q.options === "object" && !Array.isArray(q.options)) {
+          const h = q.options.hindi || {};
+          const e = q.options.english || {};
+          if (!hindiArr.some(o => o)) hindiArr = [h.A || "", h.B || "", h.C || "", h.D || ""];
+          if (!englishArr.some(o => o)) englishArr = [e.A || "", e.B || "", e.C || "", e.D || ""];
+        }
 
-        const hindiOptions = [
-          clean(
-            q.optionsHindi?.[0] ||
-            q.options?.hindi?.A ||
-            ""
-          ),
+        // Priority 3: q.options[] (combined)
+        if (Array.isArray(q.options) && q.options.length) {
+          if (!hindiArr.some(o => o) && !englishArr.some(o => o)) {
+            hindiArr = [
+              q.options[0] || "",
+              q.options[1] || "",
+              q.options[2] || "",
+              q.options[3] || ""
+            ];
+          }
+        }
 
-          clean(
-            q.optionsHindi?.[1] ||
-            q.options?.hindi?.B ||
-            ""
-          ),
-
-          clean(
-            q.optionsHindi?.[2] ||
-            q.options?.hindi?.C ||
-            ""
-          ),
-
-          clean(
-            q.optionsHindi?.[3] ||
-            q.options?.hindi?.D ||
-            ""
-          )
-        ];
-
-        const englishOptions = [
-          clean(
-            q.optionsEnglish?.[0] ||
-            q.options?.english?.A ||
-            ""
-          ),
-
-          clean(
-            q.optionsEnglish?.[1] ||
-            q.options?.english?.B ||
-            ""
-          ),
-
-          clean(
-            q.optionsEnglish?.[2] ||
-            q.options?.english?.C ||
-            ""
-          ),
-
-          clean(
-            q.optionsEnglish?.[3] ||
-            q.options?.english?.D ||
-            ""
-          )
-        ];
-
-        // --------------------------------------------
-        // COMBINED OPTIONS
-        // --------------------------------------------
+        const hindiOptions = hindiArr.map(o => clean(o));
+        const englishOptions = englishArr.map(o => clean(o));
 
         const combinedOptions = [];
-
-        for (
-          let j = 0;
-          j < 4;
-          j++
-        ) {
-          const hindi =
-            hindiOptions[j];
-
-          const english =
-            englishOptions[j];
-
+        for (let j = 0; j < 4; j++) {
+          const h = hindiOptions[j];
+          const e = englishOptions[j];
           let combined = "";
-
-          if (
-            hindi &&
-            english &&
-            hindi !== english
-          ) {
-            combined =
-              `${hindi} / ${english}`;
-          } else {
-            combined =
-              hindi ||
-              english ||
-              "";
-          }
-
-          combinedOptions.push(
-            combined
-          );
+          if (h && e && h !== e) combined = `${h} / ${e}`;
+          else combined = h || e || "";
+          combinedOptions.push(combined);
         }
 
-        // --------------------------------------------
-        // ANSWER
-        // --------------------------------------------
+        // ---------- CORRECT ANSWER ----------
+        let correctAnswer = q.correctAnswer;
 
-        let correctAnswer =
-          q.correctAnswer;
-
-        if (
-          typeof correctAnswer ===
-            "string" &&
-          /^[A-Da-d]$/.test(
-            correctAnswer.trim()
-          )
-        ) {
-          correctAnswer =
-            correctAnswer
-              .trim()
-              .toUpperCase()
-              .charCodeAt(0) -
-            "A".charCodeAt(0);
+        if (typeof correctAnswer === "string") {
+          const a = correctAnswer.trim().toUpperCase();
+          if (/^[A-D]$/.test(a)) correctAnswer = a.charCodeAt(0) - 65;
+          else if (/^[1-4]$/.test(a)) correctAnswer = Number(a) - 1;
         }
 
         if (
-          correctAnswer ===
-            undefined ||
-          correctAnswer ===
-            null ||
-          correctAnswer === ""
+          correctAnswer === undefined ||
+          correctAnswer === null ||
+          correctAnswer === "" ||
+          isNaN(Number(correctAnswer))
         ) {
-          const answer =
-            String(
-              q.answer || ""
-            )
-              .trim()
-              .toUpperCase();
-
-          if (
-            /^[A-D]$/.test(
-              answer
-            )
-          ) {
-            correctAnswer =
-              answer.charCodeAt(0) -
-              "A".charCodeAt(0);
-          }
-
-          if (
-            /^[1-4]$/.test(
-              answer
-            )
-          ) {
-            correctAnswer =
-              Number(answer) - 1;
-          }
+          const answer = String(q.answer || "").trim().toUpperCase();
+          if (/^[A-D]$/.test(answer)) correctAnswer = answer.charCodeAt(0) - 65;
+          else if (/^[1-4]$/.test(answer)) correctAnswer = Number(answer) - 1;
+          else correctAnswer = 0;
         }
 
-        correctAnswer =
-          Number(
-            correctAnswer
-          );
+        correctAnswer = Number(correctAnswer);
 
-        // --------------------------------------------
-        // EXPLANATIONS
-        // --------------------------------------------
+        // ---------- EXPLANATION ----------
+        const explanationHindi = clean(q.hindiExplanation || q.explanationHindi || "");
+        const explanationEnglish = clean(q.englishExplanation || q.explanationEnglish || "");
 
-        const explanationHindi =
-          clean(
-            q.hindiExplanation ||
-            q.explanationHindi ||
-            q.explanation?.hindi ||
-            ""
-          );
-
-        const explanationEnglish =
-          clean(
-            q.englishExplanation ||
-            q.explanationEnglish ||
-            q.explanation?.english ||
-            ""
-          );
-
-        // --------------------------------------------
-        // COMBINED QUESTION
-        // --------------------------------------------
-
-        let combinedQuestion =
-          "";
-
-        if (
-          questionHindi &&
-          questionEnglish &&
-          questionHindi !==
-            questionEnglish
-        ) {
-          combinedQuestion =
-            `${questionHindi}\n\n${questionEnglish}`;
+        let combinedQuestion = "";
+        if (questionHindi && questionEnglish && questionHindi !== questionEnglish) {
+          combinedQuestion = `${questionHindi}\n\n${questionEnglish}`;
         } else {
-          combinedQuestion =
-            questionHindi ||
-            questionEnglish ||
-            "";
+          combinedQuestion = questionHindi || questionEnglish || "";
         }
 
-        // --------------------------------------------
-        // COMBINED EXPLANATION
-        // --------------------------------------------
-
-        let combinedExplanation =
-          "";
-
-        if (
-          explanationHindi &&
-          explanationEnglish &&
-          explanationHindi !==
-            explanationEnglish
-        ) {
-          combinedExplanation =
-            `${explanationHindi}\n\n${explanationEnglish}`;
+        let combinedExplanation = "";
+        if (explanationHindi && explanationEnglish && explanationHindi !== explanationEnglish) {
+          combinedExplanation = `${explanationHindi}\n\n${explanationEnglish}`;
         } else {
-          combinedExplanation =
-            explanationHindi ||
-            explanationEnglish ||
-            "";
+          combinedExplanation = explanationHindi || explanationEnglish || clean(q.explanation || "");
         }
 
-        // --------------------------------------------
-        // VALIDATION
-        // --------------------------------------------
-
-        if (
-          !combinedQuestion
-        ) {
-          throw new Error(
-            `Question ${
-              i + 1
-            }: Question text is missing`
-          );
+        // ---------- VALIDATION ----------
+        if (!combinedQuestion) {
+          return res.status(400).json({
+            success: false,
+            message: `Q${i + 1}: Question text missing. Hindi: "${questionHindi}", English: "${questionEnglish}"`
+          });
+        }
+        if (combinedOptions.some(opt => !clean(opt))) {
+          return res.status(400).json({
+            success: false,
+            message: `Q${i + 1}: All 4 options required. Got: ${JSON.stringify(combinedOptions)}`
+          });
+        }
+        if (!Number.isInteger(correctAnswer) || correctAnswer < 0 || correctAnswer > 3) {
+          return res.status(400).json({
+            success: false,
+            message: `Q${i + 1}: Correct answer invalid (${q.correctAnswer}/${q.answer}). Must be A/B/C/D or 0-3.`
+          });
         }
 
-        if (
-          combinedOptions.length !==
-          4
-        ) {
-          throw new Error(
-            `Question ${
-              i + 1
-            }: Exactly 4 options are required`
-          );
-        }
-
-        if (
-          combinedOptions.some(
-            option =>
-              !clean(option)
-          )
-        ) {
-          throw new Error(
-            `Question ${
-              i + 1
-            }: All 4 options are required`
-          );
-        }
-
-        if (
-          !Number.isInteger(
-            correctAnswer
-          ) ||
-          correctAnswer < 0 ||
-          correctAnswer > 3
-        ) {
-          throw new Error(
-            `Question ${
-              i + 1
-            }: Correct answer must be A, B, C or D`
-          );
-        }
-
-        // --------------------------------------------
-        // FINAL DOCUMENT
-        // --------------------------------------------
-
-        const questionData = {
-          testId:
-            test._id,
-
-          questionNumber:
-            Number(
-              q.questionNumber
-            ) ||
-            i + 1,
-
-          subject:
-            clean(q.subject) ||
-            clean(subject) ||
-            "General",
-
-          chapter:
-            clean(q.chapter) ||
-            clean(chapter) ||
-            "General",
-
-          language:
-            selectedLanguage,
-
-          // ⬇️ ये नई line है - questionText के लिए
-          questionText:
-            combinedQuestion,
-
-          // ⬇️ ये भी नई line है - optionsText के लिए (अगर model में है)
-          optionsText:
-            combinedOptions,
-
+        // ---------- BUILD DOC ----------
+        docs.push({
+          testId: test._id,
+          questionNumber: Number(q.questionNumber) || i + 1,
+          subject: clean(q.subject) || clean(subject) || "General",
+          chapter: clean(q.chapter) || clean(chapter) || "General",
+          language: selectedLanguage,
+          questionText: combinedQuestion,
+          optionsText: combinedOptions,
           questionHindi,
-
           questionEnglish,
-
-          question:
-            combinedQuestion,
-
-          optionsHindi:
-            hindiOptions,
-
-          optionsEnglish:
-            englishOptions,
-
-          options:
-            combinedOptions,
-
+          question: combinedQuestion,
+          optionsHindi: hindiOptions,
+          optionsEnglish: englishOptions,
+          options: combinedOptions,
           correctAnswer,
-
           explanationHindi,
-
           explanationEnglish,
-
-          explanation:
-            combinedExplanation,
-
-          type:
-            "single"
-        };
-        docs.push(
-          questionData
-        );
+          explanation: combinedExplanation,
+          type: "single"
+        });
       }
 
-      // ----------------------------------------------
-      // INSERT
-      //
-      // IMPORTANT:
-      // Existing questions are NOT deleted.
-      // ----------------------------------------------
-
-      const inserted =
-        await Question.insertMany(
-          docs,
-          {
-            ordered: true
-          }
-        );
-
-      // ----------------------------------------------
-      // SUCCESS
-      // ----------------------------------------------
+      const inserted = await Question.insertMany(docs, { ordered: true });
 
       return res.json({
         success: true,
-
-        message:
-          `${inserted.length} questions imported successfully.`,
-
-        imported:
-          inserted.length,
-
-        total:
-          questions.length
+        message: `${inserted.length} questions imported.`,
+        imported: inserted.length,
+        total: questions.length
       });
     } catch (error) {
-      console.error(
-        "Bulk Import Error:",
-        error
-      );
-
+      console.error("Bulk Import Error:", error);
       return res.status(500).json({
         success: false,
-
-        message:
-          error.message ||
-          "Questions import failed"
+        message: error.message || "Import failed"
       });
     }
   }
 );
 
 // ======================================================
-// ADMIN: GET QUESTIONS FOR TEST
+// ADMIN: GET QUESTIONS
 // ======================================================
 
-router.get(
-  "/admin/test/:testId",
-  adminOnly,
-
-  async (req, res) => {
-    try {
-      const questions =
-        await Question.find({
-          testId:
-            req.params.testId
-        }).sort({
-          questionNumber: 1,
-          createdAt: 1
-        });
-
-      return res.json({
-        success: true,
-        questions
-      });
-    } catch (error) {
-      console.error(
-        "Admin Questions Error:",
-        error
-      );
-
-      return res.status(500).json({
-        success: false,
-        message:
-          "Unable to load questions"
-      });
-    }
+router.get("/admin/test/:testId", adminOnly, async (req, res) => {
+  try {
+    const questions = await Question.find({ testId: req.params.testId })
+      .sort({ questionNumber: 1, createdAt: 1 });
+    return res.json({ success: true, questions });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: "Failed" });
   }
-);
+});
 
 // ======================================================
 // STUDENT: GET QUESTIONS
 // ======================================================
 
-router.get(
-  "/test/:testId",
+router.get("/test/:testId", async (req, res) => {
+  try {
+    const test = await Test.findById(req.params.testId);
+    if (!test) return res.status(404).json({ success: false, message: "Test not found" });
+    if (test.visible === false) return res.status(404).json({ success: false, message: "Not available" });
 
-  async (req, res) => {
-    try {
-      const test =
-        await Test.findById(
-          req.params.testId
-        );
+    const questions = await Question.find({ testId: req.params.testId })
+      .select("-answer -explanation")
+      .sort({ questionNumber: 1, createdAt: 1 });
 
-      if (!test) {
-        return res.status(404).json({
-          success: false,
-          message:
-            "Test not found"
-        });
-      }
-
-      if (
-        test.visible === false
-      ) {
-        return res.status(404).json({
-          success: false,
-          message:
-            "Test is not available"
-        });
-      }
-
-      const questions =
-        await Question.find({
-          testId:
-            req.params.testId
-        })
-          .select(
-            "-answer -explanation"
-          )
-          .sort({
-            questionNumber: 1,
-            createdAt: 1
-          });
-
-      return res.json({
-        success: true,
-        questions
-      });
-    } catch (error) {
-      console.error(
-        "Student Questions Error:",
-        error
-      );
-
-      return res.status(500).json({
-        success: false,
-        message:
-          "Unable to load test questions"
-      });
-    }
+    return res.json({ success: true, questions });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: "Failed" });
   }
-);
+});
 
 // ======================================================
-// MANUAL QUESTION ADD
+// MANUAL ADD
 // ======================================================
 
-router.post(
-  "/",
-  adminOnly,
-
-  async (req, res) => {
-    try {
-      const question =
-        await Question.create(
-          req.body
-        );
-
-      return res.json({
-        success: true,
-        message:
-          "Question added successfully",
-        question
-      });
-    } catch (error) {
-      console.error(
-        "Manual Question Error:",
-        error
-      );
-
-      return res.status(500).json({
-        success: false,
-        message:
-          error.message
-      });
-    }
+router.post("/", adminOnly, async (req, res) => {
+  try {
+    const question = await Question.create(req.body);
+    return res.json({ success: true, message: "Added", question });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: error.message });
   }
-);
+});
 
 // ======================================================
-// UPDATE QUESTION
+// UPDATE
 // ======================================================
 
-router.put(
-  "/:id",
-  adminOnly,
-
-  async (req, res) => {
-    try {
-      const question =
-        await Question.findByIdAndUpdate(
-          req.params.id,
-          req.body,
-          {
-            new: true,
-            runValidators: true
-          }
-        );
-
-      if (!question) {
-        return res.status(404).json({
-          success: false,
-          message:
-            "Question not found"
-        });
-      }
-
-      return res.json({
-        success: true,
-        message:
-          "Question updated successfully",
-        question
-      });
-    } catch (error) {
-      console.error(
-        "Update Question Error:",
-        error
-      );
-
-      return res.status(500).json({
-        success: false,
-        message:
-          error.message
-      });
-    }
+router.put("/:id", adminOnly, async (req, res) => {
+  try {
+    const question = await Question.findByIdAndUpdate(req.params.id, req.body, {
+      new: true, runValidators: true
+    });
+    if (!question) return res.status(404).json({ success: false, message: "Not found" });
+    return res.json({ success: true, message: "Updated", question });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: error.message });
   }
-);
+});
 
 // ======================================================
-// DELETE QUESTION
+// DELETE
 // ======================================================
 
-router.delete(
-  "/:id",
-  adminOnly,
-
-  async (req, res) => {
-    try {
-      const question =
-        await Question.findByIdAndDelete(
-          req.params.id
-        );
-
-      if (!question) {
-        return res.status(404).json({
-          success: false,
-          message:
-            "Question not found"
-        });
-      }
-
-      return res.json({
-        success: true,
-        message:
-          "Question deleted successfully"
-      });
-    } catch (error) {
-      console.error(
-        "Delete Question Error:",
-        error
-      );
-
-      return res.status(500).json({
-        success: false,
-        message:
-          "Delete failed"
-      });
-    }
+router.delete("/:id", adminOnly, async (req, res) => {
+  try {
+    const question = await Question.findByIdAndDelete(req.params.id);
+    if (!question) return res.status(404).json({ success: false, message: "Not found" });
+    return res.json({ success: true, message: "Deleted" });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: "Failed" });
   }
-);
+});
 
 // ======================================================
-// MULTER ERROR HANDLER
+// MULTER ERROR
 // ======================================================
 
-router.use(
-  (err, req, res, next) => {
-    if (
-      err instanceof multer.MulterError
-    ) {
-      return res.status(400).json({
-        success: false,
-        message:
-          err.message
-      });
-    }
-
-    if (err) {
-      return res.status(400).json({
-        success: false,
-        message:
-          err.message
-      });
-    }
-
-    next();
+router.use((err, req, res, next) => {
+  if (err instanceof multer.MulterError) {
+    return res.status(400).json({ success: false, message: err.message });
   }
-);
-
-// ======================================================
-// EXPORT
-// ======================================================
+  if (err) {
+    return res.status(400).json({ success: false, message: err.message });
+  }
+  next();
+});
 
 module.exports = router;

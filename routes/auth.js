@@ -38,7 +38,6 @@ router.post("/register", async (req, res) => {
 
     const normalizedEmail = email ? email.trim().toLowerCase() : "";
 
-    // Check duplicate email
     if (normalizedEmail) {
       const existingEmail = await User.findOne({ email: normalizedEmail });
       if (existingEmail) {
@@ -49,7 +48,6 @@ router.post("/register", async (req, res) => {
       }
     }
 
-    // Check duplicate mobile
     if (mobile) {
       const existingMobile = await User.findOne({ mobile: mobile.trim() });
       if (existingMobile) {
@@ -71,7 +69,6 @@ router.post("/register", async (req, res) => {
       isActive: true
     });
 
-    // Session
     req.session.userId = user._id.toString();
     req.session.user = {
       id: user._id.toString(),
@@ -116,7 +113,6 @@ router.post("/login", async (req, res) => {
       });
     }
 
-    // Email ya mobile se user dhundo
     let user;
     if (email) {
       user = await User.findOne({ email: email.trim().toLowerCase() });
@@ -147,7 +143,6 @@ router.post("/login", async (req, res) => {
       });
     }
 
-    // Session save
     req.session.userId = user._id.toString();
     req.session.user = {
       id: user._id.toString(),
@@ -253,9 +248,62 @@ router.post("/logout", (req, res) => {
 });
 
 // =====================================================
+// UPDATE TARGET EXAM (PHASE 2)
+// POST /api/auth/update-target
+// Body: { targetExam }
+// =====================================================
+router.post("/update-target", async (req, res) => {
+  try {
+    if (!req.session.userId) {
+      return res.status(401).json({
+        success: false,
+        message: "Please login first"
+      });
+    }
+
+    const { targetExam } = req.body;
+
+    if (!targetExam) {
+      return res.status(400).json({
+        success: false,
+        message: "Target exam required"
+      });
+    }
+
+    const user = await User.findByIdAndUpdate(
+      req.session.userId,
+      { targetExam: targetExam.trim() },
+      { new: true }
+    ).select("-password");
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found"
+      });
+    }
+
+    // Update session
+    req.session.user.targetExam = user.targetExam;
+
+    res.json({
+      success: true,
+      message: "Target exam saved",
+      user
+    });
+
+  } catch (error) {
+    console.error("Update target error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to update target"
+    });
+  }
+});
+
+// =====================================================
 // FORGOT PASSWORD - STEP 1: Send OTP
 // POST /api/auth/forgot-password
-// Body: { email } ya { mobile }
 // =====================================================
 router.post("/forgot-password", async (req, res) => {
   try {
@@ -287,14 +335,11 @@ router.post("/forgot-password", async (req, res) => {
       });
     }
 
-    // OTP generate
     const otp = generateOTP();
-    const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 min
+    const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
 
-    // Purane OTP delete
     await OTP.deleteMany({ identifier });
 
-    // Naya OTP save
     await OTP.create({
       identifier,
       identifierType,
@@ -302,7 +347,6 @@ router.post("/forgot-password", async (req, res) => {
       expiresAt
     });
 
-    // Email bhejo
     if (identifierType === "email") {
       try {
         await transporter.sendMail({
@@ -338,7 +382,6 @@ router.post("/forgot-password", async (req, res) => {
         });
       }
     } else {
-      // Mobile OTP - abhi console me print (SMS service baad me)
       console.log(`📱 OTP for ${identifier}: ${otp}`);
       res.json({
         success: true,
@@ -358,7 +401,6 @@ router.post("/forgot-password", async (req, res) => {
 
 // =====================================================
 // FORGOT PASSWORD - STEP 2: Verify OTP
-// POST /api/auth/verify-otp
 // =====================================================
 router.post("/verify-otp", async (req, res) => {
   try {
@@ -412,7 +454,6 @@ router.post("/verify-otp", async (req, res) => {
 
 // =====================================================
 // FORGOT PASSWORD - STEP 3: Reset Password
-// POST /api/auth/reset-password
 // =====================================================
 router.post("/reset-password", async (req, res) => {
   try {
@@ -440,7 +481,6 @@ router.post("/reset-password", async (req, res) => {
       });
     }
 
-    // User dhundo
     let user;
     if (email) {
       user = await User.findOne({ email: email.trim().toLowerCase() });
@@ -455,12 +495,10 @@ router.post("/reset-password", async (req, res) => {
       });
     }
 
-    // Naya password hash
     const hashed = await bcrypt.hash(newPassword, 12);
     user.password = hashed;
     await user.save();
 
-    // OTP delete
     await OTP.deleteMany({ identifier });
 
     res.json({

@@ -1,0 +1,327 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Exams Manager - Admin</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', Arial, sans-serif; background: var(--bg); color: var(--text); padding: 20px; }
+    .container { max-width: 1200px; margin: auto; }
+    .page-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px; }
+    .page-head h1 { font-size: 24px; font-weight: 900; }
+    .page-head .actions { display: flex; gap: 10px; }
+    .page-head a { color: var(--primary); text-decoration: none; font-weight: 700; font-size: 13px; }
+
+    .btn { padding: 10px 18px; border-radius: 10px; font-weight: 800; font-size: 13px; border: none; cursor: pointer; text-decoration: none; display: inline-block; }
+    .btn-blue { background: var(--gradient-blue); color: white; }
+    .btn-green { background: var(--gradient-green); color: white; }
+    .btn-red { background: var(--gradient-red); color: white; }
+    .btn-gray { background: var(--card-hover); color: var(--text); border: 1px solid var(--border); }
+    .btn-sm { padding: 6px 12px; font-size: 11px; }
+
+    .form-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 14px; padding: 20px; margin-bottom: 20px; display: none; }
+    .form-card.open { display: block; }
+    .form-card h2 { font-size: 18px; margin-bottom: 16px; }
+
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .form-group { margin-bottom: 14px; }
+    .form-group label { display: block; margin-bottom: 6px; font-weight: 800; font-size: 12px; color: var(--muted); text-transform: uppercase; }
+    .form-input, .form-select, .form-textarea { width: 100%; padding: 11px 14px; background: var(--bg); border: 2px solid var(--border); border-radius: 10px; color: var(--text); font-size: 14px; }
+    .form-input:focus, .form-select:focus, .form-textarea:focus { outline: none; border-color: var(--primary); }
+    .form-textarea { min-height: 80px; resize: vertical; }
+
+    .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+    .card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 14px; padding: 18px; transition: all 0.2s; }
+    .card:hover { border-color: var(--primary); }
+    .card .icon { font-size: 36px; margin-bottom: 8px; }
+    .card h3 { font-size: 16px; margin-bottom: 6px; }
+    .card .cat { font-size: 11px; color: var(--muted); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .card p { font-size: 12px; color: var(--muted); margin-bottom: 12px; line-height: 1.4; min-height: 32px; }
+    .card .actions { display: flex; gap: 6px; flex-wrap: wrap; }
+
+    .badge { padding: 3px 10px; border-radius: 20px; font-size: 10px; font-weight: 800; display: inline-block; }
+    .badge-blue { background: #1e3a8a; color: #93c5fd; }
+    .badge-green { background: #14532d; color: #86efac; }
+    .badge-red { background: #7f1d1d; color: #fca5a5; }
+
+    .msg { padding: 12px 16px; border-radius: 10px; margin-bottom: 15px; display: none; font-weight: 700; font-size: 13px; }
+    .msg.success { background: #14532d; color: #86efac; display: block; }
+    .msg.error { background: #7f1d1d; color: #fca5a5; display: block; }
+
+    .empty-box { text-align: center; padding: 40px; color: var(--muted); font-size: 14px; grid-column: 1/-1; background: var(--card-bg); border: 1px dashed var(--border); border-radius: 14px; }
+
+    @media (max-width: 900px) {
+      .grid { grid-template-columns: repeat(2, 1fr); }
+      .form-row { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 600px) {
+      .grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="page-head">
+      <h1>🎓 Exams Manager</h1>
+      <div class="actions">
+        <a href="/admin-dashboard.html" class="btn btn-gray">← Dashboard</a>
+        <button class="btn btn-blue" id="addNewBtn">➕ Add New Exam</button>
+      </div>
+    </div>
+
+    <div id="msg" class="msg"></div>
+
+    <!-- FORM -->
+    <div class="form-card" id="formCard">
+      <h2 id="formTitle">➕ Add New Exam</h2>
+
+      <input type="hidden" id="examId" />
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Exam Name *</label>
+          <input type="text" id="examName" class="form-input" placeholder="BSF HCM" />
+        </div>
+        <div class="form-group">
+          <label>Category *</label>
+          <select id="category" class="form-select">
+            <option value="SSC">SSC</option>
+            <option value="Railway">Railway</option>
+            <option value="Defence">Defence</option>
+            <option value="Police">Police</option>
+            <option value="UPSSSC">UPSSSC</option>
+            <option value="Banking">Banking</option>
+            <option value="Teaching">Teaching</option>
+            <option value="State">State</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Icon (Emoji)</label>
+          <input type="text" id="icon" class="form-input" placeholder="🛡️" maxlength="4" />
+        </div>
+        <div class="form-group">
+          <label>Display Order</label>
+          <input type="number" id="order" class="form-input" value="0" />
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Description</label>
+        <input type="text" id="description" class="form-input" placeholder="BSF HCM complete preparation" />
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>PDF Link (optional)</label>
+          <input type="url" id="pdfUrl" class="form-input" placeholder="https://drive.google.com/..." />
+        </div>
+        <div class="form-group">
+          <label>Test Link (optional)</label>
+          <input type="text" id="testUrl" class="form-input" placeholder="/exam-test.html?exam=BSF HCM" />
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Demo Video (YouTube, optional)</label>
+        <input type="url" id="demoUrl" class="form-input" placeholder="https://youtube.com/watch?v=..." />
+      </div>
+
+      <div style="display: flex; gap: 10px; margin-top: 10px;">
+        <button class="btn btn-green" id="saveBtn">💾 Save Exam</button>
+        <button class="btn btn-gray" id="cancelBtn">Cancel</button>
+      </div>
+    </div>
+
+    <!-- LIST -->
+    <div class="grid" id="examGrid">
+      <div class="empty-box">Loading exams...</div>
+    </div>
+  </div>
+
+  <script src="/js/common.js"></script>
+  <script>
+    let allExams = [];
+
+    async function loadExams() {
+      const grid = document.getElementById("examGrid");
+      grid.innerHTML = '<div class="empty-box">Loading exams...</div>';
+
+      try {
+        const r = await fetch("/api/exam-links/admin/all", { credentials: "include" });
+        const data = await r.json();
+
+        if (!data.success) throw new Error(data.message);
+
+        allExams = data.data || [];
+        renderExams();
+      } catch (e) {
+        grid.innerHTML = '<div class="empty-box">❌ ' + escapeHtml(e.message) + '</div>';
+      }
+    }
+
+    function renderExams() {
+      const grid = document.getElementById("examGrid");
+
+      if (!allExams.length) {
+        grid.innerHTML = '<div class="empty-box">📭 Koi exam nahi hai. "Add New Exam" click karo.</div>';
+        return;
+      }
+
+      grid.innerHTML = allExams.map(e => {
+        const visibleBadge = e.visible === false
+          ? '<span class="badge badge-red">🚫 Hidden</span>'
+          : '<span class="badge badge-green">👁️ Visible</span>';
+
+        return '<div class="card">' +
+          '<div class="icon">' + escapeHtml(e.icon || "🎓") + '</div>' +
+          '<h3>' + escapeHtml(e.examName) + '</h3>' +
+          '<div class="cat">' + escapeHtml(e.category || "Other") + '</div>' +
+          '<p>' + escapeHtml(e.description || "") + '</p>' +
+          '<div style="margin-bottom: 10px;">' + visibleBadge + '</div>' +
+          '<div class="actions">' +
+            '<button class="btn btn-blue btn-sm" onclick="editExam(\'' + e._id + '\')">✏️ Edit</button>' +
+            '<button class="btn btn-red btn-sm" onclick="deleteExam(\'' + e._id + '\')">🗑 Delete</button>' +
+          '</div>' +
+        '</div>';
+      }).join("");
+    }
+
+    document.getElementById("addNewBtn").addEventListener("click", () => {
+      resetForm();
+      document.getElementById("formTitle").textContent = "➕ Add New Exam";
+      document.getElementById("formCard").classList.add("open");
+      document.getElementById("formCard").scrollIntoView({ behavior: "smooth" });
+    });
+
+    document.getElementById("cancelBtn").addEventListener("click", () => {
+      document.getElementById("formCard").classList.remove("open");
+      resetForm();
+    });
+
+    function resetForm() {
+      document.getElementById("examId").value = "";
+      document.getElementById("examName").value = "";
+      document.getElementById("category").value = "SSC";
+      document.getElementById("icon").value = "";
+      document.getElementById("order").value = 0;
+      document.getElementById("description").value = "";
+      document.getElementById("pdfUrl").value = "";
+      document.getElementById("testUrl").value = "";
+      document.getElementById("demoUrl").value = "";
+    }
+
+    function editExam(id) {
+      const e = allExams.find(x => x._id === id);
+      if (!e) return;
+
+      document.getElementById("examId").value = e._id;
+      document.getElementById("examName").value = e.examName || "";
+      document.getElementById("category").value = e.category || "SSC";
+      document.getElementById("icon").value = e.icon || "";
+      document.getElementById("order").value = e.order || 0;
+      document.getElementById("description").value = e.description || "";
+      document.getElementById("pdfUrl").value = e.pdfUrl || "";
+      document.getElementById("testUrl").value = e.testUrl || "";
+      document.getElementById("demoUrl").value = e.demoUrl || "";
+
+      document.getElementById("formTitle").textContent = "✏️ Edit Exam";
+      document.getElementById("formCard").classList.add("open");
+      document.getElementById("formCard").scrollIntoView({ behavior: "smooth" });
+    }
+
+    document.getElementById("saveBtn").addEventListener("click", async () => {
+      const id = document.getElementById("examId").value;
+      const examName = document.getElementById("examName").value.trim();
+
+      if (!examName) {
+        showMsg("Exam name required", "error");
+        return;
+      }
+
+      const payload = {
+        examName,
+        category: document.getElementById("category").value,
+        icon: document.getElementById("icon").value.trim() || "🎓",
+        order: Number(document.getElementById("order").value) || 0,
+        description: document.getElementById("description").value.trim(),
+        pdfUrl: document.getElementById("pdfUrl").value.trim(),
+        testUrl: document.getElementById("testUrl").value.trim(),
+        demoUrl: document.getElementById("demoUrl").value.trim()
+      };
+
+      const btn = document.getElementById("saveBtn");
+      const orig = btn.innerHTML;
+      btn.innerHTML = '<span class="spinner"></span> Saving...';
+      btn.disabled = true;
+
+      try {
+        const url = id ? "/api/exam-links/" + id : "/api/exam-links";
+        const method = id ? "PUT" : "POST";
+
+        const r = await fetch(url, {
+          method,
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify(payload)
+        });
+        const data = await r.json();
+
+        if (data.success) {
+          showMsg(id ? "✅ Exam updated!" : "✅ Exam created!", "success");
+          document.getElementById("formCard").classList.remove("open");
+          resetForm();
+          loadExams();
+        } else {
+          showMsg(data.message || "Failed", "error");
+        }
+      } catch (e) {
+        showMsg("Server error: " + e.message, "error");
+      } finally {
+        btn.innerHTML = orig;
+        btn.disabled = false;
+      }
+    });
+
+    async function deleteExam(id) {
+      if (!confirm("Ye exam delete karna hai?")) return;
+
+      try {
+        const r = await fetch("/api/exam-links/" + id, {
+          method: "DELETE",
+          credentials: "include"
+        });
+        const data = await r.json();
+
+        if (data.success) {
+          showMsg("🗑 Deleted!", "success");
+          loadExams();
+        } else {
+          showMsg(data.message || "Failed", "error");
+        }
+      } catch (e) {
+        showMsg("Server error: " + e.message, "error");
+      }
+    }
+
+    function showMsg(text, type) {
+      const box = document.getElementById("msg");
+      box.textContent = text;
+      box.className = "msg " + type;
+      setTimeout(() => box.style.display = "none", 3000);
+    }
+
+    (async function() {
+      const user = await requireLogin();
+      if (!user) return;
+      if (user.role !== "admin") { location.href = "/dashboard.html"; return; }
+      loadExams();
+    })();
+  </script>
+</body>
+</html>

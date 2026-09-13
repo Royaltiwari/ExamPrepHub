@@ -27,6 +27,10 @@ const chatRoutes = require("./routes/chat");
 const settingsRoutes = require("./routes/settings");
 const paymentRoutes = require("./routes/payments");
 const purchaseRoutes = require("./routes/purchases");
+const progressRoutes = require("./routes/progress");
+const savedRoutes = require("./routes/saved");
+const notificationRoutes = require("./routes/notifications");
+const subjectRoutes = require("./routes/subjects");
 // =====================================================
 // MIDDLEWARE
 // =====================================================
@@ -114,6 +118,10 @@ app.use("/api/chat", chatRoutes);
 app.use("/api/settings", settingsRoutes);
 app.use("/api/payments", paymentRoutes);
 app.use("/api/purchases", purchaseRoutes);
+app.use("/api/progress", progressRoutes);
+app.use("/api/saved", savedRoutes);
+app.use("/api/notifications", notificationRoutes);
+app.use("/api/subjects", subjectRoutes);
 // =====================================================
 // HOME
 // =====================================================

@@ -41,6 +41,24 @@ const userSchema = new mongoose.Schema(
     isActive: {
       type: Boolean,
       default: true
+    },
+
+    targetExam: {
+      type: String,
+      default: "",
+      trim: true
+    },
+
+    language: {
+      type: String,
+      enum: ["Hindi", "English", "Bilingual"],
+      default: "Bilingual"
+    },
+
+    theme: {
+      type: String,
+      enum: ["light", "dark", "system"],
+      default: "dark"
     }
   },
   {

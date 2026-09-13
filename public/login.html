@@ -151,8 +151,15 @@
 
         showMessage("Login successful! Redirecting...", "success");
 
+        // ✅ ADMIN ko admin-dashboard, student ko dashboard
         setTimeout(() => {
-          window.location.href = "/dashboard.html";
+          const role = (data.user && data.user.role) || "student";
+
+          if (role === "admin") {
+            window.location.href = "/admin-dashboard.html";
+          } else {
+            window.location.href = "/dashboard.html";
+          }
         }, 800);
 
       } catch (error) {

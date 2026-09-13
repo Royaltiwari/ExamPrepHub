@@ -1,0 +1,228 @@
+﻿<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Instructions Settings - ExamPrepHub</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+  <header class="header">
+    <div class="header-inner">
+      <a href="/admin.html" class="logo">📋 Instructions Settings</a>
+      <div class="header-actions">
+        <a href="/admin.html" class="btn-header">← Admin Home</a>
+        <button class="btn-header" id="logoutBtn">Logout</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="layout-full" style="padding: 25px 20px; max-width: 1000px; margin: auto;">
+
+    <h1 style="font-size: 24px; margin-bottom: 6px;">📋 Test Instructions Settings</h1>
+    <p class="text-muted" style="margin-bottom: 25px;">
+      यहाँ लिखी instructions सभी tests में दिखेंगी (Bilingual)
+    </p>
+
+    <div id="message" class="alert" style="display: none;"></div>
+
+    <div class="card" style="margin-bottom: 20px;">
+      <div class="card-heading">
+        <div class="heading-icon">✏️</div>
+        <h2>Instructions Content</h2>
+      </div>
+
+      <div class="form-group">
+        <label>Title (Heading)</label>
+        <input type="text" id="title" class="form-input" placeholder="📋 Important Instructions / महत्वपूर्ण निर्देश" />
+      </div>
+
+      <div class="form-group">
+        <label>Instructions Content (Bilingual — Hindi + English)</label>
+        <textarea 
+          id="content" 
+          class="form-textarea" 
+          rows="20" 
+          style="font-family: monospace; font-size: 14px; line-height: 1.6;"
+          placeholder="यहाँ instructions लिखें..."
+        ></textarea>
+        <div style="font-size: 12px; color: var(--muted); margin-top: 6px;">
+          💡 Placeholders: [Total Questions], [Duration], [Type] — automatically replace ho jayenge
+        </div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom: 20px;">
+      <div class="card-heading">
+        <div class="heading-icon">👁️</div>
+        <h2>Live Preview</h2>
+      </div>
+
+      <div style="background: var(--bg-alt); padding: 20px; border-radius: 12px; border: 1px solid var(--border);">
+        <h3 id="previewTitle" style="font-size: 18px; margin-bottom: 12px; color: var(--primary);">📋 Important Instructions</h3>
+        <div id="previewContent" style="white-space: pre-wrap; font-size: 14px; line-height: 1.7; color: var(--text);"></div>
+      </div>
+    </div>
+
+    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+      <button class="btn btn-green btn-lg" id="saveBtn" style="flex: 1; min-width: 200px;">
+        💾 Save Instructions
+      </button>
+      <button class="btn btn-gray btn-lg" id="resetBtn" style="flex: 1; min-width: 200px;">
+        🔄 Reset to Default
+      </button>
+    </div>
+
+  </div>
+
+  <script src="/js/common.js"></script>
+  <script>
+    const DEFAULT_TITLE = "📋 UPSSSC PET परीक्षा के महत्वपूर्ण निर्देश / Important Instructions";
+    const DEFAULT_CONTENT = `🇮🇳 UPSSSC PET (प्रारंभिक अर्हता परीक्षा) — मॉक टेस्ट
+🇮🇳 UPSSSC PET (Preliminary Eligibility Test) — Mock Test
+
+═══════════════════════════════════════
+
+📌 1. सामान्य जानकारी / General Information
+
+• कुल प्रश्न: [Total Questions]
+• निर्धारित समय: [Duration] मिनट
+• भाषा: हिंदी एवं अंग्रेजी (Bilingual)
+• प्रकार: [Type] Test
+
+• Total Questions: [Total Questions]
+• Duration: [Duration] minutes
+• Language: Hindi & English (Bilingual)
+• Type: [Type] Test
+
+═══════════════════════════════════════
+
+📊 2. अंकन प्रणाली / Marking Scheme
+
+• सही उत्तर: +1 अंक
+• गलत उत्तर: कोई ऋणात्मक अंकन नहीं
+• छोड़े गए प्रश्न: 0 अंक
+
+• Correct Answer: +1 mark
+• Wrong Answer: No Negative Marking
+• Unattempted: 0 mark
+
+═══════════════════════════════════════
+
+⚠️ 3. महत्वपूर्ण निर्देश / Important Instructions
+
+1. परीक्षा प्रारंभ होने के बाद टाइमर को रोका नहीं जा सकता।
+   Once the exam starts, the timer cannot be paused.
+
+2. प्रत्येक प्रश्न में 4 विकल्प दिए गए हैं, जिनमें से केवल 1 सही है।
+   Each question has 4 options, only 1 is correct.
+
+3. उत्तर चुनने के बाद 'Save & Next' बटन पर क्लिक करना अनिवार्य है।
+   After selecting an answer, click 'Save & Next'.
+
+4. उत्तर बदलने के लिए 'Clear Response' बटन का उपयोग करें।
+   To change answer, use 'Clear Response'.
+
+5. टेस्ट के दौरान TAB न बदलें।
+   Do NOT switch tabs.
+
+6. समय समाप्त होने पर टेस्ट स्वतः सबमिट हो जाएगा।
+   Test will auto-submit when time is over.
+
+═══════════════════════════════════════
+
+📞 4. सहायता / Help & Support
+
+• ईमेल / Email: examprep776@gmail.com
+• वेबसाइट / Website: examprephub-live.onrender.com
+• हेल्पलाइन / Helpline: 7753921748
+
+═══════════════════════════════════════
+
+🇮🇳 आप सभी को हार्दिक शुभकामनाएँ! 🇮🇳
+🇮🇳 Best of Luck to All! 🇮🇳
+
+कृपया चेकबॉक्स पर टिक करके पुष्टि करें।
+Please tick the checkbox to confirm.`;
+
+    async function loadInstructions() {
+      try {
+        const r = await fetch("/api/settings/instructions");
+        const data = await r.json();
+
+        if (data.success && data.data) {
+          document.getElementById("title").value = data.data.title || DEFAULT_TITLE;
+          document.getElementById("content").value = data.data.content || DEFAULT_CONTENT;
+        } else {
+          document.getElementById("title").value = DEFAULT_TITLE;
+          document.getElementById("content").value = DEFAULT_CONTENT;
+        }
+        updatePreview();
+      } catch (e) {
+        document.getElementById("title").value = DEFAULT_TITLE;
+        document.getElementById("content").value = DEFAULT_CONTENT;
+        updatePreview();
+      }
+    }
+
+    function updatePreview() {
+      document.getElementById("previewTitle").textContent = document.getElementById("title").value || DEFAULT_TITLE;
+      document.getElementById("previewContent").textContent = document.getElementById("content").value || "";
+    }
+
+    document.getElementById("title").addEventListener("input", updatePreview);
+    document.getElementById("content").addEventListener("input", updatePreview);
+
+    document.getElementById("saveBtn").addEventListener("click", async () => {
+      const btn = document.getElementById("saveBtn");
+      const orig = btn.innerHTML;
+      btn.innerHTML = '<span class="spinner"></span> Saving...';
+      btn.disabled = true;
+
+      try {
+        const r = await fetch("/api/settings/instructions", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({
+            title: document.getElementById("title").value.trim(),
+            content: document.getElementById("content").value
+          })
+        });
+        const data = await r.json();
+
+        if (data.success) {
+          showAlert("✅ Instructions saved! Sabhi tests me apply ho gayi.", "success");
+        } else {
+          showAlert(data.message || "Failed", "error");
+        }
+      } catch (e) {
+        showAlert("Server error: " + e.message, "error");
+      } finally {
+        btn.innerHTML = orig;
+        btn.disabled = false;
+      }
+    });
+
+    document.getElementById("resetBtn").addEventListener("click", () => {
+      if (!confirm("Default instructions pe reset karna hai?")) return;
+      document.getElementById("title").value = DEFAULT_TITLE;
+      document.getElementById("content").value = DEFAULT_CONTENT;
+      updatePreview();
+      showAlert("Default content load ho gaya. Save click karo.", "info");
+    });
+
+    (async function() {
+      const user = await requireLogin();
+      if (!user) return;
+      if (user.role !== "admin") {
+        window.location.href = "/dashboard.html";
+        return;
+      }
+      loadInstructions();
+    })();
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,186 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard - ExamPrepHub</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', Arial, sans-serif; background: var(--bg); color: var(--text); padding-bottom: 70px; }
+    .top-bar { background: linear-gradient(135deg, #1e1b4b, #312e81); padding: 14px 20px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
+    .top-bar .logo { font-size: 18px; font-weight: 900; color: white; }
+    .top-bar .actions { display: flex; gap: 10px; align-items: center; }
+    .icon-btn { background: rgba(255,255,255,0.1); border: none; width: 38px; height: 38px; border-radius: 10px; color: white; cursor: pointer; font-size: 18px; }
+    .icon-btn:hover { background: rgba(255,255,255,0.2); }
+    .layout { display: grid; grid-template-columns: 220px 1fr; gap: 20px; max-width: 1400px; margin: auto; padding: 20px; }
+    .sidebar { background: var(--card-bg); border: 1px solid var(--border); border-radius: 16px; padding: 15px; height: fit-content; position: sticky; top: 90px; }
+    .sidebar h3 { font-size: 11px; color: var(--muted); text-transform: uppercase; margin-bottom: 12px; padding-left: 8px; letter-spacing: 1px; }
+    .side-link { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 10px; color: var(--text-light); font-weight: 600; font-size: 13px; margin-bottom: 3px; text-decoration: none; transition: all 0.2s; }
+    .side-link:hover { background: var(--card-hover); color: var(--primary); }
+    .side-link.active { background: var(--gradient-blue); color: white; }
+    .main { min-height: 400px; }
+    .welcome { margin-bottom: 20px; }
+    .welcome h1 { font-size: 22px; font-weight: 900; margin-bottom: 4px; }
+    .welcome p { color: var(--muted); font-size: 14px; }
+    .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 20px; }
+    .stat-box { background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; padding: 16px; display: flex; align-items: center; gap: 12px; }
+    .stat-box .icon-box { width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
+    .stat-box.blue .icon-box { background: #1e3a8a; color: #93c5fd; }
+    .stat-box.green .icon-box { background: #14532d; color: #86efac; }
+    .stat-box.orange .icon-box { background: #78350f; color: #fcd34d; }
+    .stat-box.purple .icon-box { background: #4c1d95; color: #c4b5fd; }
+    .stat-box .num { font-size: 22px; font-weight: 900; color: var(--text); line-height: 1; }
+    .stat-box .lbl { font-size: 11px; color: var(--muted); margin-top: 3px; }
+    .sec-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; margin-top: 25px; }
+    .sec-head h2 { font-size: 15px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.5px; }
+    .sec-head a { font-size: 12px; color: var(--primary); text-decoration: none; font-weight: 700; }
+    .live-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 14px; padding: 16px; display: flex; align-items: center; gap: 14px; margin-bottom: 12px; }
+    .live-card .live-dot { width: 12px; height: 12px; background: #dc2626; border-radius: 50%; animation: pulse 1.5s infinite; flex-shrink: 0; }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+    .live-card .info { flex: 1; }
+    .live-card h3 { font-size: 15px; margin-bottom: 4px; }
+    .live-card p { font-size: 12px; color: var(--muted); }
+    .action-btn { background: var(--gradient-blue); color: white; padding: 8px 14px; border-radius: 8px; font-weight: 800; font-size: 12px; text-decoration: none; border: none; cursor: pointer; }
+    .quick-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 20px; }
+    .quick-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; padding: 16px 10px; text-align: center; text-decoration: none; color: var(--text); transition: all 0.2s; }
+    .quick-card:hover { transform: translateY(-3px); border-color: var(--primary); }
+    .quick-card .ico { font-size: 24px; margin-bottom: 4px; }
+    .quick-card .ttl { font-size: 11px; font-weight: 700; }
+    .empty-box { text-align: center; padding: 30px 20px; color: var(--muted); background: var(--card-bg); border: 1px dashed var(--border); border-radius: 14px; font-size: 13px; }
+    .bottom-nav { display: none; position: fixed; bottom: 0; left: 0; right: 0; background: var(--card-bg); border-top: 1px solid var(--border); padding: 8px 0; z-index: 99; }
+    .bottom-nav-inner { display: flex; justify-content: space-around; max-width: 500px; margin: auto; }
+    .bottom-nav a { display: flex; flex-direction: column; align-items: center; gap: 3px; color: var(--muted); text-decoration: none; font-size: 10px; font-weight: 700; padding: 4px 10px; }
+    .bottom-nav a .ic { font-size: 20px; }
+    .bottom-nav a.active { color: var(--primary); }
+    @media (max-width: 900px) { .layout { grid-template-columns: 1fr; padding: 15px; } .sidebar { display: none; } .bottom-nav { display: block; } .stats-grid { grid-template-columns: repeat(2, 1fr); } .quick-grid { grid-template-columns: repeat(2, 1fr); } }
+  </style>
+</head>
+<body>
+
+<div class="top-bar">
+  <div class="logo">👑 ExamPrepHub Admin</div>
+  <div class="actions">
+    <button class="icon-btn" onclick="location.href='/admin-notifications.html'" title="Notifications">🔔</button>
+    <button class="icon-btn" onclick="location.href='/admin.html'" title="Old Panel">⚙️</button>
+    <button class="icon-btn" onclick="location.href='/profile.html'" title="Profile">👤</button>
+  </div>
+</div>
+
+<div class="layout">
+  <aside class="sidebar">
+    <h3>Admin Menu</h3>
+    <a href="/admin-dashboard.html" class="side-link active"><span>📊</span> Dashboard</a>
+    <a href="/admin-students.html" class="side-link"><span>👥</span> Students</a>
+    <a href="/admin-exams-mgmt.html" class="side-link"><span>🎓</span> Exams</a>
+    <a href="/admin-classes.html" class="side-link"><span>📚</span> Classes</a>
+    <a href="/admin-live.html" class="side-link"><span>📺</span> Live</a>
+    <a href="/admin-content-manager.html" class="side-link"><span>🎯</span> Content Mgr</a>
+    <a href="/admin-tests.html" class="side-link"><span>📝</span> Tests</a>
+    <a href="/admin-questions.html" class="side-link"><span>❓</span> Questions</a>
+    <a href="/admin-payments.html" class="side-link"><span>💰</span> Payments</a>
+    <a href="/admin-schedule.html" class="side-link"><span>📅</span> Schedule</a>
+    <a href="/admin-announcements.html" class="side-link"><span>📢</span> Notice</a>
+    <a href="/admin-leaderboard.html" class="side-link"><span>🏆</span> Rank</a>
+    <a href="/admin-media.html" class="side-link"><span>🖼️</span> Media</a>
+    <a href="/admin.html" class="side-link"><span>⚙️</span> Old Panel</a>
+  </aside>
+
+  <main class="main">
+    <div class="welcome">
+      <h1>👑 Welcome, <span id="adminName">Admin</span></h1>
+      <p>Complete control of ExamPrepHub</p>
+    </div>
+
+    <div class="stats-grid">
+      <div class="stat-box blue"><div class="icon-box">👥</div><div><div class="num" id="statStudents">0</div><div class="lbl">Students</div></div></div>
+      <div class="stat-box green"><div class="icon-box">📚</div><div><div class="num" id="statClasses">0</div><div class="lbl">Classes</div></div></div>
+      <div class="stat-box orange"><div class="icon-box">📝</div><div><div class="num" id="statTests">0</div><div class="lbl">Tests</div></div></div>
+      <div class="stat-box purple"><div class="icon-box">📄</div><div><div class="num" id="statNotes">0</div><div class="lbl">PDFs</div></div></div>
+    </div>
+
+    <div class="sec-head"><h2>🔴 Live Now</h2><a href="/admin-live.html">Manage →</a></div>
+    <div id="liveBox"><div class="empty-box">Abhi koi live class nahi chal rahi</div></div>
+
+    <div class="sec-head"><h2>📅 Upcoming Classes</h2><a href="/admin-schedule.html">View All →</a></div>
+    <div id="upcomingBox"><div class="empty-box">Koi upcoming class nahi</div></div>
+
+    <div class="sec-head"><h2>⚡ Quick Actions</h2></div>
+    <div class="quick-grid">
+      <a href="/admin-classes.html" class="quick-card"><div class="ico">➕</div><div class="ttl">Add Class</div></a>
+      <a href="/admin-tests.html" class="quick-card"><div class="ico">📝</div><div class="ttl">Add Test</div></a>
+      <a href="/admin-questions.html" class="quick-card"><div class="ico">❓</div><div class="ttl">Add Q</div></a>
+      <a href="/admin-content-manager.html" class="quick-card"><div class="ico">🎯</div><div class="ttl">Content</div></a>
+    </div>
+  </main>
+</div>
+
+<nav class="bottom-nav">
+  <div class="bottom-nav-inner">
+    <a href="/admin-dashboard.html" class="active"><span class="ic">📊</span> Dash</a>
+    <a href="/admin-students.html"><span class="ic">👥</span> Students</a>
+    <a href="/admin-classes.html"><span class="ic">📚</span> Classes</a>
+    <a href="/admin-tests.html"><span class="ic">📝</span> Tests</a>
+    <a href="/admin.html"><span class="ic">⚙️</span> More</a>
+  </div>
+</nav>
+
+<script src="/js/common.js"></script>
+<script>
+  async function loadStats() {
+    try {
+      const me = await fetch("/api/auth/me", { credentials: "include" }).then(r => r.json());
+      if (me.user) document.getElementById("adminName").textContent = me.user.name || "Admin";
+    } catch (e) {}
+
+    try {
+      const users = await fetch("/api/admin/students-count", { credentials: "include" }).then(r => r.json()).catch(() => ({ count: 0 }));
+      document.getElementById("statStudents").textContent = users.count || 0;
+    } catch (e) {}
+
+    try {
+      const cls = await fetch("/api/classes/admin/all", { credentials: "include" }).then(r => r.json());
+      document.getElementById("statClasses").textContent = (cls.data || []).length;
+    } catch (e) {}
+
+    try {
+      const tests = await fetch("/api/admin/tests", { credentials: "include" }).then(r => r.json());
+      document.getElementById("statTests").textContent = (tests.tests || []).length;
+    } catch (e) {}
+
+    try {
+      const notes = await fetch("/api/notes", { credentials: "include" }).then(r => r.json());
+      document.getElementById("statNotes").textContent = (notes.data || []).length;
+    } catch (e) {}
+  }
+
+  async function loadLive() {
+    try {
+      const r = await fetch("/api/classes?status=live", { credentials: "include" });
+      const data = await r.json();
+      const live = data.data || [];
+      if (!live.length) return;
+      const c = live[0];
+      document.getElementById("liveBox").innerHTML = '<div class="live-card"><div class="live-dot"></div><div class="info"><h3>' + escapeHtml(c.title || "Live Class") + '</h3><p>' + escapeHtml(c.subject || "") + ' • ' + escapeHtml(c.examName || "") + '</p></div><a href="/admin-classes.html" class="action-btn">Manage</a></div>';
+    } catch (e) {}
+  }
+
+  async function loadUpcoming() {
+    try {
+      const r = await fetch("/api/classes?status=scheduled", { credentials: "include" });
+      const data = await r.json();
+      const up = (data.data || []).slice(0, 3);
+      if (!up.length) return;
+      document.getElementById("upcomingBox").innerHTML = up.map(c => '<div class="live-card"><div style="width:12px;height:12px;background:#f59e0b;border-radius:50%;"></div><div class="info"><h3>' + escapeHtml(c.title || "") + '</h3><p>' + escapeHtml(c.subject || "") + ' • ' + (c.scheduledDate ? new Date(c.scheduledDate).toLocaleDateString("en-IN") : "") + ' ' + escapeHtml(c.scheduledTime || "") + '</p></div></div>').join("");
+    } catch (e) {}
+  }
+
+  (async function() {
+    const user = await requireLogin();
+    if (!user) return;
+    if (user.role !== "admin") { location.href = "/dashboard.html"; return; }
+    await Promise.all([loadStats(), loadLive(), loadUpcoming()]);
+  })();
+</script>
+</body>
+</html>

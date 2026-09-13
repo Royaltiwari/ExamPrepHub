@@ -1,0 +1,70 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>💬 Live Comments - Admin</title>
+<link rel="stylesheet" href="/css/style.css">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',Arial,sans-serif;background:var(--bg);color:var(--text);padding:20px}
+.container{max-width:900px;margin:auto}
+.page-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
+.page-head h1{font-size:24px;font-weight:900}
+.page-head a{color:var(--primary);text-decoration:none;font-weight:700;font-size:13px}
+.card{background:var(--card-bg);border:1px solid var(--border);border-radius:14px;padding:20px;margin-bottom:20px}
+.form-group{margin-bottom:15px}
+.form-group label{display:block;margin-bottom:6px;font-weight:800;font-size:12px;color:var(--muted);text-transform:uppercase}
+.form-input,.form-select,.form-textarea{width:100%;padding:12px;background:var(--bg);border:2px solid var(--border);border-radius:10px;color:var(--text);font-size:14px}
+.form-textarea{min-height:100px;resize:vertical}
+.btn{padding:12px 20px;border-radius:10px;font-weight:800;font-size:14px;border:none;cursor:pointer;background:var(--gradient-blue);color:white;text-decoration:none;display:inline-block}
+.alert{padding:12px;border-radius:10px;margin-bottom:15px;display:none}
+.alert.success{background:#14532d;color:#86efac;display:block}
+.alert.error{background:#7f1d1d;color:#fca5a5;display:block}
+.empty-box{text-align:center;padding:60px 20px;color:var(--muted);background:var(--card-bg);border:1px dashed var(--border);border-radius:14px;font-size:14px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px}
+.item-card{background:var(--card-bg);border:1px solid var(--border);border-radius:12px;padding:16px}
+.item-card h4{font-size:14px;margin-bottom:6px}
+.item-card p{font-size:12px;color:var(--muted)}
+.day-card{background:var(--card-bg);border:1px solid var(--border);border-radius:14px;padding:16px;margin-bottom:12px}
+.day-head{font-size:14px;font-weight:900;color:var(--primary);margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--border)}
+.class-row{display:flex;gap:12px;align-items:center;padding:10px 0;border-bottom:1px solid var(--border)}
+.class-row:last-child{border-bottom:none}
+.time{background:var(--gradient-blue);color:white;padding:8px 12px;border-radius:8px;font-weight:800;font-size:12px;min-width:80px;text-align:center}
+</style>
+</head>
+<body>
+<div class="container">
+<div class="page-head"><h1>💬 Live Comments</h1><a href="/admin-dashboard.html">← Dashboard</a></div>
+<div class="card">
+  <select id="classSelect" class="form-select"><option value="">-- Select Class --</option></select>
+</div>
+<div id="cmtBox"><div class="empty-box">👆 Class select karo</div></div>
+<script>
+async function pageInit(){
+  const r = await fetch("/api/classes/admin/all",{credentials:"include"});
+  const data = await r.json();
+  const sel = document.getElementById("classSelect");
+  sel.innerHTML = '<option value="">-- Select Class --</option>'+(data.data||[]).map(c=>'<option value="'+c._id+'">'+escapeHtml(c.title||"Untitled")+'</option>').join("");
+  sel.addEventListener("change", async (e)=>{
+    const box = document.getElementById("cmtBox");
+    if(!e.target.value){ box.innerHTML='<div class="empty-box">👆 Class select karo</div>'; return; }
+    const r2 = await fetch("/api/chat/"+e.target.value,{credentials:"include"});
+    const d2 = await r2.json();
+    const list = d2.data||[];
+    if(!list.length){ box.innerHTML='<div class="empty-box">💬 Koi comment nahi</div>'; return; }
+    box.innerHTML = list.map(c=>'<div class="item-card" style="margin-bottom:10px"><h4>'+escapeHtml(c.userName||"User")+'</h4><p>'+escapeHtml(c.message||"")+'</p></div>').join("");
+  });
+}
+</script>
+</div>
+<script src="/js/common.js"></script>
+<script>
+(async function(){
+  const u = await requireLogin();
+  if(!u || u.role !== "admin"){ location.href = "/dashboard.html"; return; }
+  if(typeof pageInit === "function") pageInit();
+})();
+</script>
+</body>
+</html>

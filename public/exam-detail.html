@@ -1,0 +1,197 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Exam - ExamPrepHub</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', Arial, sans-serif; background: var(--bg); color: var(--text); padding-bottom: 70px; }
+    .top-bar { background: linear-gradient(135deg, #1e1b4b, #312e81); padding: 14px 20px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; }
+    .back-btn { background: rgba(255,255,255,0.1); border: none; width: 38px; height: 38px; border-radius: 10px; color: white; cursor: pointer; font-size: 18px; }
+    .exam-title { font-size: 16px; font-weight: 900; color: white; flex: 1; text-align: center; }
+    .container { max-width: 900px; margin: auto; padding: 20px; }
+    .exam-header { background: linear-gradient(135deg, #7c2d12, #9a3412); border-radius: 16px; padding: 25px; text-align: center; margin-bottom: 20px; color: white; }
+    .exam-header .emoji { font-size: 48px; }
+    .exam-header h1 { font-size: 24px; font-weight: 900; margin: 8px 0 4px; }
+    .exam-header p { font-size: 13px; opacity: 0.8; }
+    .tabs { display: flex; gap: 6px; margin-bottom: 20px; overflow-x: auto; padding-bottom: 6px; }
+    .tab { background: var(--card-bg); border: 1px solid var(--border); padding: 10px 16px; border-radius: 10px; font-size: 13px; font-weight: 700; cursor: pointer; white-space: nowrap; color: var(--text-light); }
+    .tab.active { background: var(--gradient-blue); color: white; border-color: transparent; }
+    .section { margin-bottom: 25px; }
+    .sec-head { margin-bottom: 12px; }
+    .sec-head h2 { font-size: 15px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.5px; }
+    .live-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; }
+    .live-header { background: linear-gradient(90deg, #dc2626, #b91c1c); padding: 8px 14px; color: white; font-weight: 900; font-size: 12px; }
+    .live-body { padding: 16px; display: flex; align-items: center; gap: 14px; }
+    .live-thumb { width: 80px; height: 60px; background: var(--bg-alt); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 28px; }
+    .live-info { flex: 1; }
+    .live-info h3 { font-size: 15px; margin-bottom: 4px; }
+    .live-info p { font-size: 12px; color: var(--muted); }
+    .join-btn { background: var(--gradient-red); color: white; padding: 8px 14px; border-radius: 8px; font-weight: 800; font-size: 12px; text-decoration: none; }
+    .upcoming-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 14px; padding: 14px 16px; display: flex; align-items: center; gap: 14px; margin-bottom: 10px; }
+    .upcoming-time { background: var(--gradient-blue); color: white; padding: 10px 12px; border-radius: 10px; font-weight: 900; font-size: 12px; text-align: center; min-width: 60px; }
+    .upcoming-info { flex: 1; }
+    .upcoming-info h4 { font-size: 14px; }
+    .upcoming-info p { font-size: 11px; color: var(--muted); }
+    .subject-filter { display: flex; gap: 6px; margin-bottom: 14px; overflow-x: auto; padding-bottom: 6px; }
+    .subj-btn { background: var(--card-bg); border: 1px solid var(--border); padding: 6px 14px; border-radius: 20px; font-size: 12px; font-weight: 700; cursor: pointer; white-space: nowrap; color: var(--text-light); }
+    .subj-btn.active { background: var(--gradient-blue); color: white; border-color: transparent; }
+    .recorded-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
+    .recorded-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; cursor: pointer; }
+    .recorded-card:hover { border-color: var(--primary); }
+    .recorded-thumb { height: 110px; background: var(--bg-alt); background-size: cover; background-position: center; display: flex; align-items: center; justify-content: center; font-size: 36px; }
+    .recorded-body { padding: 12px; }
+    .recorded-body h4 { font-size: 13px; margin-bottom: 4px; }
+    .recorded-body .meta { font-size: 11px; color: var(--muted); margin-bottom: 8px; }
+    .btn-small { flex: 1; padding: 7px; border: none; border-radius: 6px; font-size: 11px; font-weight: 800; text-decoration: none; text-align: center; display: inline-block; cursor: pointer; }
+    .btn-watch { background: var(--gradient-blue); color: white; }
+    .btn-save { background: var(--card-hover); color: var(--text); border: 1px solid var(--border); }
+    .empty-box { text-align: center; padding: 40px 20px; color: var(--muted); background: var(--card-bg); border: 1px dashed var(--border); border-radius: 14px; font-size: 13px; }
+    .bottom-nav { display: none; position: fixed; bottom: 0; left: 0; right: 0; background: var(--card-bg); border-top: 1px solid var(--border); padding: 8px 0; z-index: 99; }
+    .bottom-nav-inner { display: flex; justify-content: space-around; max-width: 500px; margin: auto; }
+    .bottom-nav a { display: flex; flex-direction: column; align-items: center; gap: 3px; color: var(--muted); text-decoration: none; font-size: 10px; font-weight: 700; padding: 4px 12px; }
+    .bottom-nav a .ic { font-size: 20px; }
+    .bottom-nav a.active { color: var(--primary); }
+    @media (max-width: 700px) { .recorded-grid { grid-template-columns: 1fr; } .bottom-nav { display: block; } }
+  </style>
+</head>
+<body>
+
+<div class="top-bar">
+  <button class="back-btn" onclick="history.back()">←</button>
+  <div class="exam-title" id="topTitle">Exam</div>
+  <button class="back-btn" onclick="location.href='/dashboard.html'">🏠</button>
+</div>
+
+<div class="container">
+  <div class="exam-header">
+    <div class="emoji" id="examEmoji">📚</div>
+    <h1 id="examName">Loading...</h1>
+    <p>Complete Preparation</p>
+  </div>
+
+  <div class="tabs">
+    <div class="tab active" data-tab="all">All</div>
+    <div class="tab" data-tab="live">🔴 Live</div>
+    <div class="tab" data-tab="upcoming">📅 Upcoming</div>
+    <div class="tab" data-tab="recorded">🎬 Recorded</div>
+  </div>
+
+  <div class="section" id="liveSection">
+    <div class="sec-head"><h2>🔴 Live Now</h2></div>
+    <div id="liveBox"><div class="empty-box">Loading...</div></div>
+  </div>
+
+  <div class="section" id="upcomingSection">
+    <div class="sec-head"><h2>🕐 Upcoming</h2></div>
+    <div id="upcomingBox"><div class="empty-box">Loading...</div></div>
+  </div>
+
+  <div class="section" id="recordedSection">
+    <div class="sec-head"><h2>🎬 Recorded Classes</h2></div>
+    <div class="subject-filter" id="subjectFilter"></div>
+    <div class="recorded-grid" id="recordedBox"><div class="empty-box" style="grid-column:1/-1;">Loading...</div></div>
+  </div>
+</div>
+
+<nav class="bottom-nav">
+  <div class="bottom-nav-inner">
+    <a href="/dashboard.html"><span class="ic">🏠</span> Home</a>
+    <a href="/home-class.html" class="active"><span class="ic">📚</span> Learn</a>
+    <a href="/test-center.html"><span class="ic">📝</span> Tests</a>
+    <a href="/progress.html"><span class="ic">📊</span> Progress</a>
+    <a href="/profile.html"><span class="ic">👤</span> Profile</a>
+  </div>
+</nav>
+
+<script src="/js/common.js"></script>
+<script>
+const params = new URLSearchParams(window.location.search);
+const examName = params.get("exam") || "";
+const category = params.get("category") || "";
+let allClasses = [];
+let currentSubject = "";
+
+const emojiMap = {"SSC GD":"🪖","SSC CGL":"📘","SSC CHSL":"📖","SSC MTS":"📝","Railway":"🚆","BSF HCM":"🛡️","CRPF":"🛡️","CISF":"🛡️","ITBP":"🛡️","UPSSSC PET":"🏛️","UP Police":"👮","Agniveer":"🎖️","Class 6":"📗","Class 7":"📘","Class 8":"📙","Class 9":"📕","Class 10":"📓","Class 11":"📔","Class 12":"📒"};
+
+function initHeader() {
+  const title = examName || category;
+  document.getElementById("topTitle").textContent = title;
+  document.getElementById("examName").textContent = title;
+  document.getElementById("examEmoji").textContent = emojiMap[title] || "📚";
+}
+
+async function loadClasses() {
+  try {
+    const p = new URLSearchParams();
+    if (examName) p.append("examName", examName);
+    else if (category) p.append("category", category);
+    const r = await fetch("/api/classes?" + p, { credentials: "include" });
+    const data = await r.json();
+    allClasses = data.data || [];
+    renderLive(); renderUpcoming(); renderSubjects(); renderRecorded();
+  } catch (e) { console.error(e); }
+}
+
+function renderLive() {
+  const box = document.getElementById("liveBox");
+  const live = allClasses.filter(c => c.status === "live");
+  if (!live.length) { box.innerHTML = '<div class="empty-box">📴 Abhi koi live class nahi</div>'; return; }
+  const c = live[0];
+  box.innerHTML = '<div class="live-card"><div class="live-header">🔴 LIVE NOW</div><div class="live-body"><div class="live-thumb" style="' + (c.thumbnail ? "background-image:url('" + c.thumbnail + "')" : "") + '">' + (!c.thumbnail ? "📺" : "") + '</div><div class="live-info"><h3>' + escapeHtml(c.title||"Live") + '</h3><p>' + escapeHtml(c.subject||"") + '</p></div><a href="/class-detail.html?id=' + c._id + '" class="join-btn">JOIN →</a></div></div>';
+}
+
+function renderUpcoming() {
+  const box = document.getElementById("upcomingBox");
+  const up = allClasses.filter(c => c.status === "scheduled").slice(0, 5);
+  if (!up.length) { box.innerHTML = '<div class="empty-box">📅 Koi upcoming class nahi</div>'; return; }
+  box.innerHTML = up.map(c => '<div class="upcoming-card"><div class="upcoming-time">' + (c.scheduledTime || "Soon") + '</div><div class="upcoming-info"><h4>' + escapeHtml(c.title||"") + '</h4><p>' + escapeHtml(c.subject||"") + '</p></div></div>').join("");
+}
+
+function renderSubjects() {
+  const box = document.getElementById("subjectFilter");
+  const subjects = [...new Set(allClasses.map(c => c.subject).filter(Boolean))];
+  if (!subjects.length) { box.innerHTML = ""; return; }
+  let html = '<div class="subj-btn active" data-subj="">All</div>';
+  subjects.forEach(s => html += '<div class="subj-btn" data-subj="' + escapeHtml(s) + '">' + escapeHtml(s) + '</div>');
+  box.innerHTML = html;
+  box.querySelectorAll(".subj-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      currentSubject = btn.dataset.subj;
+      box.querySelectorAll(".subj-btn").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      renderRecorded();
+    });
+  });
+}
+
+function renderRecorded() {
+  const box = document.getElementById("recordedBox");
+  let rec = allClasses.filter(c => c.status === "recorded");
+  if (currentSubject) rec = rec.filter(c => c.subject === currentSubject);
+  if (!rec.length) { box.innerHTML = '<div class="empty-box" style="grid-column:1/-1;">🎬 Koi recorded class nahi</div>'; return; }
+  box.innerHTML = rec.map(c => '<div class="recorded-card"><div class="recorded-thumb" style="' + (c.thumbnail ? "background-image:url('" + c.thumbnail + "')" : "") + '">' + (!c.thumbnail ? "📹" : "") + '</div><div class="recorded-body"><h4>' + escapeHtml(c.title||"") + '</h4><div class="meta">' + escapeHtml(c.subject||"") + ' • ' + (c.duration||45) + ' min</div><div style="display:flex;gap:6px;"><a href="/class-detail.html?id=' + c._id + '" class="btn-small btn-watch">▶ Watch</a></div></div></div>').join("");
+}
+
+document.querySelectorAll(".tab").forEach(tab => {
+  tab.addEventListener("click", () => {
+    document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+    tab.classList.add("active");
+    const t = tab.dataset.tab;
+    document.getElementById("liveSection").style.display = (t==="all"||t==="live") ? "block" : "none";
+    document.getElementById("upcomingSection").style.display = (t==="all"||t==="upcoming") ? "block" : "none";
+    document.getElementById("recordedSection").style.display = (t==="all"||t==="recorded") ? "block" : "none";
+  });
+});
+
+(async function() {
+  const user = await requireLogin();
+  if (!user) return;
+  initHeader();
+  await loadClasses();
+})();
+</script>
+</body>
+</html>

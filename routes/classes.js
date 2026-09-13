@@ -24,7 +24,7 @@ const storage = multer.diskStorage({
 
 const upload = multer({
   storage,
-  limits: { fileSize: 2 * 1024 * 1024 }, // 2MB
+  limits: { fileSize: 2 * 1024 * 1024 },
   fileFilter: (req, file, cb) => {
     const allowed = [".jpg", ".jpeg", ".png", ".webp", ".gif"];
     const ext = path.extname(file.originalname).toLowerCase();
@@ -94,6 +94,82 @@ router.get("/", async (req, res) => {
   } catch (e) {
     console.error("Get classes error:", e);
     res.status(500).json({ success: false, message: "Failed to fetch" });
+  }
+});
+
+// =====================================================
+// PUBLIC: GET CLASSES GROUPED BY SUBJECT → CHAPTER
+// GET /api/classes/grouped/:examName
+// =====================================================
+router.get("/grouped/:examName", requireLogin, async (req, res) => {
+  try {
+    const examName = decodeURIComponent(req.params.examName);
+
+    const classes = await Class.find({ examName, visible: true })
+      .sort({ scheduledDate: -1, createdAt: -1 });
+
+    const subjects = {};
+
+    classes.forEach(c => {
+      const subj = c.subject || "General";
+      const chap = c.topic || "General";
+
+      if (!subjects[subj]) subjects[subj] = {};
+      if (!subjects[subj][chap]) subjects[subj][chap] = [];
+
+      subjects[subj][chap].push({
+        _id: c._id,
+        title: c.title,
+        status: c.status,
+        thumbnail: c.thumbnail,
+        duration: c.duration,
+        scheduledDate: c.scheduledDate,
+        scheduledTime: c.scheduledTime,
+        isPaid: c.isPaid,
+        price: c.price,
+        teacher: c.teacher,
+        views: c.views
+      });
+    });
+
+    res.json({
+      success: true,
+      examName,
+      count: classes.length,
+      data: subjects
+    });
+  } catch (e) {
+    console.error("Grouped classes error:", e);
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch grouped classes"
+    });
+  }
+});
+
+// =====================================================
+// PUBLIC: GET ALL SUBJECTS FOR AN EXAM
+// GET /api/classes/subjects-list/:examName
+// =====================================================
+router.get("/subjects-list/:examName", requireLogin, async (req, res) => {
+  try {
+    const examName = decodeURIComponent(req.params.examName);
+
+    const subjects = await Class.distinct("subject", {
+      examName,
+      visible: true
+    });
+
+    res.json({
+      success: true,
+      examName,
+      subjects
+    });
+  } catch (e) {
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch subjects"
+    });
   }
 });
 

@@ -1,0 +1,167 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Profile - ExamPrepHub</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', Arial, sans-serif; background: var(--bg); color: var(--text); padding-bottom: 70px; }
+    .top-bar { background: linear-gradient(135deg, #1e1b4b, #312e81); padding: 14px 20px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
+    .back-btn { background: rgba(255,255,255,0.1); border: none; width: 38px; height: 38px; border-radius: 10px; color: white; cursor: pointer; font-size: 18px; }
+    .title-bar { color: white; font-size: 16px; font-weight: 900; flex: 1; text-align: center; }
+    .container { max-width: 700px; margin: auto; padding: 20px; }
+    
+    .profile-head { background: linear-gradient(135deg, #1e1b4b, #312e81); border-radius: 20px; padding: 30px 20px; text-align: center; color: white; margin-bottom: 20px; }
+    .avatar { width: 90px; height: 90px; border-radius: 50%; background: linear-gradient(135deg, #3b82f6, #8b5cf6); display: inline-flex; align-items: center; justify-content: center; font-size: 40px; font-weight: 900; margin-bottom: 12px; }
+    .profile-head h2 { font-size: 22px; margin-bottom: 4px; }
+    .profile-head p { font-size: 13px; opacity: 0.8; }
+    .role-badge { display: inline-block; background: rgba(255,255,255,0.15); padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 800; margin-top: 8px; text-transform: uppercase; }
+    
+    .card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 14px; padding: 20px; margin-bottom: 15px; }
+    .card h3 { font-size: 15px; font-weight: 900; margin-bottom: 15px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .info-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--border); font-size: 14px; }
+    .info-row:last-child { border-bottom: none; }
+    .info-row .label { color: var(--muted); font-weight: 600; }
+    .info-row .value { font-weight: 700; text-align: right; }
+    
+    .stats-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+    .stat-box { background: var(--bg-alt); border-radius: 12px; padding: 16px; text-align: center; }
+    .stat-box .num { font-size: 24px; font-weight: 900; color: var(--primary); }
+    .stat-box .lbl { font-size: 11px; color: var(--muted); text-transform: uppercase; margin-top: 4px; }
+    
+    .action-btn { display: block; width: 100%; padding: 14px; border-radius: 12px; text-align: center; font-weight: 800; font-size: 14px; border: none; cursor: pointer; text-decoration: none; margin-bottom: 10px; }
+    .btn-blue { background: var(--gradient-blue); color: white; }
+    .btn-red { background: var(--gradient-red); color: white; }
+    .btn-gray { background: var(--card-hover); color: var(--text); border: 1px solid var(--border); }
+    
+    .bottom-nav { display: none; position: fixed; bottom: 0; left: 0; right: 0; background: var(--card-bg); border-top: 1px solid var(--border); padding: 8px 0; z-index: 99; }
+    .bottom-nav-inner { display: flex; justify-content: space-around; max-width: 500px; margin: auto; }
+    .bottom-nav a { display: flex; flex-direction: column; align-items: center; gap: 3px; color: var(--muted); text-decoration: none; font-size: 10px; font-weight: 700; padding: 4px 12px; }
+    .bottom-nav a .ic { font-size: 20px; }
+    .bottom-nav a.active { color: var(--primary); }
+    @media (max-width: 700px) { .bottom-nav { display: block; } }
+  </style>
+</head>
+<body>
+
+<div class="top-bar">
+  <button class="back-btn" onclick="location.href='/dashboard.html'">←</button>
+  <div class="title-bar">👤 My Profile</div>
+  <button class="back-btn" onclick="location.href='/dashboard.html'">🏠</button>
+</div>
+
+<div class="container">
+  <div class="profile-head">
+    <div class="avatar" id="avatar">S</div>
+    <h2 id="userName">Loading...</h2>
+    <p id="userEmail">-</p>
+    <div class="role-badge" id="userRole">Student</div>
+  </div>
+
+  <div class="card">
+    <h3>📋 Account Info</h3>
+    <div class="info-row"><span class="label">Full Name</span><span class="value" id="infoName">-</span></div>
+    <div class="info-row"><span class="label">Email</span><span class="value" id="infoEmail">-</span></div>
+    <div class="info-row"><span class="label">Mobile</span><span class="value" id="infoMobile">-</span></div>
+    <div class="info-row"><span class="label">Target Exam</span><span class="value" id="infoTarget">Not set</span></div>
+    <div class="info-row"><span class="label">Member Since</span><span class="value" id="infoJoined">-</span></div>
+  </div>
+
+  <div class="card">
+    <h3>📊 My Stats</h3>
+    <div class="stats-grid">
+      <div class="stat-box"><div class="num" id="statTests">0</div><div class="lbl">Tests</div></div>
+      <div class="stat-box"><div class="num" id="statScore">0%</div><div class="lbl">Avg Score</div></div>
+      <div class="stat-box"><div class="num" id="statClasses">0</div><div class="lbl">Classes</div></div>
+      <div class="stat-box"><div class="num" id="statQs">0</div><div class="lbl">Questions</div></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>⚙️ Actions</h3>
+    <a href="/target-exam.html" class="action-btn btn-blue">🎯 Change Target Exam</a>
+    <a href="/progress.html" class="action-btn btn-blue">📊 View Full Progress</a>
+    <a href="/saved.html" class="action-btn btn-blue">🔖 My Saved Items</a>
+    <button class="action-btn btn-red" id="logoutBtn">🚪 Logout</button>
+  </div>
+</div>
+
+<nav class="bottom-nav">
+  <div class="bottom-nav-inner">
+    <a href="/dashboard.html"><span class="ic">🏠</span> Home</a>
+    <a href="/home-class.html"><span class="ic">📚</span> Learn</a>
+    <a href="/test-center.html"><span class="ic">📝</span> Tests</a>
+    <a href="/progress.html"><span class="ic">📊</span> Progress</a>
+    <a href="/profile.html" class="active"><span class="ic">👤</span> Profile</a>
+  </div>
+</nav>
+
+<script src="/js/common.js"></script>
+<script>
+  async function loadProfile() {
+    try {
+      const r = await fetch("/api/auth/me", { credentials: "include" });
+      const data = await r.json();
+
+      if (!r.ok || !data.success || !data.user) {
+        window.location.href = "/login.html";
+        return;
+      }
+
+      const u = data.user;
+
+      // Header
+      document.getElementById("userName").textContent = u.name || "Student";
+      document.getElementById("userEmail").textContent = u.email || "-";
+      document.getElementById("userRole").textContent = (u.role || "student").toUpperCase();
+
+      // Avatar
+      const initial = (u.name || "S").charAt(0).toUpperCase();
+      document.getElementById("avatar").textContent = initial;
+
+      // Info
+      document.getElementById("infoName").textContent = u.name || "-";
+      document.getElementById("infoEmail").textContent = u.email || "-";
+      document.getElementById("infoMobile").textContent = u.mobile || "Not set";
+      document.getElementById("infoTarget").textContent = u.targetExam || "Not set";
+
+      if (u.createdAt) {
+        document.getElementById("infoJoined").textContent = new Date(u.createdAt).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
+      }
+
+    } catch (e) {
+      console.error("Profile error:", e);
+    }
+
+    // Load stats
+    try {
+      const r = await fetch("/api/progress/stats", { credentials: "include" });
+      const data = await r.json();
+      if (data.success) {
+        document.getElementById("statTests").textContent = data.data.testsAttempted || 0;
+        document.getElementById("statScore").textContent = (data.data.avgScore || 0) + "%";
+        document.getElementById("statClasses").textContent = data.data.classesWatched || 0;
+        document.getElementById("statQs").textContent = data.data.totalQuestions || 0;
+      }
+    } catch (e) {}
+  }
+
+  document.getElementById("logoutBtn").addEventListener("click", async () => {
+    try {
+      await fetch("/api/auth/logout", { method: "POST", credentials: "include" });
+      window.location.href = "/login.html";
+    } catch (e) {
+      alert("Logout failed");
+    }
+  });
+
+  (async function() {
+    const user = await requireLogin();
+    if (!user) return;
+    loadProfile();
+  })();
+</script>
+</body>
+</html>

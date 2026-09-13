@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Choose Your Target - ExamPrepHub</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', Arial, sans-serif; background: var(--bg); color: var(--text); padding: 25px 20px; }
+    .container { max-width: 900px; margin: auto; }
+    h1 { font-size: 28px; font-weight: 900; text-align: center; margin-bottom: 8px; }
+    .subtitle { text-align: center; color: var(--muted); margin-bottom: 30px; font-size: 14px; }
+    .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 25px; }
+    .exam-card {
+      background: var(--card-bg); border: 2px solid var(--border);
+      border-radius: 14px; padding: 18px 12px; text-align: center;
+      cursor: pointer; transition: all 0.2s;
+      display: flex; flex-direction: column; align-items: center; gap: 6px;
+    }
+    .exam-card:hover { transform: translateY(-4px); border-color: var(--primary); }
+    .exam-card.selected {
+      background: var(--gradient-blue); border-color: var(--primary);
+      color: white; box-shadow: 0 8px 25px rgba(59, 130, 246, 0.4);
+    }
+    .exam-card .emoji { font-size: 32px; }
+    .exam-card .name { font-size: 13px; font-weight: 800; text-align: center; }
+    .continue-btn {
+      width: 100%; padding: 16px;
+      background: var(--gradient-green); color: white;
+      border: none; border-radius: 12px;
+      font-size: 16px; font-weight: 800;
+      cursor: pointer; transition: all 0.2s; opacity: 0.5;
+    }
+    .continue-btn.enabled { opacity: 1; }
+    .continue-btn:hover:not(:disabled) { transform: translateY(-2px); }
+    .continue-btn:disabled { cursor: not-allowed; }
+    @media (max-width: 700px) { .grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 450px) { .grid { grid-template-columns: 1fr 1fr; gap: 8px; } h1 { font-size: 22px; } }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+
+    <h1>🎯 Choose Your Target</h1>
+    <p class="subtitle">What are you preparing for? Select your exam</p>
+
+    <div class="grid" id="examGrid"></div>
+
+    <button class="continue-btn" id="continueBtn" disabled>
+      Continue →
+    </button>
+
+  </div>
+
+  <script src="/js/common.js"></script>
+  <script>
+    const exams = [
+      { name: "SSC GD", icon: "🪖" },
+      { name: "SSC CGL", icon: "📘" },
+      { name: "SSC CHSL", icon: "📖" },
+      { name: "SSC MTS", icon: "📝" },
+      { name: "Railway", icon: "🚆" },
+      { name: "BSF HCM", icon: "🛡️" },
+      { name: "CRPF", icon: "🛡️" },
+      { name: "CISF", icon: "🛡️" },
+      { name: "ITBP", icon: "🛡️" },
+      { name: "UPSSSC PET", icon: "🏛️" },
+      { name: "UP Police", icon: "👮" },
+      { name: "Agniveer", icon: "🎖️" }
+    ];
+
+    let selectedExam = "";
+
+    function renderExams() {
+      const grid = document.getElementById("examGrid");
+      grid.innerHTML = exams.map(e => `
+        <div class="exam-card" data-exam="${e.name}">
+          <div class="emoji">${e.icon}</div>
+          <div class="name">${e.name}</div>
+        </div>
+      `).join("");
+
+      document.querySelectorAll(".exam-card").forEach(card => {
+        card.addEventListener("click", () => {
+          document.querySelectorAll(".exam-card").forEach(c => c.classList.remove("selected"));
+          card.classList.add("selected");
+          selectedExam = card.dataset.exam;
+          document.getElementById("continueBtn").disabled = false;
+          document.getElementById("continueBtn").classList.add("enabled");
+        });
+      });
+    }
+
+    document.getElementById("continueBtn").addEventListener("click", async () => {
+      if (!selectedExam) return;
+
+      const btn = document.getElementById("continueBtn");
+      btn.textContent = "Saving...";
+      btn.disabled = true;
+
+      try {
+        const r = await fetch("/api/auth/update-target", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({ targetExam: selectedExam })
+        });
+        const data = await r.json();
+
+        if (data.success) {
+          btn.textContent = "✅ Saved! Redirecting...";
+          setTimeout(() => { location.href = "/dashboard.html"; }, 1200);
+        } else {
+          showAlert(data.message || "Failed", "error");
+          btn.textContent = "Continue →";
+          btn.disabled = false;
+        }
+      } catch (e) {
+        showAlert("Server error", "error");
+        btn.textContent = "Continue →";
+        btn.disabled = false;
+      }
+    });
+
+    (async function() {
+      const user = await requireLogin();
+      if (!user) return;
+      renderExams();
+
+      // Pre-select if already has target
+      if (user.targetExam) {
+        const card = document.querySelector(`.exam-card[data-exam="${user.targetExam}"]`);
+        if (card) {
+          card.classList.add("selected");
+          selectedExam = user.targetExam;
+          document.getElementById("continueBtn").disabled = false;
+          document.getElementById("continueBtn").classList.add("enabled");
+        }
+      }
+    })();
+  </script>
+
+</body>
+</html>

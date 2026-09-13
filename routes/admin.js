@@ -1,5 +1,6 @@
-﻿const express = require("express");
+const express = require("express");
 const Test = require("../models/Test");
+const User = require("../models/User");
 const requireAdmin = require("../middleware/admin");
 
 const router = express.Router();
@@ -169,6 +170,51 @@ router.delete("/tests/:id", requireAdmin, async (req, res) => {
     res.status(500).json({
       success: false,
       message: "Unable to delete test"
+    });
+  }
+});
+
+// =====================================
+// ADMIN: Get all students
+// =====================================
+
+router.get("/students", requireAdmin, async (req, res) => {
+  try {
+    const students = await User.find({ role: "student" })
+      .select("-password")
+      .sort({ createdAt: -1 });
+
+    res.json({
+      success: true,
+      count: students.length,
+      students
+    });
+
+  } catch (error) {
+    console.error("Get Students Error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Unable to load students"
+    });
+  }
+});
+
+// =====================================
+// ADMIN: Count students
+// =====================================
+
+router.get("/students-count", requireAdmin, async (req, res) => {
+  try {
+    const count = await User.countDocuments({ role: "student" });
+    res.json({
+      success: true,
+      count
+    });
+  } catch (error) {
+    console.error("Count Students Error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Unable to count students"
     });
   }
 });

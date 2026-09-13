@@ -1,0 +1,124 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Students - ExamPrepHub Admin</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', Arial, sans-serif; background: var(--bg); color: var(--text); padding: 20px; }
+    .container { max-width: 1200px; margin: auto; }
+    .page-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px; }
+    .page-head h1 { font-size: 24px; font-weight: 900; }
+    .page-head a { color: var(--primary); text-decoration: none; font-weight: 700; font-size: 13px; }
+    .search-bar { background: var(--card-bg); border: 1px solid var(--border); border-radius: 14px; padding: 14px; margin-bottom: 20px; display: flex; gap: 10px; flex-wrap: wrap; }
+    .search-bar input, .search-bar select { padding: 10px 14px; background: var(--bg); border: 2px solid var(--border); border-radius: 10px; color: var(--text); font-size: 14px; flex: 1; min-width: 200px; }
+    .search-bar input:focus, .search-bar select:focus { outline: none; border-color: var(--primary); }
+    .student-table { background: var(--card-bg); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; }
+    .table-head, .table-row { display: grid; grid-template-columns: 2fr 1.5fr 1fr 1fr 1fr; gap: 10px; padding: 14px 18px; align-items: center; font-size: 13px; }
+    .table-head { background: var(--bg-alt); font-weight: 800; color: var(--muted); text-transform: uppercase; font-size: 11px; letter-spacing: 0.5px; }
+    .table-row { border-top: 1px solid var(--border); }
+    .table-row:hover { background: var(--card-hover); }
+    .badge { padding: 3px 10px; border-radius: 20px; font-size: 10px; font-weight: 800; display: inline-block; }
+    .badge-active { background: #14532d; color: #86efac; }
+    .badge-inactive { background: #7f1d1d; color: #fca5a5; }
+    .btn-sm { padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: 800; border: none; cursor: pointer; text-decoration: none; display: inline-block; }
+    .btn-blue { background: var(--gradient-blue); color: white; }
+    .btn-red { background: var(--gradient-red); color: white; }
+    .empty-box { text-align: center; padding: 50px 20px; color: var(--muted); font-size: 14px; }
+    @media (max-width: 800px) { .table-head, .table-row { grid-template-columns: 1fr 1fr; } .table-head > *:nth-child(n+3), .table-row > *:nth-child(n+3) { display: none; } }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="page-head">
+      <h1>👥 Students</h1>
+      <a href="/admin-dashboard.html">← Dashboard</a>
+    </div>
+
+    <div class="search-bar">
+      <input type="text" id="searchInput" placeholder="🔍 Search by name or email..." />
+      <select id="examFilter"><option value="">All Exams</option></select>
+      <select id="statusFilter">
+        <option value="">All Status</option>
+        <option value="active">Active</option>
+        <option value="inactive">Inactive</option>
+      </select>
+    </div>
+
+    <div class="student-table">
+      <div class="table-head">
+        <div>Name / Email</div>
+        <div>Target Exam</div>
+        <div>Mobile</div>
+        <div>Status</div>
+        <div>Action</div>
+      </div>
+      <div id="studentList">
+        <div class="empty-box">Loading students...</div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/js/common.js"></script>
+  <script>
+    let allStudents = [];
+    let searchQ = "";
+    let examF = "";
+    let statusF = "";
+
+    async function loadStudents() {
+      try {
+        const r = await fetch("/api/admin/students", { credentials: "include" });
+        const data = await r.json();
+        allStudents = data.students || data.data || [];
+        renderStudents();
+
+        const exams = [...new Set(allStudents.map(s => s.targetExam).filter(Boolean))];
+        const sel = document.getElementById("examFilter");
+        sel.innerHTML = '<option value="">All Exams</option>' + exams.map(e => '<option value="' + escapeHtml(e) + '">' + escapeHtml(e) + '</option>').join("");
+      } catch (e) {
+        document.getElementById("studentList").innerHTML = '<div class="empty-box">❌ Failed to load: ' + escapeHtml(e.message) + '</div>';
+      }
+    }
+
+    function renderStudents() {
+      const box = document.getElementById("studentList");
+      let filtered = allStudents;
+
+      if (searchQ) {
+        const q = searchQ.toLowerCase();
+        filtered = filtered.filter(s => (s.name || "").toLowerCase().includes(q) || (s.email || "").toLowerCase().includes(q));
+      }
+      if (examF) filtered = filtered.filter(s => s.targetExam === examF);
+      if (statusF === "active") filtered = filtered.filter(s => s.isActive !== false);
+      if (statusF === "inactive") filtered = filtered.filter(s => s.isActive === false);
+
+      if (!filtered.length) {
+        box.innerHTML = '<div class="empty-box">Koi student nahi mila</div>';
+        return;
+      }
+
+      box.innerHTML = filtered.map(s => '<div class="table-row">' +
+        '<div><div style="font-weight: 700;">' + escapeHtml(s.name || "User") + '</div><div style="font-size: 11px; color: var(--muted);">' + escapeHtml(s.email || "") + '</div></div>' +
+        '<div>' + escapeHtml(s.targetExam || "-") + '</div>' +
+        '<div>' + escapeHtml(s.mobile || "-") + '</div>' +
+        '<div><span class="badge ' + (s.isActive === false ? "badge-inactive" : "badge-active") + '">' + (s.isActive === false ? "Inactive" : "Active") + '</span></div>' +
+        '<div><a href="/admin-student-profile.html?id=' + s._id + '" class="btn-sm btn-blue">View</a></div>' +
+      '</div>').join("");
+    }
+
+    document.getElementById("searchInput").addEventListener("input", debounce((e) => { searchQ = e.target.value; renderStudents(); }, 300));
+    document.getElementById("examFilter").addEventListener("change", (e) => { examF = e.target.value; renderStudents(); });
+    document.getElementById("statusFilter").addEventListener("change", (e) => { statusF = e.target.value; renderStudents(); });
+
+    (async function() {
+      const user = await requireLogin();
+      if (!user) return;
+      if (user.role !== "admin") { location.href = "/dashboard.html"; return; }
+      loadStudents();
+    })();
+  </script>
+</body>
+</html>

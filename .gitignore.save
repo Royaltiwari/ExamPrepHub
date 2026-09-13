@@ -1,0 +1,37 @@
+# Dependencies
+node_modules/
+
+# Environment
+.env
+.env.local
+.env.production
+
+# Logs
+*.log
+*.tmp
+
+# Uploads
+uploads/
+uploads/payments/
+uploads/thumbnails/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# Backups
+backup/
+*.bak
+*-backup.html
+
+# PHP files (not used in Node.js project)
+vendor/
+api/
+parser/
+composer.json
+composer.lock
+

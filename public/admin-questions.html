@@ -1,5156 +1,926 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="hi">
-
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-  <title>Question Management - ExamPrepHub</title>
-
+  <title>Question Manager - ExamPrepHub</title>
+  <link rel="stylesheet" href="/css/style.css">
   <style>
-    :root {
-      --primary: #6c2bd9;
-      --primary2: #9333ea;
-      --pink: #ec4899;
-      --blue: #2563eb;
-      --green: #16a34a;
-      --red: #dc2626;
-      --dark: #111827;
-      --text: #1e293b;
-      --muted: #64748b;
-      --border: #e2e8f0;
-      --bg: #f4f7fb;
-      --white: #ffffff;
-    }
-
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-
-    html {
-      scroll-behavior: smooth;
-    }
-
-    body {
-      font-family: "Segoe UI", Arial, sans-serif;
-      background:
-        radial-gradient(circle at top left, #eee7ff 0, transparent 28%),
-        radial-gradient(circle at top right, #ffe6f3 0, transparent 25%),
-        var(--bg);
-      color: var(--text);
-      min-height: 100vh;
-    }
-
-    header {
-      background: linear-gradient(135deg, #111827, #312e81, #6d28d9);
-      color: white;
-      padding: 18px 20px;
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      box-shadow: 0 8px 25px rgba(0, 0, 0, .18);
-    }
-
-    .header-inner {
-      max-width: 1150px;
-      margin: auto;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 15px;
-    }
-
-    .logo {
-      font-size: 21px;
-      font-weight: 900;
-    }
-
-    .badge {
-      background: rgba(255, 255, 255, .14);
-      border: 1px solid rgba(255, 255, 255, .25);
-      padding: 8px 14px;
-      border-radius: 30px;
-      font-size: 12px;
-      font-weight: 800;
-    }
-
-    main {
-      max-width: 1150px;
-      margin: auto;
-      padding: 30px 16px 70px;
-    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', Arial, sans-serif; background: var(--bg); color: var(--text); padding-bottom: 40px; }
 
     .top-bar {
+      background: linear-gradient(135deg, #1e1b4b, #312e81);
+      padding: 14px 20px;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      gap: 15px;
-      margin-bottom: 22px;
-      flex-wrap: wrap;
+      position: sticky; top: 0; z-index: 100;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.3);
     }
+    .top-bar .logo { font-size: 18px; font-weight: 900; color: white; }
+    .top-bar .actions { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+    .btn-header {
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.2);
+      color: white; padding: 8px 14px; border-radius: 8px;
+      font-size: 12px; font-weight: 700; cursor: pointer; text-decoration: none;
+    }
+    .btn-header:hover { background: rgba(255,255,255,0.2); }
 
-    .top-title {
-      display: flex;
-      align-items: center;
-      gap: 13px;
-    }
-
-    .title-icon {
-      width: 52px;
-      height: 52px;
-      border-radius: 16px;
-      display: grid;
-      place-items: center;
-      background: linear-gradient(135deg, #6d28d9, #ec4899);
-      color: white;
-      font-size: 25px;
-    }
-
-    .top-bar h1 {
-      font-size: 27px;
-      font-weight: 900;
-    }
-
-    .top-bar small {
-      color: var(--muted);
-      display: block;
-      margin-top: 3px;
-    }
-
-    .btn {
-      border: none;
-      text-decoration: none;
-      cursor: pointer;
-      padding: 12px 18px;
-      border-radius: 12px;
-      font-weight: 800;
-      font-size: 14px;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 7px;
-      transition: .25s ease;
-      box-shadow: 0 5px 15px rgba(0, 0, 0, .08);
-    }
-
-    .btn:hover {
-      transform: translateY(-2px);
-    }
-
-    .blue {
-      background: linear-gradient(135deg, #2563eb, #4f46e5);
-      color: white;
-    }
-
-    .green {
-      background: linear-gradient(135deg, #16a34a, #059669);
-      color: white;
-    }
-
-    .red {
-      background: linear-gradient(135deg, #dc2626, #e11d48);
-      color: white;
-    }
-
-    .gray {
-      background: #475569;
-      color: white;
-    }
-
-    .card {
-      background: rgba(255, 255, 255, .96);
-      border: 1px solid rgba(226, 232, 240, .9);
-      border-radius: 22px;
-      padding: 25px;
-      margin-bottom: 22px;
-      box-shadow: 0 12px 40px rgba(30, 41, 59, .08);
-    }
-
-    .card-heading {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      margin-bottom: 20px;
-    }
-
-    .heading-icon {
-      width: 42px;
-      height: 42px;
-      border-radius: 12px;
-      display: grid;
-      place-items: center;
-      background: #f1eaff;
-      font-size: 20px;
-    }
-
-    .card h2 {
-      font-size: 21px;
-      font-weight: 900;
-    }
+    .container { max-width: 1100px; margin: auto; padding: 20px; }
 
     .test-info {
-      background: linear-gradient(135deg, #eff6ff, #f5f3ff);
-      border: 1px solid #c7d2fe;
-      padding: 19px;
-      border-radius: 16px;
+      background: var(--card-bg); border: 1px solid var(--border);
+      border-left: 5px solid var(--primary); border-radius: 12px;
+      padding: 14px 18px; margin-bottom: 16px;
+      display: flex; justify-content: space-between; align-items: center;
+      flex-wrap: wrap; gap: 10px;
+    }
+    .test-info h2 { font-size: 16px; font-weight: 900; }
+    .test-info .meta { font-size: 12px; color: var(--muted); margin-top: 4px; }
+
+    .action-bar {
+      display: flex; gap: 10px; margin-bottom: 16px;
+      flex-wrap: wrap; align-items: center;
+    }
+    .btn {
+      padding: 10px 16px; border-radius: 10px;
+      font-weight: 800; font-size: 13px;
+      border: none; cursor: pointer; text-decoration: none;
+      display: inline-flex; align-items: center; gap: 6px;
+    }
+    .btn-blue { background: var(--gradient-blue); color: white; }
+    .btn-green { background: var(--gradient-green); color: white; }
+    .btn-gray { background: var(--card-hover); color: var(--text); border: 1px solid var(--border); }
+    .btn-red { background: var(--gradient-red); color: white; }
+    .btn-sm { padding: 6px 10px; font-size: 11px; }
+
+    .search-bar {
+      background: var(--card-bg); border: 1px solid var(--border);
+      border-radius: 12px; padding: 12px;
+      display: flex; gap: 10px; margin-bottom: 16px; flex-wrap: wrap;
+    }
+    .search-bar input, .search-bar select {
+      padding: 10px 14px; background: var(--bg);
+      border: 2px solid var(--border); border-radius: 10px;
+      color: var(--text); font-size: 13px; flex: 1; min-width: 150px;
+    }
+    .search-bar input:focus, .search-bar select:focus { outline: none; border-color: var(--primary); }
+
+    .q-list { display: flex; flex-direction: column; gap: 10px; }
+
+    .q-card {
+      background: var(--card-bg); border: 1px solid var(--border);
+      border-radius: 12px; padding: 12px 16px;
+      transition: all 0.15s; cursor: pointer;
+    }
+    .q-card:hover { border-color: var(--primary); }
+
+    .q-header {
+      display: flex; justify-content: space-between; align-items: center;
+      gap: 10px; margin-bottom: 6px; flex-wrap: wrap;
+    }
+    .q-num {
+      background: var(--primary); color: white;
+      padding: 2px 10px; border-radius: 6px;
+      font-size: 11px; font-weight: 800;
+    }
+    .q-subject {
+      background: #1e3a8a; color: #93c5fd;
+      padding: 2px 10px; border-radius: 6px;
+      font-size: 10px; font-weight: 700;
+    }
+    .q-chapter {
+      background: #4c1d95; color: #c4b5fd;
+      padding: 2px 10px; border-radius: 6px;
+      font-size: 10px; font-weight: 700;
+    }
+    .q-actions { display: flex; gap: 6px; }
+
+    .q-text {
+      font-size: 14px; font-weight: 600; line-height: 1.5;
+      margin-bottom: 8px; color: var(--text);
     }
 
-    .test-info strong {
-      color: #4f46e5;
-      font-size: 18px;
+    .q-options { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
+    .q-opt {
+      background: var(--bg-alt); border: 1px solid var(--border);
+      padding: 5px 10px; border-radius: 8px;
+      font-size: 12px; color: var(--text-light);
+      max-width: 100%; overflow: hidden;
+      text-overflow: ellipsis; white-space: nowrap;
     }
-
-    #testDetails {
-      color: #64748b;
-      font-size: 13px;
+    .q-opt.correct {
+      background: #14532d; color: #86efac;
+      border-color: #16a34a; font-weight: 800;
     }
+    .q-opt.correct::before { content: "✅ "; }
 
-    /* =========================
-       MANUAL FORM
-    ========================= */
-
-    .form-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 18px;
+    .q-details {
+      display: none; margin-top: 10px; padding-top: 10px;
+      border-top: 1px solid var(--border);
+      font-size: 13px; color: var(--text-light);
     }
+    .q-card.expanded .q-details { display: block; }
+    .q-details strong { color: var(--text); }
 
-    .full {
-      grid-column: 1 / -1;
-    }
-
-    .field {
-      position: relative;
-    }
-
-    label {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      font-weight: 800;
-      margin-bottom: 8px;
-      font-size: 14px;
-      color: #334155;
-    }
-
-    textarea,
-    input,
-    select {
-      width: 100%;
-      border: 2px solid #e5e7eb;
-      border-radius: 14px;
-      padding: 14px;
-      font-size: 15px;
-      outline: none;
-      background: #fff;
-      color: #1e293b;
-      transition: .2s ease;
-    }
-
-    textarea {
-      min-height: 130px;
-      resize: vertical;
-      line-height: 1.6;
-    }
-
-    input,
-    select {
-      min-height: 48px;
-    }
-
-    textarea:focus,
-    input:focus,
-    select:focus {
-      border-color: #7c3aed;
-      box-shadow: 0 0 0 4px rgba(124, 58, 237, .10);
-    }
-
-    .category-box {
-      grid-column: 1 / -1;
-      background: linear-gradient(135deg, #fff7ed, #fff1f2);
-      border: 2px solid #fed7aa;
+    .modal-overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,0.75); z-index: 999;
+      justify-content: center; align-items: center;
       padding: 20px;
-      border-radius: 17px;
     }
-
-    .category-title {
-      font-size: 17px;
-      font-weight: 900;
-      color: #9a3412;
-      margin-bottom: 15px;
+    .modal-overlay.open { display: flex; }
+    .modal {
+      background: var(--card-bg); border-radius: 16px;
+      padding: 25px; max-width: 800px; width: 100%;
+      max-height: 90vh; overflow-y: auto;
     }
+    .modal h2 { font-size: 20px; font-weight: 900; margin-bottom: 20px; }
+    .form-group { margin-bottom: 15px; }
+    .form-group label { display: block; margin-bottom: 6px; font-weight: 800; font-size: 12px; color: var(--muted); text-transform: uppercase; }
+    .form-input, .form-select, .form-textarea {
+      width: 100%; padding: 11px 14px; background: var(--bg);
+      border: 2px solid var(--border); border-radius: 10px;
+      color: var(--text); font-size: 14px;
+    }
+    .form-input:focus, .form-select:focus, .form-textarea:focus { outline: none; border-color: var(--primary); }
+    .form-textarea { min-height: 70px; resize: vertical; }
 
-    .category-grid {
+    .lang-tabs {
+      display: flex; gap: 6px; margin-bottom: 15px;
+      border-bottom: 2px solid var(--border);
+      padding-bottom: 0;
+    }
+    .lang-tab {
+      padding: 10px 18px; border-radius: 10px 10px 0 0;
+      font-weight: 800; font-size: 13px;
+      cursor: pointer; border: none;
+      background: var(--bg-alt); color: var(--muted);
+      border-bottom: 3px solid transparent;
+    }
+    .lang-tab.active {
+      background: var(--gradient-blue); color: white;
+      border-bottom-color: var(--primary);
+    }
+    .lang-section { display: none; }
+    .lang-section.active { display: block; }
+
+    .opt-row {
       display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 15px;
-    }
-
-    .language-section {
-      grid-column: 1 / -1;
-      border: 2px solid #e2e8f0;
-      border-radius: 18px;
-      padding: 20px;
-      background: #fff;
-    }
-
-    .language-heading {
-      font-size: 18px;
-      font-weight: 900;
-      padding: 12px 15px;
-      border-radius: 12px;
-      margin-bottom: 17px;
-    }
-
-    .hindi-section {
-      border-color: #fecaca;
-      background: #fffafa;
-    }
-
-    .hindi-section .language-heading {
-      background: #fff1f2;
-      color: #991b1b;
-      border-left: 5px solid #dc2626;
-    }
-
-    .english-section {
-      border-color: #bfdbfe;
-      background: #fafcff;
-    }
-
-    .english-section .language-heading {
-      background: #eff6ff;
-      color: #1d4ed8;
-      border-left: 5px solid #2563eb;
-    }
-
-    .options-container {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 12px;
-    }
-
-    .option-row {
-      display: grid;
-      grid-template-columns: 48px 1fr;
-      align-items: center;
-      gap: 12px;
-    }
-
-    .option-letter {
-      height: 48px;
-      width: 48px;
-      display: grid;
-      place-items: center;
-      border-radius: 12px;
-      background: linear-gradient(135deg, #6d28d9, #9333ea);
-      color: white;
-      font-weight: 900;
-      font-size: 17px;
-    }
-
-    .option-row input {
-      min-height: 48px;
-    }
-
-    .correct-box {
-      grid-column: 1 / -1;
-      background: linear-gradient(135deg, #ecfdf5, #f0fdf4);
-      border: 2px solid #bbf7d0;
-      padding: 20px;
-      border-radius: 17px;
-    }
-
-    .correct-box label {
-      color: #166534;
-    }
-
-    .correct-box select {
-      border-color: #86efac;
-    }
-
-    .section-title {
-      grid-column: 1 / -1;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      font-size: 18px;
-      font-weight: 900;
-      margin-top: 10px;
-      padding: 13px 15px;
-      border-radius: 13px;
-      background: linear-gradient(90deg, #f5f3ff, #fff1f8);
-      color: #5b21b6;
-      border-left: 5px solid #7c3aed;
-    }
-
-    .form-buttons {
-      display: flex;
-      gap: 12px;
-      flex-wrap: wrap;
-      margin-top: 8px;
-    }
-
-    #saveBtn {
-      min-width: 190px;
-      padding: 15px 24px;
-      font-size: 15px;
-      border-radius: 14px;
-    }
-
-    #saveBtn:disabled {
-      opacity: .65;
-      cursor: not-allowed;
-    }
-
-    .message {
-      padding: 15px 18px;
-      border-radius: 14px;
-      margin-bottom: 18px;
-      display: none;
-      font-weight: 800;
-    }
-
-    .success {
-      background: #dcfce7;
-      color: #166534;
-      border: 1px solid #86efac;
-    }
-
-    .error {
-      background: #fee2e2;
-      color: #991b1b;
-      border: 1px solid #fca5a5;
-    }
-
-    /* =========================
-       QUESTION LIST
-    ========================= */
-
-    .question-item {
-      border: 1px solid #e2e8f0;
-      border-radius: 18px;
-      padding: 21px;
-      margin-bottom: 17px;
-      background: linear-gradient(145deg, #fff, #fafbff);
-    }
-
-    .question-header {
-      display: flex;
-      justify-content: space-between;
+      grid-template-columns: 40px 1fr;
       gap: 10px;
       align-items: center;
-      margin-bottom: 14px;
+      margin-bottom: 10px;
     }
-
-    .question-number {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      min-width: 58px;
-      padding: 7px 12px;
-      border-radius: 30px;
-      background: linear-gradient(135deg, #6d28d9, #ec4899);
-      color: white;
+    .opt-label {
+      background: var(--primary); color: white;
+      width: 32px; height: 32px;
+      border-radius: 8px; font-weight: 900;
+      display: flex; align-items: center; justify-content: center;
       font-size: 14px;
-      font-weight: 900;
-    }
-
-    .question-category {
-      background: #f1f5f9;
-      padding: 8px 12px;
-      border-radius: 10px;
-      font-size: 12px;
-      color: #475569;
-      font-weight: 800;
-    }
-
-    .question-text {
-      line-height: 1.7;
-      margin-bottom: 14px;
-      background: #f8fafc;
-      padding: 15px;
-      border-radius: 13px;
-      border-left: 4px solid #7c3aed;
-      white-space: pre-line;
-    }
-
-    .display-language {
-      margin-bottom: 15px;
-    }
-
-    .display-language-title {
-      font-weight: 900;
-      margin-bottom: 7px;
-    }
-
-    .options-list {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 9px;
-      margin: 12px 0;
-    }
-
-    .option {
-      background: white;
-      border: 1px solid #e2e8f0;
-      padding: 12px;
-      border-radius: 11px;
-      font-size: 14px;
-    }
-
-    .option strong {
-      color: #6d28d9;
-      margin-right: 5px;
-    }
-
-    .answer {
-      background: linear-gradient(135deg, #dcfce7, #ecfdf5);
-      color: #166534;
-      border: 1px solid #86efac;
-      padding: 11px 13px;
-      border-radius: 11px;
-      margin-top: 10px;
-      font-weight: 900;
-    }
-
-    .explanation {
-      background: #fff7ed;
-      border: 1px solid #fed7aa;
-      padding: 13px;
-      border-radius: 11px;
-      margin-top: 10px;
-      line-height: 1.65;
-      white-space: pre-line;
-    }
-
-    .question-actions {
-      display: flex;
-      gap: 9px;
-      margin-top: 15px;
-      flex-wrap: wrap;
-    }
-
-    .small-btn {
-      padding: 9px 14px;
-      border: none;
-      border-radius: 10px;
-      cursor: pointer;
-      font-weight: 800;
-      font-size: 13px;
-    }
-
-    .empty {
-      text-align: center;
-      padding: 45px 20px;
-      color: #64748b;
-      background: #f8fafc;
-      border: 2px dashed #cbd5e1;
-      border-radius: 15px;
-    }
-
-    #pageLoading {
-      background: white;
-      padding: 45px 20px;
-      text-align: center;
-      border-radius: 20px;
-      font-weight: 800;
-      color: #64748b;
-    }
-
-    #mainContent {
-      display: none;
-    }
-
-    /* =========================
-       BULK UPLOAD
-    ========================= */
-
-    .bulk-upload-card {
-      margin-bottom: 22px;
-      padding: 25px;
-      border-radius: 22px;
-      background: linear-gradient(135deg, #ffffff, #f8f7ff);
-      border: 1px solid #ddd6fe;
-      box-shadow: 0 12px 40px rgba(30, 41, 59, .08);
-    }
-
-    .bulk-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 15px;
-      margin-bottom: 20px;
-      flex-wrap: wrap;
-    }
-
-    .bulk-title {
-      font-size: 22px;
-      font-weight: 900;
-      color: #312e81;
-    }
-
-    .bulk-subtitle {
-      margin-top: 5px;
-      color: #64748b;
-      font-size: 14px;
-    }
-
-    .bulk-badge {
-      padding: 8px 14px;
-      border-radius: 30px;
-      background: #ede9fe;
-      color: #5b21b6;
-      font-size: 12px;
-      font-weight: 900;
-    }
-
-    .bulk-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 17px;
-    }
-
-    .bulk-field {
-      display: flex;
-      flex-direction: column;
-      gap: 7px;
-    }
-
-    .bulk-field.full {
-      grid-column: 1 / -1;
-    }
-
-    .bulk-field label {
-      margin-bottom: 0;
-    }
-
-    .bulk-language {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 10px;
-    }
-
-    .language-option {
-      position: relative;
-    }
-
-    .language-option input {
-      position: absolute;
-      opacity: 0;
-      pointer-events: none;
-    }
-
-    .language-option label {
-      display: block;
-      padding: 13px;
-      text-align: center;
-      border: 2px solid #e5e7eb;
-      border-radius: 12px;
-      cursor: pointer;
-      background: #fff;
-      transition: .2s;
-    }
-
-    .language-option input:checked + label {
-      border-color: #6366f1;
-      background: #eef2ff;
-      color: #4338ca;
-      font-weight: 900;
-    }
-
-    .bulk-file-box {
-      padding: 20px;
-      border: 2px dashed #c7d2fe;
-      border-radius: 15px;
-      background: #f5f3ff;
-      text-align: center;
-    }
-
-    .bulk-file-box input {
-      max-width: 100%;
-      border: none;
-      background: transparent;
-    }
-
-    .bulk-file-help {
-      margin-top: 8px;
-      color: #6b7280;
-      font-size: 12px;
-    }
-
-    .bulk-format-box {
-      margin-top: 15px;
-      padding: 14px;
-      background: #f8fafc;
-      border: 1px solid #e2e8f0;
-      border-radius: 13px;
-      font-size: 13px;
-      line-height: 1.7;
-      color: #475569;
-      overflow-x: auto;
-    }
-
-    .bulk-format-box strong {
-      color: #312e81;
-    }
-
-    .bulk-actions {
-      display: flex;
-      gap: 12px;
-      flex-wrap: wrap;
-      margin-top: 20px;
-    }
-
-    .bulk-btn {
-      border: none;
-      border-radius: 12px;
-      padding: 13px 20px;
-      font-weight: 900;
-      cursor: pointer;
-      transition: .2s;
-    }
-
-    .bulk-btn:hover {
-      transform: translateY(-2px);
-    }
-
-    .bulk-preview-btn {
-      background: linear-gradient(135deg, #4f46e5, #7c3aed);
-      color: white;
-    }
-
-    .bulk-import-btn {
-      background: linear-gradient(135deg, #059669, #16a34a);
-      color: white;
-    }
-
-    .bulk-clear-btn {
-      background: #e2e8f0;
-      color: #334155;
-    }
-
-    .bulk-btn:disabled {
-      opacity: .5;
-      cursor: not-allowed;
-      transform: none;
-    }
-
-    .bulk-status {
-      margin-top: 15px;
-      padding: 13px 15px;
-      border-radius: 11px;
-      display: none;
-      font-size: 14px;
-      font-weight: 800;
-    }
-
-    .bulk-status.success {
-      display: block;
-      background: #dcfce7;
-      color: #166534;
-    }
-
-    .bulk-status.error {
-      display: block;
-      background: #fee2e2;
-      color: #991b1b;
-    }
-
-    .bulk-status.loading {
-      display: block;
-      background: #e0e7ff;
-      color: #3730a3;
     }
 
     .bulk-preview {
-      margin-top: 22px;
-      display: none;
+      display: none; margin-top: 20px;
+      background: var(--card-bg); border: 1px solid var(--border);
+      border-radius: 12px; padding: 16px;
+      max-height: 500px; overflow-y: auto;
     }
-
-    .bulk-preview.show {
-      display: block;
-    }
-
-    .bulk-preview-head {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10px;
-      flex-wrap: wrap;
-      margin-bottom: 12px;
-    }
-
-    .bulk-preview-head h3 {
-      font-size: 19px;
-      color: #111827;
-    }
-
-    .bulk-count {
-      background: #eef2ff;
-      color: #4338ca;
-      padding: 7px 12px;
-      border-radius: 999px;
-      font-size: 12px;
-      font-weight: 900;
-    }
-
-    .bulk-table-wrap {
-      width: 100%;
-      overflow-x: auto;
-      border: 1px solid #e5e7eb;
-      border-radius: 14px;
-      background: white;
-    }
-
-    .bulk-table {
-      width: 100%;
-      min-width: 1000px;
-      border-collapse: collapse;
-    }
-
-    .bulk-table th,
-    .bulk-table td {
-      padding: 12px;
-      border-bottom: 1px solid #e5e7eb;
-      vertical-align: top;
-      text-align: left;
+    .bulk-preview.show { display: block; }
+    .bulk-preview h3 { font-size: 15px; font-weight: 900; margin-bottom: 12px; color: var(--primary); }
+    .preview-question {
+      background: var(--bg-alt); padding: 12px;
+      border-radius: 8px; margin-bottom: 10px;
       font-size: 13px;
     }
+    .preview-question strong { display: block; margin-bottom: 6px; }
+    .preview-options { list-style: none; margin: 6px 0; }
+    .preview-options li { padding: 3px 0; font-size: 12px; color: var(--text-light); }
+    .preview-options li.correct { color: #86efac; font-weight: 800; }
+    .preview-answer { font-size: 12px; color: var(--muted); margin-top: 6px; }
 
-    .bulk-table th {
-      background: #f8fafc;
-      color: #374151;
-      font-weight: 900;
-      position: sticky;
-      top: 0;
-      z-index: 2;
+    .alert {
+      padding: 12px 16px; border-radius: 10px; margin-bottom: 15px;
+      display: none; font-size: 13px; font-weight: 700;
     }
+    .alert.success { background: #14532d; color: #86efac; display: block; }
+    .alert.error { background: #7f1d1d; color: #fca5a5; display: block; }
+    .alert.info { background: #172554; color: #93c5fd; display: block; }
 
-    .bulk-table tr:last-child td {
-      border-bottom: none;
+    .empty-box {
+      text-align: center; padding: 40px 20px; color: var(--muted);
+      background: var(--card-bg); border: 1px dashed var(--border);
+      border-radius: 12px; font-size: 14px;
     }
+    .loading-box { text-align: center; padding: 40px; color: var(--muted); }
 
-    .preview-question {
-      max-width: 350px;
-      white-space: pre-wrap;
-      line-height: 1.5;
-    }
-
-    .preview-options {
-      margin: 0;
-      padding-left: 20px;
-    }
-
-    .preview-options li {
-      margin-bottom: 5px;
-      line-height: 1.45;
-    }
-
-    .preview-answer {
-      font-weight: 900;
-      color: #059669;
-      white-space: nowrap;
-    }
-
-    .bulk-summary {
-      margin-top: 15px;
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 10px;
-    }
-
-    .bulk-summary-box {
-      background: #f8fafc;
-      border: 1px solid #e2e8f0;
-      border-radius: 12px;
-      padding: 13px;
-      text-align: center;
-    }
-
-    .bulk-summary-box strong {
-      display: block;
-      font-size: 20px;
-      color: #312e81;
-    }
-
-    .bulk-summary-box span {
-      font-size: 12px;
-      color: #64748b;
-    }
-
-    @media (max-width: 760px) {
-
-      header {
-        padding: 15px;
-      }
-
-      .header-inner {
-        align-items: flex-start;
-      }
-
-      main {
-        padding: 20px 11px 50px;
-      }
-
-      .top-title {
-        width: 100%;
-      }
-
-      .top-bar h1 {
-        font-size: 22px;
-      }
-
-      .top-bar > div:last-child {
-        width: 100%;
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 8px;
-      }
-
-      .top-bar .btn {
-        width: 100%;
-      }
-
-      .card,
-      .bulk-upload-card {
-        padding: 18px 14px;
-        border-radius: 17px;
-      }
-
-      .form-grid,
-      .bulk-grid {
-        grid-template-columns: 1fr;
-      }
-
-      .category-grid {
-        grid-template-columns: 1fr;
-      }
-
-      .full,
-      .section-title,
-      .correct-box,
-      .language-section,
-      .category-box,
-      .bulk-field.full {
-        grid-column: auto;
-      }
-
-      .option-row {
-        grid-template-columns: 42px 1fr;
-      }
-
-      .option-letter {
-        width: 42px;
-        height: 42px;
-      }
-
-      .form-buttons,
-      .bulk-actions {
-        display: grid;
-        grid-template-columns: 1fr;
-      }
-
-      #saveBtn,
-      .bulk-btn {
-        width: 100%;
-      }
-
-      .bulk-language {
-        grid-template-columns: 1fr;
-      }
-
-      .bulk-summary {
-        grid-template-columns: 1fr;
-      }
-    }
-
-    @media (max-width: 420px) {
-
-      .header-inner {
-        flex-direction: column;
-      }
-
-      .top-bar > div:last-child {
-        grid-template-columns: 1fr;
-      }
-
-      input,
-      textarea,
-      select {
-        font-size: 14px;
-      }
+    @media (max-width: 700px) {
+      .q-card { padding: 10px 12px; }
+      .q-text { font-size: 13px; }
+      .q-opt { font-size: 11px; padding: 4px 8px; }
+      .modal { padding: 18px; }
+      .lang-tab { padding: 8px 12px; font-size: 12px; }
     }
   </style>
 </head>
-
 <body>
 
-<header>
-  <div class="header-inner">
-    <div class="logo">🏆 ExamPrepHub</div>
-    <div class="badge">ADMIN • QUESTION MANAGER</div>
-  </div>
-</header>
-
-<main>
-
-  <div id="pageLoading">
-    🔄 Checking admin access...
+  <div class="top-bar">
+    <div class="logo">❓ Question Manager</div>
+    <div class="actions">
+      <a href="/admin-tests.html" class="btn-header">← Tests</a>
+      <a href="/admin-dashboard.html" class="btn-header">🏠 Dashboard</a>
+    </div>
   </div>
 
-  <div id="mainContent">
+  <div class="container">
 
-    <div class="top-bar">
-
-      <div class="top-title">
-
-        <div class="title-icon">
-          ❓
-        </div>
-
-        <div>
-          <h1>Question Management</h1>
-          <small>Create, edit and manage your test questions</small>
-        </div>
-
-      </div>
-
+    <div class="test-info">
       <div>
-        <a href="/admin.html" class="btn gray">
-          ← Admin Panel
-        </a>
-
-        <a href="/admin-tests.html" class="btn blue">
-          📝 Tests
-        </a>
+        <h2 id="testName">Loading test...</h2>
+        <div class="meta" id="testMeta">-</div>
       </div>
-
+      <div style="font-size: 13px; color: var(--muted);">
+        Total: <strong id="qCount" style="color: var(--primary);">0</strong> questions
+      </div>
     </div>
 
-    <div id="message" class="message"></div>
-
-    <!-- SELECTED TEST -->
-
-    <div class="card">
-
-      <div class="card-heading">
-
-        <div class="heading-icon">
-          🎯
-        </div>
-
-        <h2>Selected Test</h2>
-
-      </div>
-
-      <div class="test-info">
-
-        <strong id="testName">
-          Loading...
-        </strong>
-
-        <br>
-
-        <span id="testDetails"></span>
-
-      </div>
-
+    <div class="action-bar">
+      <button class="btn btn-green" id="addBtn">➕ Add Question</button>
+      <button class="btn btn-blue" id="bulkBtn">📤 Bulk Import (Word/PDF)</button>
+      <button class="btn btn-gray" onclick="location.reload()">🔄 Refresh</button>
     </div>
 
-
-    <!-- BULK QUESTION UPLOAD -->
-
-    <section class="bulk-upload-card">
-
-      <div class="bulk-header">
-
-        <div>
-
-          <h2 class="bulk-title">
-            📚 Bulk Question Upload
-          </h2>
-
-          <p class="bulk-subtitle">
-            Word/PDF से 20, 50, 100 या उससे अधिक Questions एक साथ upload करें
-          </p>
-
-        </div>
-
-        <span class="bulk-badge">
-          PDF • WORD • MONGODB
-        </span>
-
-      </div>
-
-
-      <div class="bulk-grid">
-
-        <div class="bulk-field">
-
-          <label for="bulkTest">
-            🎯 Test / Batch
-          </label>
-
-          <select id="bulkTest">
-
-            <option value="">
-              -- Select Test / Batch --
-            </option>
-
-          </select>
-
-        </div>
-
-
-        <div class="bulk-field">
-
-          <label for="bulkSubject">
-            📖 Subject
-          </label>
-
-          <select id="bulkSubject">
-
-            <option value="">
-              -- Select Subject --
-            </option>
-
-          </select>
-
-        </div>
-
-
-        <div class="bulk-field">
-
-          <label for="bulkChapter">
-            📑 Chapter
-          </label>
-
-          <select id="bulkChapter">
-
-            <option value="">
-              -- Select Chapter --
-            </option>
-
-          </select>
-
-        </div>
-
-
-        <div class="bulk-field">
-
-          <label>
-            🌐 Question Language
-          </label>
-
-          <div class="bulk-language">
-
-            <div class="language-option">
-
-              <input
-                type="radio"
-                name="bulkLanguage"
-                id="bulkHindi"
-                value="hindi"
-                checked
-              >
-
-              <label for="bulkHindi">
-                🇮🇳 Hindi
-              </label>
-
-            </div>
-
-
-            <div class="language-option">
-
-              <input
-                type="radio"
-                name="bulkLanguage"
-                id="bulkEnglish"
-                value="english"
-              >
-
-              <label for="bulkEnglish">
-                🇬🇧 English
-              </label>
-
-            </div>
-
-
-            <div class="language-option">
-
-              <input
-                type="radio"
-                name="bulkLanguage"
-                id="bulkBilingual"
-                value="bilingual"
-              >
-
-              <label for="bulkBilingual">
-                🌐 Bilingual
-              </label>
-
-            </div>
-
-          </div>
-
-        </div>
-
-
-        <div class="bulk-field full">
-
-          <label for="bulkFile">
-            📄 Word / PDF File
-          </label>
-
-          <div class="bulk-file-box">
-
-            <input
-              type="file"
-              id="bulkFile"
-              accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-            >
-
-            <div class="bulk-file-help">
-              केवल PDF या DOCX • Maximum 10 MB
-            </div>
-
-          </div>
-
-        </div>
-
-      </div>
-
-
-      <div class="bulk-format-box">
-
-        <strong>📌 File Format:</strong>
-
-        File में Questions इस format में होने चाहिए:
-
-        <br><br>
-
-        <b>QUESTION 1</b><br>
-        Subject: General Studies<br>
-        Chapter: Indian History<br>
-        Hindi Question: भारत की राजधानी क्या है?<br>
-        English Question: What is the capital of India?<br>
-        Hindi Option A: नई दिल्ली<br>
-        Hindi Option B: मुंबई<br>
-        Hindi Option C: कोलकाता<br>
-        Hindi Option D: चेन्नई<br>
-        English Option A: New Delhi<br>
-        English Option B: Mumbai<br>
-        English Option C: Kolkata<br>
-        English Option D: Chennai<br>
-        Answer: A<br>
-        Hindi Explanation: भारत की राजधानी नई दिल्ली है।<br>
-        English Explanation: New Delhi is the capital of India.
-
-      </div>
-
-
-      <div class="bulk-actions">
-
-        <button
-          type="button"
-          class="bulk-btn bulk-preview-btn"
-          id="bulkPreviewBtn"
-        >
-          👁️ Preview Questions
-        </button>
-
-
-        <button
-          type="button"
-          class="bulk-btn bulk-import-btn"
-          id="bulkImportBtn"
-          disabled
-        >
-          ⬆️ Import to MongoDB
-        </button>
-
-
-        <button
-          type="button"
-          class="bulk-btn bulk-clear-btn"
-          id="bulkClearBtn"
-        >
-          ↻ Clear
-        </button>
-
-      </div>
-
-
-      <div
-        id="bulkStatus"
-        class="bulk-status"
-      ></div>
-
-
-      <div
-        id="bulkSummary"
-        class="bulk-summary"
-        style="display:none;"
-      >
-
-        <div class="bulk-summary-box">
-
-          <strong id="summaryTotal">
-            0
-          </strong>
-
-          <span>
-            Total Questions
-          </span>
-
-        </div>
-
-
-        <div class="bulk-summary-box">
-
-          <strong id="summaryLanguage">
-            Hindi
-          </strong>
-
-          <span>
-            Language
-          </span>
-
-        </div>
-
-
-        <div class="bulk-summary-box">
-
-          <strong id="summaryTest">
-            —
-          </strong>
-
-          <span>
-            Selected Test
-          </span>
-
-        </div>
-
-      </div>
-
-
-      <div
-        id="bulkPreview"
-        class="bulk-preview"
-      >
-
-        <div class="bulk-preview-head">
-
-          <h3>
-            📋 All Questions Preview
-          </h3>
-
-          <span
-            id="bulkCount"
-            class="bulk-count"
-          >
-            0 Questions
-          </span>
-
-        </div>
-
-
-        <div class="bulk-table-wrap">
-
-          <table class="bulk-table">
-
-            <thead id="bulkPreviewHead"></thead>
-
-            <tbody id="bulkPreviewBody"></tbody>
-
-          </table>
-
-        </div>
-
-      </div>
-
-    </section>
-
-
-    <!-- MANUAL QUESTION FORM -->
-
-    <div class="card">
-
-      <div class="card-heading">
-
-        <div class="heading-icon">
-          ✨
-        </div>
-
-        <h2 id="formTitle">
-          Add New Question
-        </h2>
-
-      </div>
-
-
-      <form id="questionForm">
-
-        <input
-          type="hidden"
-          id="questionId"
-        >
-
-
-        <div class="form-grid">
-
-
-          <div class="category-box">
-
-            <div class="category-title">
-              📚 Subject & Chapter
-            </div>
-
-
-            <div class="category-grid">
-
-              <div class="field">
-
-                <label>
-                  📖 Subject / विषय
-                </label>
-
-                <select
-                  id="subject"
-                  required
-                >
-
-                  <option value="">
-                    -- Select Subject --
-                  </option>
-
-                </select>
-
-              </div>
-
-
-              <div class="field">
-
-                <label>
-                  📑 Chapter / अध्याय
-                </label>
-
-                <select
-                  id="chapter"
-                  required
-                >
-
-                  <option value="">
-                    -- Select Chapter --
-                  </option>
-
-                </select>
-
-              </div>
-
-            </div>
-
-          </div>
-
-
-          <div class="language-section hindi-section">
-
-            <div class="language-heading">
-              🇮🇳 Hindi Question / हिंदी प्रश्न
-            </div>
-
-
-            <div class="field">
-
-              <label>
-                Question
-              </label>
-
-              <textarea
-                id="questionHindi"
-                placeholder="यहाँ प्रश्न हिंदी में लिखें..."
-                required
-              ></textarea>
-
-            </div>
-
-
-            <br>
-
-
-            <label>
-              Options / विकल्प
-            </label>
-
-
-            <div class="options-container">
-
-              <div class="option-row">
-
-                <div class="option-letter">A</div>
-
-                <input
-                  type="text"
-                  id="hi0"
-                  placeholder="Hindi Option A"
-                  required
-                >
-
-              </div>
-
-
-              <div class="option-row">
-
-                <div class="option-letter">B</div>
-
-                <input
-                  type="text"
-                  id="hi1"
-                  placeholder="Hindi Option B"
-                  required
-                >
-
-              </div>
-
-
-              <div class="option-row">
-
-                <div class="option-letter">C</div>
-
-                <input
-                  type="text"
-                  id="hi2"
-                  placeholder="Hindi Option C"
-                  required
-                >
-
-              </div>
-
-
-              <div class="option-row">
-
-                <div class="option-letter">D</div>
-
-                <input
-                  type="text"
-                  id="hi3"
-                  placeholder="Hindi Option D"
-                  required
-                >
-
-              </div>
-
-            </div>
-
-          </div>
-
-
-          <div class="language-section english-section">
-
-            <div class="language-heading">
-              🇬🇧 English Question / अंग्रेजी प्रश्न
-            </div>
-
-
-            <div class="field">
-
-              <label>
-                Question
-              </label>
-
-              <textarea
-                id="questionEnglish"
-                placeholder="Write the question in English..."
-              ></textarea>
-
-            </div>
-
-
-            <br>
-
-
-            <label>
-              Options / विकल्प
-            </label>
-
-
-            <div class="options-container">
-
-              <div class="option-row">
-
-                <div class="option-letter">A</div>
-
-                <input
-                  type="text"
-                  id="en0"
-                  placeholder="English Option A"
-                >
-
-              </div>
-
-
-              <div class="option-row">
-
-                <div class="option-letter">B</div>
-
-                <input
-                  type="text"
-                  id="en1"
-                  placeholder="English Option B"
-                >
-
-              </div>
-
-
-              <div class="option-row">
-
-                <div class="option-letter">C</div>
-
-                <input
-                  type="text"
-                  id="en2"
-                  placeholder="English Option C"
-                >
-
-              </div>
-
-
-              <div class="option-row">
-
-                <div class="option-letter">D</div>
-
-                <input
-                  type="text"
-                  id="en3"
-                  placeholder="English Option D"
-                >
-
-              </div>
-
-            </div>
-
-          </div>
-
-
-          <div class="correct-box">
-
-            <label>
-              ✅ Correct Answer / सही उत्तर
-            </label>
-
-            <select
-              id="correctAnswer"
-              required
-            >
-
-              <option value="">
-                -- Select Correct Option --
-              </option>
-
-              <option value="0">
-                🅰️ Option A
-              </option>
-
-              <option value="1">
-                🅱️ Option B
-              </option>
-
-              <option value="2">
-                🅲️ Option C
-              </option>
-
-              <option value="3">
-                🅳️ Option D
-              </option>
-
-            </select>
-
-          </div>
-
-
-          <div class="section-title">
-            💡 Explanation / व्याख्या
-          </div>
-
-
-          <div class="field">
-
-            <label>
-              🇮🇳 Hindi Explanation
-            </label>
-
-            <textarea
-              id="explanationHindi"
-              placeholder="सही उत्तर की हिंदी में explanation लिखें..."
-            ></textarea>
-
-          </div>
-
-
-          <div class="field">
-
-            <label>
-              🇬🇧 English Explanation
-            </label>
-
-            <textarea
-              id="explanationEnglish"
-              placeholder="Write the explanation in English..."
-            ></textarea>
-
-          </div>
-
-
-          <div class="full form-buttons">
-
-            <button
-              type="submit"
-              class="btn green"
-              id="saveBtn"
-            >
-              ➕ Add Question
-            </button>
-
-
-            <button
-              type="button"
-              class="btn gray"
-              id="cancelBtn"
-              style="display:none;"
-              onclick="resetForm()"
-            >
-              ↩️ Cancel Edit
-            </button>
-
-          </div>
-
-        </div>
-
-      </form>
-
+    <div class="search-bar">
+      <input type="text" id="searchInput" placeholder="🔍 Search question..." />
+      <select id="subjectFilter"><option value="">All Subjects</option></select>
     </div>
 
+    <div id="msg" class="alert"></div>
 
-    <!-- QUESTIONS LIST -->
+    <div class="q-list" id="qList">
+      <div class="loading-box">Loading questions...</div>
+    </div>
 
-    <div class="card">
-
-      <div class="card-heading">
-
-        <div class="heading-icon">
-          📚
-        </div>
-
-        <h2>
-          Questions List
-        </h2>
-
+    <div class="bulk-preview" id="bulkPreview">
+      <h3>📋 Preview Questions</h3>
+      <div id="previewContent"></div>
+      <div style="display: flex; gap: 10px; margin-top: 15px; flex-wrap: wrap;">
+        <button class="btn btn-green" id="importBtn">✅ Import All Questions</button>
+        <button class="btn btn-gray" id="cancelBulkBtn">Cancel</button>
       </div>
-
-
-      <div id="questionsList">
-        🔄 Loading questions...
-      </div>
-
     </div>
 
   </div>
 
-</main>
+  <div class="modal-overlay" id="addModal">
+    <div class="modal">
+      <h2 id="modalTitle">➕ Add New Question</h2>
 
+      <div class="lang-tabs">
+        <button type="button" class="lang-tab active" data-lang="hindi">🇮🇳 हिंदी</button>
+        <button type="button" class="lang-tab" data-lang="english">🇬🇧 English</button>
+      </div>
 
-<script>
+      <div class="lang-section active" data-lang="hindi">
+        <div class="form-group">
+          <label>Question (Hindi) *</label>
+          <textarea id="addQHindi" class="form-textarea" placeholder="प्रश्न हिंदी में..."></textarea>
+        </div>
+        <div class="form-group">
+          <label>Options (Hindi)</label>
+          <div class="opt-row"><div class="opt-label">A</div><input type="text" id="addOptAHindi" class="form-input" /></div>
+          <div class="opt-row"><div class="opt-label">B</div><input type="text" id="addOptBHindi" class="form-input" /></div>
+          <div class="opt-row"><div class="opt-label">C</div><input type="text" id="addOptCHindi" class="form-input" /></div>
+          <div class="opt-row"><div class="opt-label">D</div><input type="text" id="addOptDHindi" class="form-input" /></div>
+        </div>
+        <div class="form-group">
+          <label>Explanation (Hindi)</label>
+          <textarea id="addExpHindi" class="form-textarea" placeholder="व्याख्या..."></textarea>
+        </div>
+      </div>
 
-"use strict";
+      <div class="lang-section" data-lang="english">
+        <div class="form-group">
+          <label>Question (English)</label>
+          <textarea id="addQEnglish" class="form-textarea" placeholder="Question in English..."></textarea>
+        </div>
+        <div class="form-group">
+          <label>Options (English)</label>
+          <div class="opt-row"><div class="opt-label">A</div><input type="text" id="addOptAEnglish" class="form-input" /></div>
+          <div class="opt-row"><div class="opt-label">B</div><input type="text" id="addOptBEnglish" class="form-input" /></div>
+          <div class="opt-row"><div class="opt-label">C</div><input type="text" id="addOptCEnglish" class="form-input" /></div>
+          <div class="opt-row"><div class="opt-label">D</div><input type="text" id="addOptDEnglish" class="form-input" /></div>
+        </div>
+        <div class="form-group">
+          <label>Explanation (English)</label>
+          <textarea id="addExpEnglish" class="form-textarea" placeholder="Explanation..."></textarea>
+        </div>
+      </div>
 
+      <div class="form-group" style="margin-top: 20px;">
+        <label>Correct Answer *</label>
+        <select id="addCorrect" class="form-select">
+          <option value="0">A</option>
+          <option value="1">B</option>
+          <option value="2">C</option>
+          <option value="3">D</option>
+        </select>
+      </div>
+      <div class="form-group"><label>Subject</label><input type="text" id="addSubject" class="form-input" placeholder="General Studies" /></div>
+      <div class="form-group"><label>Chapter</label><input type="text" id="addChapter" class="form-input" placeholder="Indian History" /></div>
 
-/* =========================================================
-   GLOBAL VARIABLES
-========================================================= */
+      <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+        <button class="btn btn-green" id="saveQBtn">💾 Save Question</button>
+        <button class="btn btn-gray" id="cancelAddBtn">Cancel</button>
+      </div>
+    </div>
+  </div>
 
-let testId = null;
+  <div class="modal-overlay" id="bulkModal">
+    <div class="modal">
+      <h2>📤 Bulk Import Questions</h2>
+      <p style="font-size: 13px; color: var(--muted); margin-bottom: 15px;">
+        Word (.docx) ya PDF file upload karo — 20, 50, 100 ya zyada questions ek saath
+      </p>
+      <div class="form-group">
+        <label>Language</label>
+        <select id="bulkLanguage" class="form-select">
+          <option value="bilingual">Bilingual (Hindi + English)</option>
+          <option value="hindi">Hindi only</option>
+          <option value="english">English only</option>
+        </select>
+      </div>
+      <div class="form-group"><label>Subject</label><input type="text" id="bulkSubject" class="form-input" placeholder="General Studies" /></div>
+      <div class="form-group"><label>Chapter</label><input type="text" id="bulkChapter" class="form-input" placeholder="Indian History" /></div>
+      <div class="form-group">
+        <label>File (PDF / DOCX)</label>
+        <input type="file" id="bulkFile" class="form-input" accept=".pdf,.docx" />
+        <div style="font-size: 11px; color: var(--muted); margin-top: 4px;">Max 10 MB • PDF ya DOCX</div>
+      </div>
+      <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+        <button class="btn btn-blue" id="previewBtn">👁️ Preview Questions</button>
+        <button class="btn btn-gray" id="cancelBulkModalBtn">Cancel</button>
+      </div>
+      <div id="bulkMsg" class="alert" style="margin-top: 15px;"></div>
+    </div>
+  </div>
 
-let currentTest = null;
+  <script src="/js/common.js"></script>
+  <script>
+    const testId = getQueryParam("test");
+    let allQuestions = [];
+    let searchQ = "";
+    let subjectF = "";
+    let pendingPreview = [];
+    let editingId = null;
 
-let questions = [];
-
-let bulkPreviewQuestions = [];
-
-let bulkPreviewLanguage = "hindi";
-
-
-/* =========================================================
-   SUBJECT + CHAPTER DATA
-========================================================= */
-
-const subjectChapters = {
-
-  "General Studies": [
-    "Indian History",
-    "Indian Geography",
-    "Indian Polity",
-    "Indian Economy",
-    "General Science",
-    "Current Affairs",
-    "Environment",
-    "General Knowledge"
-  ],
-
-  "General Hindi": [
-    "Hindi Grammar",
-    "Vocabulary",
-    "Synonyms",
-    "Antonyms",
-    "Sandhi",
-    "Samas",
-    "Alankar",
-    "Idioms & Proverbs"
-  ],
-
-  "General Intelligence": [
-    "Analogy",
-    "Classification",
-    "Series",
-    "Coding-Decoding",
-    "Blood Relation",
-    "Direction Test",
-    "Venn Diagram",
-    "Logical Reasoning"
-  ],
-
-  "General Science": [
-    "Physics",
-    "Chemistry",
-    "Biology",
-    "Human Body",
-    "Environment"
-  ],
-
-  "Mathematics": [
-    "Number System",
-    "Percentage",
-    "Profit & Loss",
-    "Ratio & Proportion",
-    "Average",
-    "Time & Work",
-    "Time & Distance",
-    "Simple Interest",
-    "Compound Interest"
-  ],
-
-  "Current Affairs": [
-    "National",
-    "International",
-    "Uttar Pradesh",
-    "Sports",
-    "Awards",
-    "Appointments",
-    "Important Days",
-    "Government Schemes"
-  ]
-
-};
-
-
-/* =========================================================
-   SHOW MESSAGE
-========================================================= */
-
-function showMessage(text, type = "success") {
-
-  const box =
-    document.getElementById("message");
-
-  if (!box) return;
-
-  box.textContent = text;
-
-  box.className =
-    "message " + type;
-
-  box.style.display = "block";
-
-  window.scrollTo({
-    top: 0,
-    behavior: "smooth"
-  });
-
-  setTimeout(() => {
-
-    box.style.display = "none";
-
-  }, 4000);
-
-}
-
-
-/* =========================================================
-   GET PAGE TEST ID
-========================================================= */
-
-function getTestId() {
-
-  const params =
-    new URLSearchParams(
-      window.location.search
-    );
-
-  return params.get("test");
-
-}
-
-
-/* =========================================================
-   LOAD MANUAL SUBJECTS
-========================================================= */
-
-function loadSubjects(selectedSubject = "") {
-
-  const subject =
-    document.getElementById("subject");
-
-  if (!subject) return;
-
-  subject.innerHTML = `
-    <option value="">
-      -- Select Subject --
-    </option>
-  `;
-
-  Object.keys(subjectChapters)
-    .forEach(name => {
-
-      const option =
-        document.createElement("option");
-
-      option.value = name;
-
-      option.textContent = name;
-
-      if (name === selectedSubject) {
-        option.selected = true;
+    // ==========================================
+    // UNIVERSAL OPTIONS EXTRACTOR
+    // ==========================================
+    function getOptions(q, lang) {
+      if (q.options && typeof q.options === "object" && !Array.isArray(q.options)) {
+        const h = q.options.hindi || {};
+        const e = q.options.english || {};
+        if (lang === "hindi" && (h.A || h.B || h.C || h.D)) {
+          return [h.A || "", h.B || "", h.C || "", h.D || ""];
+        }
+        if (lang === "english" && (e.A || e.B || e.C || e.D)) {
+          return [e.A || "", e.B || "", e.C || "", e.D || ""];
+        }
+        return [h.A || e.A || "", h.B || e.B || "", h.C || e.C || "", h.D || e.D || ""];
       }
+      if (Array.isArray(q.optionsHindi) && q.optionsHindi.length) return q.optionsHindi;
+      if (Array.isArray(q.optionsEnglish) && q.optionsEnglish.length) return q.optionsEnglish;
+      if (Array.isArray(q.options) && q.options.length) return q.options;
+      if (Array.isArray(q.optionsText) && q.optionsText.length) return q.optionsText;
+      if (typeof q.options === "string" && q.options.trim()) {
+        return q.options.split(/[|,\n]/).map(s => s.trim()).filter(Boolean);
+      }
+      return [];
+    }
 
-      subject.appendChild(option);
+    // ==========================================
+    // UNIVERSAL ANSWER EXTRACTOR
+    // ==========================================
+    function getCorrectIndex(q) {
+      if (typeof q.correctAnswer === "number") return q.correctAnswer;
+      if (typeof q.answer === "number") return q.answer;
+      if (typeof q.answer === "string") {
+        const a = q.answer.trim().toUpperCase();
+        if (/^[A-D]$/.test(a)) return a.charCodeAt(0) - 65;
+        if (/^[1-4]$/.test(a)) return Number(a) - 1;
+      }
+      if (typeof q.correctAnswer === "string") {
+        const a = q.correctAnswer.trim().toUpperCase();
+        if (/^[A-D]$/.test(a)) return a.charCodeAt(0) - 65;
+        if (/^[1-4]$/.test(a)) return Number(a) - 1;
+      }
+      return 0;
+    }
 
+    // ==========================================
+    // UNIVERSAL EXPLANATION EXTRACTOR
+    // ==========================================
+    function getExplanation(q, lang) {
+      const h = q.hindiExplanation || q.explanationHindi || "";
+      const e = q.englishExplanation || q.explanationEnglish || "";
+      if (lang === "hindi") return h || e || q.explanation || "";
+      if (lang === "english") return e || h || q.explanation || "";
+      if (h && e && h !== e) return h + " | " + e;
+      return h || e || q.explanation || "";
+    }
+
+    // ==========================================
+    // LANGUAGE TAB SWITCHING
+    // ==========================================
+    document.querySelectorAll(".lang-tab").forEach(tab => {
+      tab.addEventListener("click", () => {
+        document.querySelectorAll(".lang-tab").forEach(t => t.classList.remove("active"));
+        document.querySelectorAll(".lang-section").forEach(s => s.classList.remove("active"));
+        tab.classList.add("active");
+        document.querySelector('.lang-section[data-lang="' + tab.dataset.lang + '"]').classList.add("active");
+      });
     });
 
-  loadChapters(selectedSubject);
-
-}
-
-
-/* =========================================================
-   LOAD MANUAL CHAPTERS
-========================================================= */
-
-function loadChapters(
-  selectedSubject = "",
-  selectedChapter = ""
-) {
-
-  const chapter =
-    document.getElementById("chapter");
-
-  if (!chapter) return;
-
-  chapter.innerHTML = `
-    <option value="">
-      -- Select Chapter --
-    </option>
-  `;
-
-  const chapters =
-    subjectChapters[selectedSubject] || [];
-
-  chapters.forEach(name => {
-
-    const option =
-      document.createElement("option");
-
-    option.value = name;
-
-    option.textContent = name;
-
-    if (name === selectedChapter) {
-      option.selected = true;
-    }
-
-    chapter.appendChild(option);
-
-  });
-
-}
-
-
-/* =========================================================
-   CHECK ADMIN
-========================================================= */
-
-async function checkAdmin() {
-
-  try {
-
-    const response =
-      await fetch(
-        "/api/auth/me",
-        {
-          credentials: "include"
+    // ==========================================
+    // LOAD TEST INFO
+    // ==========================================
+    async function loadTestInfo() {
+      try {
+        const r = await fetch("/api/admin/tests", { credentials: "include" });
+        const data = await r.json();
+        const test = (data.tests || []).find(t => String(t._id) === String(testId));
+        if (test) {
+          document.getElementById("testName").textContent = test.name || "Untitled Test";
+          document.getElementById("testMeta").textContent =
+            (test.exam || "-") + " • " + (test.subject || "-") + " • " + (test.duration || 0) + " min";
         }
-      );
-
-    const data =
-      await response.json();
-
-    if (
-      !response.ok ||
-      !data.success
-    ) {
-
-      window.location.href =
-        "/login.html";
-
-      return;
-
+      } catch (e) {}
     }
 
-
-    const user =
-      data.user;
-
-
-    if (
-      !user ||
-      user.role !== "admin"
-    ) {
-
-      document.getElementById(
-        "pageLoading"
-      ).innerHTML = `
-
-        <div style="
-          background:#fee2e2;
-          color:#991b1b;
-          padding:25px;
-          border-radius:15px;
-          font-weight:800;
-        ">
-
-          ❌ Access Denied
-
-          <br><br>
-
-          केवल Admin इस page को access कर सकता है।
-
-          <br><br>
-
-          <a
-            href="/dashboard.html"
-            class="btn blue"
-          >
-            Go to Dashboard
-          </a>
-
-        </div>
-
-      `;
-
-      return;
-
-    }
-
-
-    testId =
-      getTestId();
-
-
-    if (!testId) {
-
-      document.getElementById(
-        "pageLoading"
-      ).innerHTML = `
-
-        <div style="
-          background:#fee2e2;
-          color:#991b1b;
-          padding:25px;
-          border-radius:15px;
-          font-weight:800;
-        ">
-
-          ❌ Test ID नहीं मिला।
-
-          <br><br>
-
-          पहले Admin Panel → Test Management से
-          test select करें।
-
-          <br><br>
-
-          <a
-            href="/admin-tests.html"
-            class="btn blue"
-          >
-            Go to Tests
-          </a>
-
-        </div>
-
-      `;
-
-      return;
-
-    }
-
-
-    document.getElementById(
-      "pageLoading"
-    ).style.display = "none";
-
-
-    document.getElementById(
-      "mainContent"
-    ).style.display = "block";
-
-
-    loadSubjects();
-
-    await loadTest();
-
-    await loadBulkTests();
-
-    loadBulkSubjects();
-
-    loadBulkChapters();
-
-    await loadQuestions();
-
-  } catch (error) {
-
-    console.error(
-      "ADMIN CHECK ERROR:",
-      error
-    );
-
-    document.getElementById(
-      "pageLoading"
-    ).innerHTML = `
-
-      <div style="
-        background:#fee2e2;
-        color:#991b1b;
-        padding:25px;
-        border-radius:15px;
-        font-weight:800;
-      ">
-
-        ❌ Server से connection नहीं हो पाया।
-
-        <br><br>
-
-        ${escapeHtml(error.message)}
-
-      </div>
-
-    `;
-
-  }
-
-}
-
-
-/* =========================================================
-   LOAD TEST
-========================================================= */
-
-async function loadTest() {
-
-  try {
-
-    const response =
-      await fetch(
-        "/api/admin/tests",
-        {
-          credentials: "include"
-        }
-      );
-
-    const data =
-      await response.json();
-
-    if (
-      !response.ok ||
-      !data.success
-    ) {
-
-      throw new Error(
-        data.message ||
-        "Unable to load tests"
-      );
-
-    }
-
-
-    const tests =
-      data.tests || [];
-
-
-    currentTest =
-      tests.find(
-        test =>
-          String(test._id) ===
-          String(testId)
-      );
-
-
-    if (!currentTest) {
-
-      document.getElementById(
-        "testName"
-      ).textContent =
-        "Test नहीं मिला";
-
-      return;
-
-    }
-
-
-    document.getElementById(
-      "testName"
-    ).textContent =
-      currentTest.name ||
-      "Unnamed Test";
-
-
-    document.getElementById(
-      "testDetails"
-    ).textContent =
-      [
-        currentTest.exam,
-        currentTest.batch,
-        currentTest.subject,
-        currentTest.chapter
-      ]
-        .filter(Boolean)
-        .join(" • ");
-
-
-    const existingSubject =
-      currentTest.subject || "";
-
-
-    const existingChapter =
-      currentTest.chapter || "";
-
-
-    if (existingSubject) {
-
-      loadSubjects(
-        existingSubject
-      );
-
-      loadChapters(
-        existingSubject,
-        existingChapter
-      );
-
-    }
-
-  } catch (error) {
-
-    console.error(
-      "LOAD TEST ERROR:",
-      error
-    );
-
-    document.getElementById(
-      "testName"
-    ).textContent =
-      "Unable to load test";
-
-  }
-
-}
-
-
-/* =========================================================
-   LOAD QUESTIONS
-========================================================= */
-
-async function loadQuestions() {
-
-  const list =
-    document.getElementById(
-      "questionsList"
-    );
-
-  list.innerHTML =
-    "🔄 Loading questions...";
-
-
-  try {
-
-    const response =
-      await fetch(
-        `/api/questions/admin/test/${testId}`,
-        {
-          credentials: "include"
-        }
-      );
-
-
-    const contentType =
-      response.headers
-        .get("content-type") || "";
-
-
-    if (
-      !contentType.includes(
-        "application/json"
-      )
-    ) {
-
-      const text =
-        await response.text();
-
-      console.error(
-        "Server returned non-JSON:",
-        text
-      );
-
-      throw new Error(
-        "Server ने JSON की जगह HTML भेजा। API route check करें।"
-      );
-
-    }
-
-
-    const data =
-      await response.json();
-
-
-    if (
-      !response.ok ||
-      !data.success
-    ) {
-
-      throw new Error(
-        data.message ||
-        "Unable to load questions"
-      );
-
-    }
-
-
-    questions =
-      data.questions || [];
-
-
-    renderQuestions();
-
-  } catch (error) {
-
-    console.error(
-      "Load Questions Error:",
-      error
-    );
-
-    list.innerHTML = `
-
-      <div
-        class="empty"
-        style="color:#b91c1c;"
-      >
-
-        ❌ ${escapeHtml(error.message)}
-
-      </div>
-
-    `;
-
-  }
-
-}
-
-
-/* =========================================================
-   RENDER QUESTIONS
-========================================================= */
-
-function renderQuestions() {
-
-  const list =
-    document.getElementById(
-      "questionsList"
-    );
-
-
-  if (!questions.length) {
-
-    list.innerHTML = `
-
-      <div class="empty">
-
-        📭 अभी इस Test में कोई Question नहीं है।
-
-        <br><br>
-
-        ऊपर से पहला Question Add करें।
-
-      </div>
-
-    `;
-
-    return;
-
-  }
-
-
-  list.innerHTML =
-    questions
-      .map((q, index) => {
-
-        const hindiQuestion =
-          q.questionHindi ||
-          q.question ||
-          "";
-
-
-        const englishQuestion =
-          q.questionEnglish ||
-          "";
-
-
-        const hiOptions =
-          Array.isArray(q.optionsHindi)
-            ? q.optionsHindi
-            : [];
-
-
-        const enOptions =
-          Array.isArray(q.optionsEnglish)
-            ? q.optionsEnglish
-            : [];
-
-
-        const oldOptions =
-          Array.isArray(q.options)
-            ? q.options
-            : [];
-
-
-        const subject =
-          q.subject ||
-          currentTest?.subject ||
-          "";
-
-
-        const chapter =
-          q.chapter ||
-          currentTest?.chapter ||
-          "";
-
-
-        let hindiOptionsHtml = "";
-
-        let englishOptionsHtml = "";
-
-
-        for (let i = 0; i < 4; i++) {
-
-          const hi =
-            hiOptions[i] ||
-            (
-              !enOptions.length
-                ? oldOptions[i]
-                : ""
-            ) ||
-            "";
-
-
-          const en =
-            enOptions[i] ||
-            "";
-
-
-          hindiOptionsHtml += `
-
-            <div class="option">
-
-              <strong>
-                ${String.fromCharCode(65 + i)}.
-              </strong>
-
-              ${escapeHtml(hi)}
-
-            </div>
-
-          `;
-
-
-          englishOptionsHtml += `
-
-            <div class="option">
-
-              <strong>
-                ${String.fromCharCode(65 + i)}.
-              </strong>
-
-              ${escapeHtml(en)}
-
-            </div>
-
-          `;
-
-        }
-
-
-        const correct =
-          Number(q.correctAnswer);
-
-
-        const explanationHindi =
-          q.explanationHindi ||
-          (
-            !q.explanationEnglish
-              ? q.explanation
-              : ""
-          ) ||
-          "";
-
-
-        const explanationEnglish =
-          q.explanationEnglish ||
-          "";
-
-
-        const showHindi =
-          Boolean(
-            q.questionHindi ||
-            q.optionsHindi?.length ||
-            explanationHindi
-          );
-
-
-        const showEnglish =
-          Boolean(
-            englishQuestion ||
-            q.optionsEnglish?.length ||
-            explanationEnglish
-          );
-
-
-        return `
-
-          <div class="question-item">
-
-            <div class="question-header">
-
-              <div class="question-number">
-                Q${index + 1}
-              </div>
-
-              <div class="question-category">
-
-                📚 ${escapeHtml(subject)}
-
-                ${
-                  chapter
-                    ? " • " +
-                      escapeHtml(chapter)
-                    : ""
-                }
-
-              </div>
-
-            </div>
-
-
-            <div class="question-text">
-
-              ${
-                showHindi
-                  ? `
-
-                    <div class="display-language">
-
-                      <div class="display-language-title">
-                        🇮🇳 Hindi Question
-                      </div>
-
-                      ${escapeHtml(
-                        hindiQuestion
-                      )}
-
-                    </div>
-
-                  `
-                  : ""
-              }
-
-
-              ${
-                showEnglish
-                  ? `
-
-                    <div class="display-language">
-
-                      <div class="display-language-title">
-                        🇬🇧 English Question
-                      </div>
-
-                      ${escapeHtml(
-                        englishQuestion
-                      )}
-
-                    </div>
-
-                  `
-                  : ""
-              }
-
-            </div>
-
-
-            ${
-              showHindi
-                ? `
-
-                  <strong>
-                    🇮🇳 Hindi Options
-                  </strong>
-
-                  <div class="options-list">
-
-                    ${hindiOptionsHtml}
-
-                  </div>
-
-                `
-                : ""
-            }
-
-
-            ${
-              showEnglish
-                ? `
-
-                  <strong>
-                    🇬🇧 English Options
-                  </strong>
-
-                  <div class="options-list">
-
-                    ${englishOptionsHtml}
-
-                  </div>
-
-                `
-                : ""
-            }
-
-
-            <div class="answer">
-
-              ✅ Correct Answer:
-
-              ${
-                correct >= 0 &&
-                correct <= 3
-                  ? "Option " +
-                    String.fromCharCode(
-                      65 + correct
-                    )
-                  : "Not set"
-              }
-
-            </div>
-
-
-            ${
-              explanationHindi
-                ? `
-
-                  <div class="explanation">
-
-                    <strong>
-                      🇮🇳 Hindi Explanation:
-                    </strong>
-
-                    <br>
-
-                    ${escapeHtml(
-                      explanationHindi
-                    )}
-
-                  </div>
-
-                `
-                : ""
-            }
-
-
-            ${
-              explanationEnglish
-                ? `
-
-                  <div class="explanation">
-
-                    <strong>
-                      🇬🇧 English Explanation:
-                    </strong>
-
-                    <br>
-
-                    ${escapeHtml(
-                      explanationEnglish
-                    )}
-
-                  </div>
-
-                `
-                : ""
-            }
-
-
-            <div class="question-actions">
-
-              <button
-                class="small-btn blue"
-                onclick="editQuestion('${q._id}')"
-              >
-                ✏️ Edit
-              </button>
-
-
-              <button
-                class="small-btn red"
-                onclick="deleteQuestion('${q._id}')"
-              >
-                🗑️ Delete
-              </button>
-
-            </div>
-
-          </div>
-
-        `;
-
-      })
-      .join("");
-
-}
-
-
-/* =========================================================
-   MANUAL ADD / EDIT QUESTION
-========================================================= */
-
-document
-  .getElementById("questionForm")
-  .addEventListener(
-    "submit",
-    async function(event) {
-
-      event.preventDefault();
-
-
-      if (!testId) {
-
-        showMessage(
-          "❌ Test ID नहीं मिला।",
-          "error"
-        );
-
-        return;
-
-      }
-
-
-      const subject =
-        document
-          .getElementById("subject")
-          .value
-          .trim();
-
-
-      const chapter =
-        document
-          .getElementById("chapter")
-          .value
-          .trim();
-
-
-      const questionHindi =
-        document
-          .getElementById("questionHindi")
-          .value
-          .trim();
-
-
-      const questionEnglish =
-        document
-          .getElementById("questionEnglish")
-          .value
-          .trim();
-
-
-      const hiOptions = [
-
-        document.getElementById("hi0").value.trim(),
-        document.getElementById("hi1").value.trim(),
-        document.getElementById("hi2").value.trim(),
-        document.getElementById("hi3").value.trim()
-
-      ];
-
-
-      const enOptions = [
-
-        document.getElementById("en0").value.trim(),
-        document.getElementById("en1").value.trim(),
-        document.getElementById("en2").value.trim(),
-        document.getElementById("en3").value.trim()
-
-      ];
-
-
-      const correctAnswer =
-        document
-          .getElementById("correctAnswer")
-          .value;
-
-
-      const explanationHindi =
-        document
-          .getElementById("explanationHindi")
-          .value
-          .trim();
-
-
-      const explanationEnglish =
-        document
-          .getElementById("explanationEnglish")
-          .value
-          .trim();
-
-
-      if (!subject) {
-
-        showMessage(
-          "❌ Subject select करें।",
-          "error"
-        );
-
-        return;
-
-      }
-
-
-      if (!chapter) {
-
-        showMessage(
-          "❌ Chapter select करें।",
-          "error"
-        );
-
-        return;
-
-      }
-
-
-      if (!questionHindi) {
-
-        showMessage(
-          "❌ Hindi Question लिखिए।",
-          "error"
-        );
-
-        return;
-
-      }
-
-
-      if (
-        hiOptions.some(
-          option => !option
-        )
-      ) {
-
-        showMessage(
-          "❌ चारों Hindi Options भरना जरूरी है।",
-          "error"
-        );
-
-        return;
-
-      }
-
-
-      if (
-        questionEnglish &&
-        enOptions.some(
-          option => !option
-        )
-      ) {
-
-        showMessage(
-          "❌ English Question दिया है, इसलिए चारों English Options भरें।",
-          "error"
-        );
-
-        return;
-
-      }
-
-
-      if (correctAnswer === "") {
-
-        showMessage(
-          "❌ Correct Answer select करें।",
-          "error"
-        );
-
-        return;
-
-      }
-
-
-      const combinedQuestion =
-        questionEnglish
-          ? `${questionHindi}\n\n${questionEnglish}`
-          : questionHindi;
-
-
-      const combinedOptions =
-        hiOptions.map(
-          (hi, i) =>
-            enOptions[i]
-              ? `${hi} / ${enOptions[i]}`
-              : hi
-        );
-
-
-      const combinedExplanation =
-        explanationEnglish
-          ? `${explanationHindi}\n\n${explanationEnglish}`
-          : explanationHindi;
-
-
-      const payload = {
-
-        testId,
-
-        subject,
-
-        chapter,
-
-        questionHindi,
-
-        questionEnglish,
-
-        optionsHindi:
-          hiOptions,
-
-        optionsEnglish:
-          enOptions,
-
-        explanationHindi,
-
-        explanationEnglish,
-
-        question:
-          combinedQuestion,
-
-        options:
-          combinedOptions,
-
-        correctAnswer:
-          Number(correctAnswer),
-
-        explanation:
-          combinedExplanation
-
-      };
-
-
-      const questionId =
-        document
-          .getElementById("questionId")
-          .value;
-
-
-      const isEdit =
-        Boolean(questionId);
-
-
-      const url =
-        isEdit
-          ? `/api/questions/${questionId}`
-          : `/api/questions/`;
-
-
-      const method =
-        isEdit
-          ? "PUT"
-          : "POST";
-
-
-      const saveBtn =
-        document.getElementById(
-          "saveBtn"
-        );
-
-
-      saveBtn.disabled = true;
-
-
-      saveBtn.textContent =
-        isEdit
-          ? "⏳ Updating..."
-          : "⏳ Adding...";
-
+    // ==========================================
+    // LOAD QUESTIONS
+    // ==========================================
+    async function loadQuestions() {
+      const list = document.getElementById("qList");
+      list.innerHTML = '<div class="loading-box">Loading questions...</div>';
 
       try {
+        const r = await fetch("/api/questions/admin/test/" + testId, { credentials: "include" });
+        const data = await r.json();
+        allQuestions = data.questions || [];
+        document.getElementById("qCount").textContent = allQuestions.length;
 
-        const response =
-          await fetch(
-            url,
-            {
+        const subjects = [...new Set(allQuestions.map(q => q.subject).filter(Boolean))];
+        const sel = document.getElementById("subjectFilter");
+        sel.innerHTML = '<option value="">All Subjects</option>' +
+          subjects.map(s => '<option value="' + escapeHtml(s) + '">' + escapeHtml(s) + '</option>').join("");
 
-              method,
+        renderQuestions();
+      } catch (e) {
+        list.innerHTML = '<div class="empty-box">❌ ' + escapeHtml(e.message) + '</div>';
+      }
+    }
 
-              headers: {
-                "Content-Type":
-                  "application/json"
-              },
+    // ==========================================
+    // RENDER QUESTIONS LIST
+    // ==========================================
+    function renderQuestions() {
+      const list = document.getElementById("qList");
+      let filtered = allQuestions;
 
-              credentials:
-                "include",
-
-              body:
-                JSON.stringify(payload)
-
-            }
-          );
-
-
-        const contentType =
-          response.headers
-            .get("content-type") || "";
-
-
-        if (
-          !contentType.includes(
-            "application/json"
-          )
-        ) {
-
-          const text =
-            await response.text();
-
-          console.error(
-            "Non JSON response:",
-            text
-          );
-
-          throw new Error(
-            "Server ने JSON की जगह HTML भेजा। Route या server check करें।"
-          );
-
-        }
-
-
-        const data =
-          await response.json();
-
-
-        if (
-          !response.ok ||
-          !data.success
-        ) {
-
-          throw new Error(
-            data.message ||
-            "Question save नहीं हुआ"
-          );
-
-        }
-
-
-        showMessage(
-          isEdit
-            ? "✅ Question successfully updated!"
-            : "✅ Question successfully added!"
+      if (searchQ) {
+        const q = searchQ.toLowerCase();
+        filtered = filtered.filter(x =>
+          (x.questionHindi || x.hindiQuestion || "").toLowerCase().includes(q) ||
+          (x.questionEnglish || x.englishQuestion || "").toLowerCase().includes(q) ||
+          (x.questionText || "").toLowerCase().includes(q)
         );
+      }
+      if (subjectF) filtered = filtered.filter(x => x.subject === subjectF);
 
-
-        resetForm();
-
-        await loadQuestions();
-
-
-      } catch (error) {
-
-        console.error(
-          "Save Question Error:",
-          error
-        );
-
-        showMessage(
-          "❌ " + error.message,
-          "error"
-        );
-
-
-      } finally {
-
-        saveBtn.disabled = false;
-
-        saveBtn.textContent =
-          "➕ Add Question";
-
+      if (!filtered.length) {
+        list.innerHTML = '<div class="empty-box">📭 Koi question nahi mila.</div>';
+        return;
       }
 
-    }
-  );
-
-
-/* =========================================================
-   EDIT QUESTION
-========================================================= */
-
-function editQuestion(id) {
-
-  const q =
-    questions.find(
-      item =>
-        String(item._id) ===
-        String(id)
-    );
-
-
-  if (!q) {
-
-    showMessage(
-      "❌ Question नहीं मिला।",
-      "error"
-    );
-
-    return;
-
-  }
-
-
-  document
-    .getElementById("questionId")
-    .value = q._id;
-
-
-  const subject =
-    q.subject ||
-    currentTest?.subject ||
-    "";
-
-
-  const chapter =
-    q.chapter ||
-    currentTest?.chapter ||
-    "";
-
-
-  loadSubjects(subject);
-
-
-  loadChapters(
-    subject,
-    chapter
-  );
-
-
-  document
-    .getElementById("questionHindi")
-    .value =
-      q.questionHindi ||
-      q.question ||
-      "";
-
-
-  document
-    .getElementById("questionEnglish")
-    .value =
-      q.questionEnglish ||
-      "";
-
-
-  const hiOptions =
-    Array.isArray(q.optionsHindi)
-      ? q.optionsHindi
-      : [];
-
-
-  const enOptions =
-    Array.isArray(q.optionsEnglish)
-      ? q.optionsEnglish
-      : [];
-
-
-  const oldOptions =
-    Array.isArray(q.options)
-      ? q.options
-      : [];
-
-
-  for (let i = 0; i < 4; i++) {
-
-    document
-      .getElementById(`hi${i}`)
-      .value =
-        hiOptions[i] ||
-        (
-          !enOptions.length
-            ? oldOptions[i]
-            : ""
-        ) ||
-        "";
-
-
-    document
-      .getElementById(`en${i}`)
-      .value =
-        enOptions[i] ||
-        "";
-
-  }
-
-
-  document
-    .getElementById("correctAnswer")
-    .value =
-      String(q.correctAnswer);
-
-
-  document
-    .getElementById("explanationHindi")
-    .value =
-      q.explanationHindi ||
-      (
-        !q.explanationEnglish
-          ? q.explanation
-          : ""
-      ) ||
-      "";
-
-
-  document
-    .getElementById("explanationEnglish")
-    .value =
-      q.explanationEnglish ||
-      "";
-
-
-  document
-    .getElementById("formTitle")
-    .textContent =
-      "✏️ Edit Question";
-
-
-  document
-    .getElementById("saveBtn")
-    .textContent =
-      "✏️ Update Question";
-
-
-  document
-    .getElementById("cancelBtn")
-    .style.display =
-      "inline-flex";
-
-
-  window.scrollTo({
-    top: 0,
-    behavior: "smooth"
-  });
-
-}
-
-
-/* =========================================================
-   DELETE QUESTION
-========================================================= */
-
-async function deleteQuestion(id) {
-
-  if (
-    !confirm(
-      "क्या आप इस Question को delete करना चाहते हैं?"
-    )
-  ) {
-
-    return;
-
-  }
-
-
-  try {
-
-    const response =
-      await fetch(
-        `/api/questions/${id}`,
-        {
-          method: "DELETE",
-          credentials: "include"
-        }
-      );
-
-
-    const contentType =
-      response.headers
-        .get("content-type") || "";
-
-
-    if (
-      !contentType.includes(
-        "application/json"
-      )
-    ) {
-
-      const text =
-        await response.text();
-
-      console.error(
-        "Delete non JSON:",
-        text
-      );
-
-      throw new Error(
-        "Server ने JSON की जगह HTML भेजा।"
-      );
-
+      list.innerHTML = filtered.map((q, idx) => {
+        const qTextH = q.questionHindi || q.hindiQuestion || "";
+        const qTextE = q.questionEnglish || q.englishQuestion || "";
+        const options = getOptions(q);
+        const correct = getCorrectIndex(q);
+
+        let qTextHtml = "";
+        if (qTextH) qTextHtml += '<div>🇮🇳 ' + escapeHtml(qTextH) + '</div>';
+        if (qTextE && qTextE !== qTextH) qTextHtml += '<div style="color:var(--muted);margin-top:4px;">🇬🇧 ' + escapeHtml(qTextE) + '</div>';
+        if (!qTextHtml) qTextHtml = '<div>' + escapeHtml(q.questionText || q.question || "(No text)") + '</div>';
+
+        const optionsHtml = options.slice(0, 4).map((opt, i) =>
+          '<span class="q-opt' + (i === correct ? ' correct' : '') + '">' +
+            String.fromCharCode(65 + i) + '. ' + escapeHtml(opt) +
+          '</span>'
+        ).join("");
+
+        const explanation = getExplanation(q);
+
+        return '<div class="q-card" data-id="' + q._id + '">' +
+          '<div class="q-header">' +
+            '<div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">' +
+              '<span class="q-num">Q' + (idx + 1) + '</span>' +
+              (q.subject ? '<span class="q-subject">' + escapeHtml(q.subject) + '</span>' : '') +
+              (q.chapter ? '<span class="q-chapter">' + escapeHtml(q.chapter) + '</span>' : '') +
+            '</div>' +
+            '<div class="q-actions">' +
+              '<button class="btn btn-blue btn-sm" onclick="event.stopPropagation();editQ(\'' + q._id + '\')">✏️ Edit</button>' +
+              '<button class="btn btn-red btn-sm" onclick="event.stopPropagation();delQ(\'' + q._id + '\')">🗑</button>' +
+            '</div>' +
+          '</div>' +
+          '<div class="q-text">' + qTextHtml + '</div>' +
+          '<div class="q-options">' + optionsHtml + '</div>' +
+          '<div class="q-details"><strong>💡 Explanation:</strong> ' + escapeHtml(explanation) + '</div>' +
+        '</div>';
+      }).join("");
+
+      document.querySelectorAll(".q-card").forEach(card => {
+        card.addEventListener("click", () => card.classList.toggle("expanded"));
+      });
     }
 
-
-    const data =
-      await response.json();
-
-
-    if (
-      !response.ok ||
-      !data.success
-    ) {
-
-      throw new Error(
-        data.message ||
-        "Question delete नहीं हुआ"
-      );
-
-    }
-
-
-    showMessage(
-      "✅ Question successfully deleted!"
-    );
-
-
-    await loadQuestions();
-
-
-  } catch (error) {
-
-    console.error(error);
-
-    showMessage(
-      "❌ " + error.message,
-      "error"
-    );
-
-  }
-
-}
-
-
-/* =========================================================
-   RESET MANUAL FORM
-========================================================= */
-
-function resetForm() {
-
-  document
-    .getElementById("questionForm")
-    .reset();
-
-
-  document
-    .getElementById("questionId")
-    .value = "";
-
-
-  loadSubjects(
-    currentTest?.subject || ""
-  );
-
-
-  if (currentTest?.subject) {
-
-    loadChapters(
-      currentTest.subject,
-      currentTest.chapter || ""
-    );
-
-  }
-
-
-  document
-    .getElementById("formTitle")
-    .textContent =
-      "✨ Add New Question";
-
-
-  document
-    .getElementById("saveBtn")
-    .textContent =
-      "➕ Add Question";
-
-
-  document
-    .getElementById("cancelBtn")
-    .style.display =
-      "none";
-
-}
-
-
-/* =========================================================
-   ESCAPE HTML
-========================================================= */
-
-function escapeHtml(value) {
-
-  if (
-    value === null ||
-    value === undefined
-  ) {
-
-    return "";
-
-  }
-
-
-  return String(value)
-
-    .replace(/&/g, "&amp;")
-
-    .replace(/</g, "&lt;")
-
-    .replace(/>/g, "&gt;")
-
-    .replace(/"/g, "&quot;")
-
-    .replace(/'/g, "&#039;");
-
-}
-
-
-/* =========================================================
-   BULK LANGUAGE
-========================================================= */
-
-function getBulkLanguage() {
-
-  const selected =
-    document.querySelector(
-      'input[name="bulkLanguage"]:checked'
-    );
-
-
-  return selected
-    ? selected.value
-    : "hindi";
-
-}
-
-
-/* =========================================================
-   BULK STATUS
-========================================================= */
-
-function bulkMessage(
-  message,
-  type = ""
-) {
-
-  const box =
-    document.getElementById(
-      "bulkStatus"
-    );
-
-
-  if (!box) return;
-
-
-  box.textContent =
-    message;
-
-
-  box.className =
-    "bulk-status " + type;
-
-}
-
-
-/* =========================================================
-   LOAD BULK TESTS
-========================================================= */
-
-async function loadBulkTests() {
-
-  const select =
-    document.getElementById(
-      "bulkTest"
-    );
-
-
-  if (!select) return;
-
-
-  try {
-
-    const response =
-      await fetch(
-        "/api/admin/tests",
-        {
-          credentials: "include"
-        }
-      );
-
-
-    const data =
-      await response.json();
-
-
-    if (
-      !response.ok ||
-      !data.success
-    ) {
-
-      throw new Error(
-        data.message ||
-        "Tests load failed."
-      );
-
-    }
-
-
-    select.innerHTML = `
-
-      <option value="">
-        -- Select Test / Batch --
-      </option>
-
-    `;
-
-
-    const tests =
-      data.tests || [];
-
-
-    tests.forEach(test => {
-
-      const option =
-        document.createElement(
-          "option"
-        );
-
-
-      option.value =
-        test._id;
-
-
-      option.textContent =
-        `${test.name || "Untitled Test"}${
-          test.batch
-            ? " • " + test.batch
-            : ""
-        }`;
-
-
-      select.appendChild(
-        option
-      );
-
+    // ==========================================
+    // SEARCH + FILTER
+    // ==========================================
+    document.getElementById("searchInput").addEventListener("input", debounce((e) => {
+      searchQ = e.target.value.trim();
+      renderQuestions();
+    }, 300));
+
+    document.getElementById("subjectFilter").addEventListener("change", (e) => {
+      subjectF = e.target.value;
+      renderQuestions();
     });
 
-
-    if (testId) {
-
-      const exists =
-        tests.some(
-          test =>
-            String(test._id) ===
-            String(testId)
-        );
-
-
-      if (exists) {
-
-        select.value =
-          testId;
-
-      }
-
+    // ==========================================
+    // OPEN ADD MODAL
+    // ==========================================
+    function clearForm() {
+      ["addQHindi","addQEnglish","addOptAHindi","addOptBHindi","addOptCHindi","addOptDHindi",
+       "addOptAEnglish","addOptBEnglish","addOptCEnglish","addOptDEnglish",
+       "addExpHindi","addExpEnglish","addSubject","addChapter"].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.value = "";
+      });
+      document.getElementById("addCorrect").value = "0";
+      document.querySelectorAll(".lang-tab").forEach(t => t.classList.remove("active"));
+      document.querySelectorAll(".lang-section").forEach(s => s.classList.remove("active"));
+      document.querySelector('.lang-tab[data-lang="hindi"]').classList.add("active");
+      document.querySelector('.lang-section[data-lang="hindi"]').classList.add("active");
     }
 
+    function openAddModal() {
+      editingId = null;
+      clearForm();
+      document.getElementById("modalTitle").textContent = "➕ Add New Question";
+      document.getElementById("addModal").classList.add("open");
+    }
 
-  } catch (error) {
+    document.getElementById("addBtn").addEventListener("click", openAddModal);
 
-    console.error(
-      "BULK TEST LOAD ERROR:",
-      error
-    );
+    // ==========================================
+    // EDIT QUESTION
+    // ==========================================
+    function editQ(id) {
+      const q = allQuestions.find(x => String(x._id) === String(id));
+      if (!q) { showMsg("Question not found", "error"); return; }
 
-    bulkMessage(
-      "Test/Batch load nahi ho paya.",
-      "error"
-    );
+      editingId = id;
+      clearForm();
+      document.getElementById("modalTitle").textContent = "✏️ Edit Question";
 
-  }
+      document.getElementById("addQHindi").value = q.questionHindi || q.hindiQuestion || "";
+      document.getElementById("addQEnglish").value = q.questionEnglish || q.englishQuestion || "";
 
-}
+      const optH = getOptions(q, "hindi");
+      document.getElementById("addOptAHindi").value = optH[0] || "";
+      document.getElementById("addOptBHindi").value = optH[1] || "";
+      document.getElementById("addOptCHindi").value = optH[2] || "";
+      document.getElementById("addOptDHindi").value = optH[3] || "";
 
+      const optE = getOptions(q, "english");
+      document.getElementById("addOptAEnglish").value = optE[0] || "";
+      document.getElementById("addOptBEnglish").value = optE[1] || "";
+      document.getElementById("addOptCEnglish").value = optE[2] || "";
+      document.getElementById("addOptDEnglish").value = optE[3] || "";
 
-/* =========================================================
-   LOAD BULK SUBJECTS
-========================================================= */
+      document.getElementById("addExpHindi").value = q.explanationHindi || q.hindiExplanation || "";
+      document.getElementById("addExpEnglish").value = q.explanationEnglish || q.englishExplanation || "";
 
-function loadBulkSubjects(
-  selectedSubject = ""
-) {
+      document.getElementById("addCorrect").value = getCorrectIndex(q);
+      document.getElementById("addSubject").value = q.subject || "";
+      document.getElementById("addChapter").value = q.chapter || "";
 
-  const select =
-    document.getElementById(
-      "bulkSubject"
-    );
+      document.getElementById("addModal").classList.add("open");
+    }
 
-
-  if (!select) return;
-
-
-  select.innerHTML = `
-
-    <option value="">
-      -- Select Subject --
-    </option>
-
-  `;
-
-
-  Object.keys(subjectChapters)
-    .forEach(subject => {
-
-      const option =
-        document.createElement(
-          "option"
-        );
-
-
-      option.value =
-        subject;
-
-
-      option.textContent =
-        subject;
-
-
-      select.appendChild(
-        option
-      );
-
+    document.getElementById("cancelAddBtn").addEventListener("click", () => {
+      document.getElementById("addModal").classList.remove("open");
+      editingId = null;
     });
 
-
-  const finalSubject =
-    selectedSubject ||
-    currentTest?.subject ||
-    "";
-
-
-  if (finalSubject) {
-
-    select.value =
-      finalSubject;
-
-  }
-
-}
-
-
-/* =========================================================
-   LOAD BULK CHAPTERS
-========================================================= */
-
-function loadBulkChapters(
-  selectedChapter = ""
-) {
-
-  const subject =
-    document.getElementById(
-      "bulkSubject"
-    ).value;
-
-
-  const chapterSelect =
-    document.getElementById(
-      "bulkChapter"
-    );
-
-
-  if (!chapterSelect) return;
-
-
-  chapterSelect.innerHTML = `
-
-    <option value="">
-      -- Select Chapter --
-    </option>
-
-  `;
-
-
-  const chapters =
-    subjectChapters[subject] || [];
-
-
-  chapters.forEach(
-    chapter => {
-
-      const option =
-        document.createElement(
-          "option"
-        );
-
-
-      option.value =
-        chapter;
-
-
-      option.textContent =
-        chapter;
-
-
-      chapterSelect.appendChild(
-        option
-      );
-
-    }
-  );
-
-
-  const finalChapter =
-    selectedChapter ||
-    (
-      currentTest &&
-      currentTest.subject === subject
-        ? currentTest.chapter || ""
-        : ""
-    );
-
-
-  if (finalChapter) {
-
-    chapterSelect.value =
-      finalChapter;
-
-  }
-
-}
-
-
-/* =========================================================
-   BULK TEST CHANGE
-========================================================= */
-
-async function bulkTestChanged() {
-
-  const selectedTestId =
-    document.getElementById(
-      "bulkTest"
-    ).value;
-
-
-  if (!selectedTestId) {
-
-    loadBulkSubjects();
-
-    loadBulkChapters();
-
-    return;
-
-  }
-
-
-  try {
-
-    const response =
-      await fetch(
-        "/api/admin/tests",
-        {
-          credentials: "include"
-        }
-      );
-
-
-    const data =
-      await response.json();
-
-
-    if (
-      !response.ok ||
-      !data.success
-    ) {
-
-      return;
-
-    }
-
-
-    const selectedTest =
-      (data.tests || []).find(
-        test =>
-          String(test._id) ===
-          String(selectedTestId)
-      );
-
-
-    if (!selectedTest) {
-
-      return;
-
-    }
-
-
-    loadBulkSubjects(
-      selectedTest.subject || ""
-    );
-
-
-    loadBulkChapters(
-      selectedTest.chapter || ""
-    );
-
-  } catch (error) {
-
-    console.error(
-      "BULK TEST CHANGE ERROR:",
-      error
-    );
-
-  }
-
-}
-
-
-/* =========================================================
-   RENDER BULK TABLE HEADER
-========================================================= */
-
-function renderBulkPreviewHeader(
-  language
-) {
-
-  const head =
-    document.getElementById(
-      "bulkPreviewHead"
-    );
-
-
-  if (!head) return;
-
-
-  let html = `
-
-    <tr>
-
-      <th>Q.No.</th>
-      <th>Subject</th>
-      <th>Chapter</th>
-
-  `;
-
-
-  if (
-    language === "hindi" ||
-    language === "bilingual"
-  ) {
-
-    html += `
-
-      <th>Hindi Question</th>
-      <th>Hindi Options</th>
-
-    `;
-
-  }
-
-
-  if (
-    language === "english" ||
-    language === "bilingual"
-  ) {
-
-    html += `
-
-      <th>English Question</th>
-      <th>English Options</th>
-
-    `;
-
-  }
-
-
-  html += `
-      <th>Answer</th>
-  `;
-
-
-  if (
-    language === "hindi" ||
-    language === "bilingual"
-  ) {
-
-    html += `
-      <th>Hindi Explanation</th>
-    `;
-
-  }
-
-
-  if (
-    language === "english" ||
-    language === "bilingual"
-  ) {
-
-    html += `
-      <th>English Explanation</th>
-    `;
-
-  }
-
-
-  html += `
-    </tr>
-  `;
-
-
-  head.innerHTML =
-    html;
-
-}
-
-
-/* =========================================================
-   BULK OPTIONS HTML
-========================================================= */
-
-function bulkOptionsHtml(
-  options
-) {
-
-  if (
-    !Array.isArray(options)
-  ) {
-
-    return "";
-
-  }
-
-
-  return `
-
-    <ol
-      class="preview-options"
-      type="A"
-    >
-
-      ${
-        options
-          .map(
-            option => `
-
-              <li>
-                ${escapeHtml(
-                  option || ""
-                )}
-              </li>
-
-            `
-          )
-          .join("")
-      }
-
-    </ol>
-
-  `;
-
-}
-
-
-/* =========================================================
-   RENDER BULK PREVIEW
-========================================================= */
-
-function renderBulkPreview(
-  questions,
-  language
-) {
-
-  const body =
-    document.getElementById(
-      "bulkPreviewBody"
-    );
-
-
-  const preview =
-    document.getElementById(
-      "bulkPreview"
-    );
-
-
-  const count =
-    document.getElementById(
-      "bulkCount"
-    );
-
-
-  if (
-    !body ||
-    !preview
-  ) {
-
-    return;
-
-  }
-
-
-  renderBulkPreviewHeader(
-    language
-  );
-
-
-  body.innerHTML =
-    "";
-
-
-  questions.forEach(
-    (question, index) => {
-
-      let html = `
-
-        <tr>
-
-          <td>
-            ${question.number || index + 1}
-          </td>
-
-          <td>
-            ${escapeHtml(
-              question.subject || ""
-            )}
-          </td>
-
-          <td>
-            ${escapeHtml(
-              question.chapter || ""
-            )}
-          </td>
-
-      `;
-
-
-      if (
-        language === "hindi" ||
-        language === "bilingual"
-      ) {
-
-        html += `
-
-          <td>
-
-            <div class="preview-question">
-
-              ${escapeHtml(
-                question.questionHindi ||
-                ""
-              )}
-
-            </div>
-
-          </td>
-
-
-          <td>
-
-            ${bulkOptionsHtml(
-              question.optionsHindi
-            )}
-
-          </td>
-
-        `;
-
-      }
-
-
-      if (
-        language === "english" ||
-        language === "bilingual"
-      ) {
-
-        html += `
-
-          <td>
-
-            <div class="preview-question">
-
-              ${escapeHtml(
-                question.questionEnglish ||
-                ""
-              )}
-
-            </div>
-
-          </td>
-
-
-          <td>
-
-            ${bulkOptionsHtml(
-              question.optionsEnglish
-            )}
-
-          </td>
-
-        `;
-
-      }
-
-
-      let answerLetter =
-        "";
-
-
-      if (
-        Number.isInteger(
-          question.correctAnswer
-        )
-      ) {
-
-        answerLetter =
-          String.fromCharCode(
-            65 +
-            question.correctAnswer
-          );
-
-      } else {
-
-        answerLetter =
-          String(
-            question.answer ||
-            ""
-          )
-            .trim()
-            .toUpperCase();
-
-      }
-
-
-      html += `
-
-        <td>
-
-          <span class="preview-answer">
-
-            ${escapeHtml(
-              answerLetter
-            )}
-
-          </span>
-
-        </td>
-
-      `;
-
-
-      if (
-        language === "hindi" ||
-        language === "bilingual"
-      ) {
-
-        html += `
-
-          <td>
-
-            <div class="preview-question">
-
-              ${escapeHtml(
-                question.explanationHindi ||
-                ""
-              )}
-
-            </div>
-
-          </td>
-
-        `;
-
-      }
-
-
-      if (
-        language === "english" ||
-        language === "bilingual"
-      ) {
-
-        html += `
-
-          <td>
-
-            <div class="preview-question">
-
-              ${escapeHtml(
-                question.explanationEnglish ||
-                ""
-              )}
-
-            </div>
-
-          </td>
-
-        `;
-
-      }
-
-
-      html += `
-        </tr>
-      `;
-
-
-      body.insertAdjacentHTML(
-        "beforeend",
-        html
-      );
-
-    }
-  );
-
-
-  count.textContent =
-    `${questions.length} Questions`;
-
-
-  preview.classList.add(
-    "show"
-  );
-
-
-  const summary =
-    document.getElementById(
-      "bulkSummary"
-    );
-
-
-  const summaryTotal =
-    document.getElementById(
-      "summaryTotal"
-    );
-
-
-  const summaryLanguage =
-    document.getElementById(
-      "summaryLanguage"
-    );
-
-
-  const summaryTest =
-    document.getElementById(
-      "summaryTest"
-    );
-
-
-  if (summary) {
-
-    summary.style.display =
-      "grid";
-
-  }
-
-
-  if (summaryTotal) {
-
-    summaryTotal.textContent =
-      questions.length;
-
-  }
-
-
-  if (summaryLanguage) {
-
-    summaryLanguage.textContent =
-      language === "bilingual"
-        ? "Bilingual"
-        : language === "english"
-          ? "English"
-          : "Hindi";
-
-  }
-
-
-  if (summaryTest) {
-
-    const selectedTest =
-      document.getElementById(
-        "bulkTest"
-      )?.value;
-
-
-    const selectedOption =
-      document.querySelector(
-        `#bulkTest option[value="${CSS.escape(selectedTest || "")}"]`
-      );
-
-
-    summaryTest.textContent =
-      selectedOption?.textContent ||
-      currentTest?.name ||
-      "Selected Test";
-
-  }
-
-}
-
-
-/* =========================================================
-   SAFE API RESPONSE
-========================================================= */
-
-async function readApiResponse(response) {
-
-  const text =
-    await response.text();
-
-
-  if (!text) {
-
-    throw new Error(
-      "Server से खाली response मिला।"
-    );
-
-  }
-
-
-  try {
-
-    return JSON.parse(text);
-
-  } catch (error) {
-
-    console.error(
-      "SERVER RESPONSE:",
-      text
-    );
-
-
-    if (
-      text.includes("<!DOCTYPE") ||
-      text.includes("<html")
-    ) {
-
-      throw new Error(
-        "Server ने API की जगह HTML/Login page भेजा। Backend API route check करना होगा।"
-      );
-
-    }
-
-
-    throw new Error(
-      "Server का response JSON नहीं है।"
-    );
-
-  }
-
-}
-
-
-/* =========================================================
-   PREVIEW BULK FILE
-========================================================= */
-
-async function previewBulkQuestions() {
-
-  const selectedTest =
-    document.getElementById(
-      "bulkTest"
-    ).value;
-
-
-  const subject =
-    document.getElementById(
-      "bulkSubject"
-    ).value;
-
-
-  const chapter =
-    document.getElementById(
-      "bulkChapter"
-    ).value;
-
-
-  const file =
-    document.getElementById(
-      "bulkFile"
-    ).files[0];
-
-
-  const language =
-    getBulkLanguage();
-
-
-  if (!selectedTest) {
-
-    bulkMessage(
-      "❌ Please Test / Batch select karein.",
-      "error"
-    );
-
-    return;
-
-  }
-
-
-  if (!subject) {
-
-    bulkMessage(
-      "❌ Please Subject select karein.",
-      "error"
-    );
-
-    return;
-
-  }
-
-
-  if (!chapter) {
-
-    bulkMessage(
-      "❌ Please Chapter select karein.",
-      "error"
-    );
-
-    return;
-
-  }
-
-
-  if (!file) {
-
-    bulkMessage(
-      "❌ Please PDF ya Word file select karein.",
-      "error"
-    );
-
-    return;
-
-  }
-
-
-  const extension =
-    file.name
-      .toLowerCase()
-      .split(".")
-      .pop();
-
-
-  if (
-    !["pdf", "docx"].includes(
-      extension
-    )
-  ) {
-
-    bulkMessage(
-      "❌ Sirf PDF ya DOCX file allowed hai.",
-      "error"
-    );
-
-    return;
-
-  }
-
-
-  if (
-    file.size >
-    10 * 1024 * 1024
-  ) {
-
-    bulkMessage(
-      "❌ File maximum 10 MB honi chahiye.",
-      "error"
-    );
-
-    return;
-
-  }
-
-
-  const formData =
-    new FormData();
-
-
-  formData.append(
-    "pdfFile",
-    file
-  );
-
-
-  formData.append(
-    "testId",
-    selectedTest
-  );
-
-
-  formData.append(
-    "language",
-    language
-  );
-
-
-  formData.append(
-    "subject",
-    subject
-  );
-
-
-  formData.append(
-    "chapter",
-    chapter
-  );
-
-
-  const previewBtn =
-    document.getElementById(
-      "bulkPreviewBtn"
-    );
-
-
-  const importBtn =
-    document.getElementById(
-      "bulkImportBtn"
-    );
-
-
-  previewBtn.disabled =
-    true;
-
-
-  importBtn.disabled =
-    true;
-
-
-  bulkMessage(
-    "⏳ File read ho rahi hai aur questions parse ho rahe hain...",
-    "loading"
-  );
-
-
-  try {
-
-    const response =
-      await fetch(
-        "/api/questions/bulk/preview",
-        {
-          method: "POST",
+    // ==========================================
+    // SAVE (CREATE / UPDATE)
+    // ==========================================
+    document.getElementById("saveQBtn").addEventListener("click", async () => {
+      const qHindi = document.getElementById("addQHindi").value.trim();
+      const qEnglish = document.getElementById("addQEnglish").value.trim();
+      const optAH = document.getElementById("addOptAHindi").value.trim();
+      const optBH = document.getElementById("addOptBHindi").value.trim();
+      const optCH = document.getElementById("addOptCHindi").value.trim();
+      const optDH = document.getElementById("addOptDHindi").value.trim();
+      const optAE = document.getElementById("addOptAEnglish").value.trim();
+      const optBE = document.getElementById("addOptBEnglish").value.trim();
+      const optCE = document.getElementById("addOptCEnglish").value.trim();
+      const optDE = document.getElementById("addOptDEnglish").value.trim();
+      const expHindi = document.getElementById("addExpHindi").value.trim();
+      const expEnglish = document.getElementById("addExpEnglish").value.trim();
+      const correct = Number(document.getElementById("addCorrect").value);
+      const subject = document.getElementById("addSubject").value.trim();
+      const chapter = document.getElementById("addChapter").value.trim();
+
+      if (!qHindi && !qEnglish) { showMsg("Question text required (Hindi ya English)", "error"); return; }
+      if (!optAH && !optAE) { showMsg("Options required", "error"); return; }
+
+      const payload = {
+        testId, subject, chapter, correctAnswer: correct,
+        questionHindi: qHindi,
+        questionEnglish: qEnglish,
+        questionText: qHindi || qEnglish,
+        question: qHindi || qEnglish,
+        optionsHindi: [optAH, optBH, optCH, optDH],
+        optionsEnglish: [optAE, optBE, optCE, optDE],
+        options: [optAH || optAE, optBH || optBE, optCH || optCE, optDH || optDE],
+        explanationHindi: expHindi,
+        explanationEnglish: expEnglish,
+        explanation: expHindi || expEnglish
+      };
+
+      try {
+        const url = editingId ? "/api/questions/" + editingId : "/api/questions";
+        const method = editingId ? "PUT" : "POST";
+
+        const r = await fetch(url, {
+          method,
+          headers: { "Content-Type": "application/json" },
           credentials: "include",
-          body: formData
+          body: JSON.stringify(payload)
+        });
+        const data = await r.json();
+
+        if (data.success) {
+          showMsg(editingId ? "✅ Question updated!" : "✅ Question added!", "success");
+          document.getElementById("addModal").classList.remove("open");
+          editingId = null;
+          loadQuestions();
+        } else {
+          showMsg(data.message || "Failed", "error");
         }
-      );
-
-
-    const data =
-      await readApiResponse(
-        response
-      );
-
-
-    if (
-      !response.ok ||
-      !data.success
-    ) {
-
-      throw new Error(
-        data.message ||
-        "Preview failed."
-      );
-
-    }
-
-
-    bulkPreviewQuestions =
-      data.questions || [];
-
-
-    bulkPreviewLanguage =
-      data.language ||
-      language;
-
-
-    if (
-      !bulkPreviewQuestions.length
-    ) {
-
-      throw new Error(
-        "No questions found."
-      );
-
-    }
-
-
-    renderBulkPreview(
-      bulkPreviewQuestions,
-      bulkPreviewLanguage
-    );
-
-
-    importBtn.disabled =
-      false;
-
-
-    bulkMessage(
-      `✅ ${bulkPreviewQuestions.length} questions preview ke liye ready hain.`,
-      "success"
-    );
-
-
-  } catch (error) {
-
-    console.error(
-      "BULK PREVIEW ERROR:",
-      error
-    );
-
-
-    bulkPreviewQuestions =
-      [];
-
-
-    bulkMessage(
-      "❌ " +
-      (
-        error.message ||
-        "Questions preview nahi ho paye."
-      ),
-      "error"
-    );
-
-
-  } finally {
-
-    previewBtn.disabled =
-      false;
-
-  }
-
-}
-
-
-/* =========================================================
-   IMPORT BULK QUESTIONS
-========================================================= */
-
-async function importBulkQuestions() {
-
-  const selectedTest =
-    document.getElementById(
-      "bulkTest"
-    ).value;
-
-
-  const subject =
-    document.getElementById(
-      "bulkSubject"
-    ).value;
-
-
-  const chapter =
-    document.getElementById(
-      "bulkChapter"
-    ).value;
-
-
-  if (!selectedTest) {
-
-    bulkMessage(
-      "❌ Test / Batch select karein.",
-      "error"
-    );
-
-    return;
-
-  }
-
-
-  if (!subject) {
-
-    bulkMessage(
-      "❌ Subject select karein.",
-      "error"
-    );
-
-    return;
-
-  }
-
-
-  if (!chapter) {
-
-    bulkMessage(
-      "❌ Chapter select karein.",
-      "error"
-    );
-
-    return;
-
-  }
-
-
-  if (
-    !bulkPreviewQuestions.length
-  ) {
-
-    bulkMessage(
-      "❌ Pehle Questions Preview karein.",
-      "error"
-    );
-
-    return;
-
-  }
-
-
-  const language =
-    bulkPreviewLanguage;
-
-
-  const importBtn =
-    document.getElementById(
-      "bulkImportBtn"
-    );
-
-
-  importBtn.disabled =
-    true;
-
-
-  bulkMessage(
-    `⏳ ${bulkPreviewQuestions.length} questions MongoDB me save ho rahe hain...`,
-    "loading"
-  );
-
-
-  try {
-
-    const response =
-      await fetch(
-        "/api/questions/bulk/import",
-        {
-
-          method: "POST",
-
-          headers: {
-            "Content-Type":
-              "application/json"
-          },
-
-          credentials:
-            "include",
-
-          body:
-            JSON.stringify({
-
-              testId:
-                selectedTest,
-
-              language:
-
-                language,
-
-              subject:
-                subject,
-
-              chapter:
-                chapter,
-
-              questions:
-                bulkPreviewQuestions
-
-            })
-
+      } catch (e) { showMsg("Server error: " + e.message, "error"); }
+    });
+
+    // ==========================================
+    // BULK IMPORT
+    // ==========================================
+    document.getElementById("bulkBtn").addEventListener("click", () => {
+      document.getElementById("bulkModal").classList.add("open");
+    });
+    document.getElementById("cancelBulkModalBtn").addEventListener("click", () => {
+      document.getElementById("bulkModal").classList.remove("open");
+    });
+
+    document.getElementById("previewBtn").addEventListener("click", async () => {
+      const file = document.getElementById("bulkFile").files[0];
+      if (!file) { showBulkMsg("File select karo", "error"); return; }
+
+      const fd = new FormData();
+      fd.append("pdfFile", file);
+      fd.append("language", document.getElementById("bulkLanguage").value);
+      fd.append("subject", document.getElementById("bulkSubject").value.trim());
+      fd.append("chapter", document.getElementById("bulkChapter").value.trim());
+
+      showBulkMsg("⏳ Parsing...", "info");
+
+      try {
+        const r = await fetch("/api/questions/bulk/preview", {
+          method: "POST", credentials: "include", body: fd
+        });
+        const data = await r.json();
+
+        if (data.success && data.questions?.length) {
+          pendingPreview = data.questions;
+          renderBulkPreview(data.questions);
+          document.getElementById("bulkModal").classList.remove("open");
+          document.getElementById("bulkPreview").classList.add("show");
+          showBulkMsg("", "info");
+        } else {
+          showBulkMsg(data.message || "Parse failed", "error");
         }
-      );
-
-
-    const data =
-      await readApiResponse(
-        response
-      );
-
-
-    if (
-      !response.ok ||
-      !data.success
-    ) {
-
-      throw new Error(
-        data.message ||
-        "Import failed."
-      );
-
-    }
-
-
-    bulkMessage(
-      `🎉 ${data.imported} questions successfully MongoDB me import ho gaye. Total questions: ${data.totalQuestions}`,
-      "success"
-    );
-
-
-    bulkPreviewQuestions =
-      [];
-
-
-    const preview =
-      document.getElementById(
-        "bulkPreview"
-      );
-
-
-    if (preview) {
-
-      preview.classList.remove(
-        "show"
-      );
-
-    }
-
-
-    const summary =
-      document.getElementById(
-        "bulkSummary"
-      );
-
-
-    if (summary) {
-
-      summary.style.display =
-        "none";
-
-    }
-
-
-    document.getElementById(
-      "bulkFile"
-    ).value = "";
-
-
-    importBtn.disabled =
-      true;
-
-
-    await loadQuestions();
-
-
-  } catch (error) {
-
-    console.error(
-      "BULK IMPORT ERROR:",
-      error
-    );
-
-
-    bulkMessage(
-      "❌ " +
-      (
-        error.message ||
-        "Questions import nahi ho paye."
-      ),
-      "error"
-    );
-
-
-    importBtn.disabled =
-      false;
-
-  }
-
-}
-
-
-/* =========================================================
-   CLEAR BULK FORM
-========================================================= */
-
-function clearBulkUpload() {
-
-  document.getElementById(
-    "bulkFile"
-  ).value = "";
-
-
-  document.getElementById(
-    "bulkTest"
-  ).value =
-    testId || "";
-
-
-  loadBulkSubjects(
-    currentTest?.subject || ""
-  );
-
-
-  loadBulkChapters(
-    currentTest?.chapter || ""
-  );
-
-
-  document.getElementById(
-    "bulkPreview"
-  ).classList.remove(
-    "show"
-  );
-
-
-  document.getElementById(
-    "bulkPreviewBody"
-  ).innerHTML =
-    "";
-
-
-  document.getElementById(
-    "bulkPreviewHead"
-  ).innerHTML =
-    "";
-
-
-  document.getElementById(
-    "bulkImportBtn"
-  ).disabled =
-    true;
-
-
-  document.getElementById(
-    "bulkSummary"
-  ).style.display =
-    "none";
-
-
-  bulkPreviewQuestions =
-    [];
-
-
-  const hindi =
-    document.getElementById(
-      "bulkHindi"
-    );
-
-
-  if (hindi) {
-
-    hindi.checked =
-      true;
-
-  }
-
-
-  bulkPreviewLanguage =
-    "hindi";
-
-
-  bulkMessage(
-    "",
-    ""
-  );
-
-}
-
-
-/* =========================================================
-   BULK LANGUAGE CHANGE
-========================================================= */
-
-function bulkLanguageChanged() {
-
-  const language =
-    getBulkLanguage();
-
-
-  if (
-    bulkPreviewQuestions.length
-  ) {
-
-    bulkPreviewLanguage =
-      language;
-
-
-    renderBulkPreview(
-      bulkPreviewQuestions,
-      language
-    );
-
-  }
-
-}
-
-
-/* =========================================================
-   DOM READY
-========================================================= */
-
-document.addEventListener(
-  "DOMContentLoaded",
-  () => {
-
-    const subject =
-      document.getElementById(
-        "subject"
-      );
-
-
-    if (subject) {
-
-      subject.addEventListener(
-        "change",
-        function() {
-
-          loadChapters(
-            this.value
-          );
-
+      } catch (e) { showBulkMsg("Server error: " + e.message, "error"); }
+    });
+
+    // ==========================================
+    // RENDER BULK PREVIEW
+    // ==========================================
+    function renderBulkPreview(questions) {
+      document.getElementById("previewContent").innerHTML = questions.map((q, i) => {
+        const qH = q.hindiQuestion || q.questionHindi || "";
+        const qE = q.englishQuestion || q.questionEnglish || "";
+
+        const optsH = getOptions(q, "hindi");
+        const optsE = getOptions(q, "english");
+        const correct = getCorrectIndex(q);
+        const explanation = getExplanation(q);
+
+        let qTextHtml = "";
+        if (qH) qTextHtml += '<div style="color:#c4b5fd;margin-bottom:4px;">🇮🇳 ' + escapeHtml(qH) + '</div>';
+        if (qE && qE !== qH) qTextHtml += '<div style="color:#93c5fd;margin-bottom:4px;">🇬🇧 ' + escapeHtml(qE) + '</div>';
+        if (!qTextHtml) qTextHtml = '<div>' + escapeHtml(q.questionText || q.question || "(No text)") + '</div>';
+
+        let optionsHtml = "";
+        if (optsH.some(o => o)) {
+          optionsHtml += '<div style="font-size:11px;color:#c4b5fd;margin-top:6px;">🇮🇳 Hindi:</div>';
+          optionsHtml += '<ul class="preview-options">' + optsH.map((o, j) =>
+            '<li class="' + (j === correct ? 'correct' : '') + '">' +
+              String.fromCharCode(65 + j) + '. ' + escapeHtml(o) +
+            '</li>'
+          ).join("") + '</ul>';
         }
-      );
 
-    }
-
-
-    const bulkSubject =
-      document.getElementById(
-        "bulkSubject"
-      );
-
-
-    if (bulkSubject) {
-
-      bulkSubject.addEventListener(
-        "change",
-        () => {
-
-          loadBulkChapters();
-
+        const optsEAlagHai = optsE.some((o, j) => o && o !== optsH[j]);
+        if (optsEAlagHai && optsE.some(o => o)) {
+          optionsHtml += '<div style="font-size:11px;color:#93c5fd;margin-top:6px;">🇬🇧 English:</div>';
+          optionsHtml += '<ul class="preview-options">' + optsE.map((o, j) =>
+            '<li class="' + (j === correct ? 'correct' : '') + '">' +
+              String.fromCharCode(65 + j) + '. ' + escapeHtml(o) +
+            '</li>'
+          ).join("") + '</ul>';
         }
-      );
 
+        return '<div class="preview-question">' +
+          '<strong>Q' + (i + 1) + '.</strong>' + qTextHtml +
+          optionsHtml +
+          '<div class="preview-answer">✅ Correct Answer: ' + String.fromCharCode(65 + correct) + '</div>' +
+          (explanation ? '<div class="preview-answer">💡 ' + escapeHtml(explanation) + '</div>' : '') +
+        '</div>';
+      }).join("");
     }
 
+    // ==========================================
+    // IMPORT ALL QUESTIONS (FINAL FIX)
+    // ==========================================
+    document.getElementById("importBtn").addEventListener("click", async () => {
+      if (!pendingPreview.length) { showMsg("Koi questions nahi", "error"); return; }
 
-    document
-      .querySelectorAll(
-        'input[name="bulkLanguage"]'
-      )
-      .forEach(input => {
+      // ⚡ NORMALIZE: Har question ko backend ke expected format me convert karo
+      const normalized = pendingPreview.map((q, i) => {
+        // Question text (dono naming conventions)
+        const qHindi = q.hindiQuestion || q.questionHindi || "";
+        const qEnglish = q.englishQuestion || q.questionEnglish || "";
 
-        input.addEventListener(
-          "change",
-          bulkLanguageChanged
-        );
+        // Options (sab formats support)
+        const optsH = getOptions(q, "hindi");
+        const optsE = getOptions(q, "english");
 
+        // Correct answer
+        const correct = getCorrectIndex(q);
+
+        // Explanation
+        const expH = q.hindiExplanation || q.explanationHindi || "";
+        const expE = q.englishExplanation || q.explanationEnglish || "";
+
+        return {
+          // Text (dono naming)
+          questionHindi: qHindi,
+          questionEnglish: qEnglish,
+          questionText: qHindi || qEnglish || "(empty)",
+          question: qHindi || qEnglish || "(empty)",
+
+          // Options (dono naming)
+          optionsHindi: [optsH[0] || "", optsH[1] || "", optsH[2] || "", optsH[3] || ""],
+          optionsEnglish: [optsE[0] || "", optsE[1] || "", optsE[2] || "", optsE[3] || ""],
+          options: [
+            optsH[0] || optsE[0] || "",
+            optsH[1] || optsE[1] || "",
+            optsH[2] || optsE[2] || "",
+            optsH[3] || optsE[3] || ""
+          ],
+
+          // Answer (number + string dono)
+          correctAnswer: correct,
+          answer: ["A","B","C","D"][correct] || "A",
+
+          // Explanation (dono naming)
+          explanationHindi: expH,
+          explanationEnglish: expE,
+          explanation: expH || expE || "",
+          hindiExplanation: expH,
+          englishExplanation: expE,
+
+          // Original parser fields bhi rakh do (safety)
+          hindiQuestion: qHindi,
+          englishQuestion: qEnglish,
+
+          // Meta
+          subject: q.subject || document.getElementById("bulkSubject").value.trim() || "General",
+          chapter: q.chapter || document.getElementById("bulkChapter").value.trim() || "General",
+          questionNumber: q.questionNumber || (i + 1)
+        };
       });
 
+      // Debug: F12 Console me dekho kya bhej rahe ho
+      console.log("📤 SENDING TO BACKEND:", JSON.stringify(normalized, null, 2));
 
-    const previewBtn =
-      document.getElementById(
-        "bulkPreviewBtn"
-      );
+      try {
+        const r = await fetch("/api/questions/bulk/import", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({
+            testId,
+            language: document.getElementById("bulkLanguage").value,
+            subject: document.getElementById("bulkSubject").value.trim(),
+            chapter: document.getElementById("bulkChapter").value.trim(),
+            questions: normalized
+          })
+        });
 
+        const data = await r.json();
+        console.log("📥 BACKEND RESPONSE:", data);
 
-    if (previewBtn) {
+        if (data.success) {
+          showMsg("✅ " + (data.imported || normalized.length) + " questions imported!", "success");
+          pendingPreview = [];
+          document.getElementById("bulkPreview").classList.remove("show");
+          loadQuestions();
+        } else {
+          showMsg("❌ " + (data.message || "Import failed"), "error");
+          console.error("Import failed:", data);
+        }
+      } catch (e) {
+        showMsg("Server error: " + e.message, "error");
+        console.error(e);
+      }
+    });
 
-      previewBtn.addEventListener(
-        "click",
-        previewBulkQuestions
-      );
+    document.getElementById("cancelBulkBtn").addEventListener("click", () => {
+      pendingPreview = [];
+      document.getElementById("bulkPreview").classList.remove("show");
+    });
 
+    // ==========================================
+    // DELETE
+    // ==========================================
+    async function delQ(id) {
+      if (!confirm("Ye question delete karna hai?")) return;
+      try {
+        await fetch("/api/questions/" + id, { method: "DELETE", credentials: "include" });
+        loadQuestions();
+      } catch (e) { showMsg("Delete failed", "error"); }
     }
 
-
-    const importBtn =
-      document.getElementById(
-        "bulkImportBtn"
-      );
-
-
-    if (importBtn) {
-
-      importBtn.addEventListener(
-        "click",
-        importBulkQuestions
-      );
-
+    // ==========================================
+    // HELPERS
+    // ==========================================
+    function showMsg(text, type) {
+      const box = document.getElementById("msg");
+      box.textContent = text;
+      box.className = "alert " + type;
+      box.style.display = "block";
+      setTimeout(() => box.style.display = "none", 5000);
+    }
+    function showBulkMsg(text, type) {
+      const box = document.getElementById("bulkMsg");
+      box.textContent = text;
+      box.className = "alert " + type;
+      box.style.display = "block";
     }
 
-
-    const clearBtn =
-      document.getElementById(
-        "bulkClearBtn"
-      );
-
-
-    if (clearBtn) {
-
-      clearBtn.addEventListener(
-        "click",
-        clearBulkUpload
-      );
-
-    }
-
-
-    const bulkTest =
-      document.getElementById(
-        "bulkTest"
-      );
-
-
-    if (bulkTest) {
-
-      bulkTest.addEventListener(
-        "change",
-        bulkTestChanged
-      );
-
-    }
-
-  }
-);
-
-
-/* =========================================================
-   START
-========================================================= */
-
-checkAdmin();
-
-</script>
+    // ==========================================
+    // INIT
+    // ==========================================
+    (async function() {
+      const user = await requireLogin();
+      if (!user) return;
+      if (user.role !== "admin") { location.href = "/dashboard.html"; return; }
+      if (!testId) {
+        document.getElementById("qList").innerHTML = '<div class="empty-box">❌ Test ID nahi mila.</div>';
+        return;
+      }
+      await loadTestInfo();
+      await loadQuestions();
+    })();
+  </script>
 
 </body>
 </html>

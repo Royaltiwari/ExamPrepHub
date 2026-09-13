@@ -6,783 +6,613 @@
   <title>Dashboard - ExamPrepHub</title>
   <link rel="stylesheet" href="/css/style.css">
   <style>
-    /* Dashboard-specific styles */
-    .dash-layout {
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      padding-bottom: 70px;
+    }
+
+    /* TOP BAR */
+    .top-bar {
+      background: linear-gradient(135deg, #1e1b4b, #312e81);
+      padding: 14px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    }
+    .top-bar .logo { font-size: 18px; font-weight: 900; color: white; }
+    .top-bar .actions { display: flex; gap: 10px; align-items: center; }
+    .icon-btn {
+      background: rgba(255,255,255,0.1);
+      border: none;
+      width: 38px; height: 38px;
+      border-radius: 10px;
+      color: white;
+      cursor: pointer;
+      font-size: 18px;
+      display: flex; align-items: center; justify-content: center;
+      position: relative;
+    }
+    .icon-btn:hover { background: rgba(255,255,255,0.2); }
+    .notif-badge {
+      position: absolute; top: -4px; right: -4px;
+      background: #dc2626; color: white;
+      font-size: 10px; font-weight: 800;
+      padding: 2px 6px; border-radius: 10px;
+      min-width: 18px; text-align: center;
+    }
+
+    /* LAYOUT */
+    .layout {
       display: grid;
-      grid-template-columns: 240px 1fr;
-      min-height: calc(100vh - 70px);
+      grid-template-columns: 220px 1fr;
+      gap: 20px;
+      max-width: 1300px;
+      margin: auto;
+      padding: 20px;
     }
 
     /* SIDEBAR */
-    .dash-sidebar {
+    .sidebar {
       background: var(--card-bg);
-      border-right: 1px solid var(--border);
-      padding: 20px 12px;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 15px;
+      height: fit-content;
       position: sticky;
-      top: 70px;
-      height: calc(100vh - 70px);
-      overflow-y: auto;
+      top: 90px;
     }
-
-    .dash-sidebar .brand {
-      text-align: center;
-      padding: 10px 0 20px;
-      border-bottom: 1px solid var(--border);
-      margin-bottom: 15px;
-    }
-
-    .dash-sidebar .brand-logo {
-      width: 60px;
-      height: 60px;
-      border-radius: 50%;
-      background: var(--gradient-blue);
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 28px;
-      margin-bottom: 8px;
-    }
-
-    .dash-sidebar .brand-name {
-      font-size: 16px;
-      font-weight: 900;
-      color: var(--text);
-      display: block;
-    }
-
-    .dash-sidebar .brand-sub {
-      font-size: 10px;
-      color: var(--muted);
+    .sidebar h3 {
+      font-size: 11px; color: var(--muted);
       text-transform: uppercase;
+      margin-bottom: 12px;
+      padding-left: 8px;
       letter-spacing: 1px;
     }
-
     .side-link {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 11px 14px;
+      display: flex; align-items: center; gap: 10px;
+      padding: 11px 12px;
       border-radius: 10px;
       color: var(--text-light);
       font-weight: 600;
       font-size: 14px;
-      margin-bottom: 4px;
-      transition: all 0.2s;
+      margin-bottom: 3px;
       text-decoration: none;
-    }
-
-    .side-link:hover {
-      background: var(--card-hover);
-      color: var(--primary);
-      transform: translateX(3px);
-    }
-
-    .side-link.active {
-      background: var(--gradient-blue);
-      color: white;
-      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
-    }
-
-    .side-link .icon {
-      font-size: 18px;
-      width: 22px;
-      text-align: center;
-    }
-
-    /* MAIN CONTENT */
-    .dash-main {
-      padding: 25px 30px;
-      overflow-x: hidden;
-    }
-
-    .dash-header {
-      margin-bottom: 25px;
-    }
-
-    .dash-header .greet {
-      font-size: 14px;
-      color: var(--muted);
-      margin-bottom: 4px;
-    }
-
-    .dash-header h1 {
-      font-size: 26px;
-      font-weight: 900;
-      color: var(--text);
-    }
-
-    /* HERO BANNER */
-    .hero-banner {
-      background: linear-gradient(135deg, #1e1b4b, #312e81, #4c1d95);
-      border-radius: 20px;
-      padding: 40px 30px;
-      margin-bottom: 25px;
-      position: relative;
-      overflow: hidden;
-      color: white;
-    }
-
-    .hero-banner::before {
-      content: "";
-      position: absolute;
-      width: 300px;
-      height: 300px;
-      background: rgba(255,255,255,0.06);
-      border-radius: 50%;
-      top: -100px;
-      right: -100px;
-    }
-
-    .hero-banner h2 {
-      font-size: 28px;
-      margin-bottom: 8px;
-      position: relative;
-    }
-
-    .hero-banner p {
-      color: #c7d2fe;
-      font-size: 15px;
-      position: relative;
-      max-width: 500px;
-    }
-
-    .hero-banner .cta {
-      margin-top: 18px;
-      display: inline-block;
-      background: white;
-      color: #312e81;
-      padding: 12px 24px;
-      border-radius: 10px;
-      font-weight: 800;
-      text-decoration: none;
-      position: relative;
-      transition: transform 0.2s;
-    }
-
-    .hero-banner .cta:hover {
-      transform: translateY(-3px);
-    }
-
-    /* STATS CARDS */
-    .stats-grid {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 15px;
-      margin-bottom: 25px;
-    }
-
-    .stat-box {
-      background: var(--card-bg);
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 18px;
-      display: flex;
-      align-items: center;
-      gap: 14px;
       transition: all 0.2s;
     }
+    .side-link:hover { background: var(--card-hover); color: var(--primary); }
+    .side-link.active { background: var(--gradient-blue); color: white; }
+    .side-link .icon { font-size: 16px; width: 20px; }
 
-    .stat-box:hover {
-      transform: translateY(-3px);
-      border-color: var(--primary);
+    /* MAIN */
+    .main { min-height: 400px; }
+
+    /* WELCOME */
+    .welcome {
+      margin-bottom: 20px;
     }
-
-    .stat-box .icon-box {
-      width: 46px;
-      height: 46px;
-      border-radius: 12px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 22px;
-      flex-shrink: 0;
+    .welcome h1 {
+      font-size: 22px; font-weight: 900;
+      margin-bottom: 4px;
     }
+    .welcome p { color: var(--muted); font-size: 14px; }
 
-    .stat-box.blue .icon-box { background: #1e3a8a; color: #93c5fd; }
-    .stat-box.green .icon-box { background: #14532d; color: #86efac; }
-    .stat-box.orange .icon-box { background: #78350f; color: #fcd34d; }
-    .stat-box.purple .icon-box { background: #4c1d95; color: #c4b5fd; }
-
-    .stat-box .num {
-      font-size: 24px;
-      font-weight: 900;
-      color: var(--text);
-      line-height: 1;
-    }
-
-    .stat-box .label {
-      font-size: 12px;
-      color: var(--muted);
-      margin-top: 4px;
-    }
-
-    /* SECTION */
-    .dash-section {
-      margin-bottom: 30px;
-    }
-
-    .dash-section-head {
+    /* SECTION HEADER */
+    .sec-head {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 15px;
+      margin-bottom: 12px;
+      margin-top: 5px;
     }
-
-    .dash-section-head h2 {
-      font-size: 18px;
+    .sec-head h2 {
+      font-size: 15px;
       font-weight: 900;
       color: var(--text);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
     }
-
-    .dash-section-head a {
-      font-size: 13px;
+    .sec-head a {
+      font-size: 12px;
       color: var(--primary);
+      text-decoration: none;
       font-weight: 700;
     }
 
-    /* TEST GRID */
-    .test-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 16px;
+    /* TARGET EXAM CARD */
+    .target-card {
+      background: linear-gradient(135deg, #7c2d12, #9a3412);
+      border-radius: 14px;
+      padding: 16px 18px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: white;
+      margin-bottom: 20px;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+    .target-card:hover { transform: translateY(-2px); }
+    .target-card .left { display: flex; align-items: center; gap: 12px; }
+    .target-card .emoji { font-size: 28px; }
+    .target-card .label { font-size: 10px; opacity: 0.8; text-transform: uppercase; letter-spacing: 1px; }
+    .target-card .name { font-size: 16px; font-weight: 900; }
+    .target-card .change {
+      background: rgba(255,255,255,0.15);
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 700;
     }
 
-    .test-card-box {
+    /* LIVE CARD */
+    .live-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      overflow: hidden;
+      margin-bottom: 20px;
+    }
+    .live-header {
+      background: linear-gradient(90deg, #dc2626, #b91c1c);
+      padding: 8px 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: white;
+      font-weight: 900;
+      font-size: 12px;
+      letter-spacing: 1px;
+    }
+    .live-dot {
+      width: 8px; height: 8px;
+      background: white; border-radius: 50%;
+      animation: pulse 1.5s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+    .live-body {
+      padding: 16px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .live-thumb {
+      width: 80px; height: 60px;
+      background: var(--bg-alt);
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 28px;
+      flex-shrink: 0;
+    }
+    .live-info { flex: 1; }
+    .live-info h3 { font-size: 15px; margin-bottom: 4px; }
+    .live-info p { font-size: 12px; color: var(--muted); }
+    .join-btn {
+      background: var(--gradient-red);
+      color: white;
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-weight: 800;
+      font-size: 12px;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+
+    /* CONTINUE LEARNING */
+    .continue-card {
       background: var(--card-bg);
       border: 1px solid var(--border);
       border-radius: 14px;
       padding: 16px;
-      cursor: pointer;
-      transition: all 0.25s;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .continue-icon {
+      width: 50px; height: 50px;
+      background: var(--gradient-blue);
+      border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px;
+      flex-shrink: 0;
+    }
+    .continue-info { flex: 1; min-width: 0; }
+    .continue-info h4 { font-size: 14px; margin-bottom: 6px; }
+    .progress-bar {
+      width: 100%;
+      height: 6px;
+      background: var(--bg-alt);
+      border-radius: 3px;
+      overflow: hidden;
+      margin-bottom: 5px;
+    }
+    .progress-fill {
+      height: 100%;
+      background: var(--gradient-green);
+      border-radius: 3px;
+    }
+    .progress-text { font-size: 11px; color: var(--muted); }
+    .resume-btn {
+      background: var(--gradient-green);
+      color: white;
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-weight: 800;
+      font-size: 12px;
+      text-decoration: none;
+      white-space: nowrap;
     }
 
-    .test-card-box:hover {
-      transform: translateY(-5px);
+    /* STATS */
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    .stat-mini {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px;
+      text-align: center;
+    }
+    .stat-mini .num {
+      font-size: 22px;
+      font-weight: 900;
+      color: var(--primary);
+      line-height: 1;
+    }
+    .stat-mini .lbl {
+      font-size: 10px;
+      color: var(--muted);
+      text-transform: uppercase;
+      margin-top: 4px;
+      letter-spacing: 0.5px;
+    }
+
+    /* QUICK ACCESS */
+    .quick-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    .quick-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px 10px;
+      text-align: center;
+      text-decoration: none;
+      color: var(--text);
+      transition: all 0.2s;
+    }
+    .quick-card:hover {
+      transform: translateY(-3px);
       border-color: var(--primary);
-      box-shadow: var(--shadow-md);
+    }
+    .quick-card .ico {
+      font-size: 26px;
+      margin-bottom: 6px;
+    }
+    .quick-card .ttl {
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    /* CONTINUE SECTION GRID */
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 14px;
+      margin-bottom: 20px;
     }
 
     /* COURSE CARDS */
-    .course-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 16px;
-    }
-
     .course-card {
       background: var(--card-bg);
       border: 1px solid var(--border);
       border-radius: 14px;
       overflow: hidden;
       cursor: pointer;
-      transition: all 0.25s;
+      transition: all 0.2s;
     }
-
     .course-card:hover {
-      transform: translateY(-5px);
+      transform: translateY(-4px);
       border-color: var(--primary);
-      box-shadow: var(--shadow-md);
     }
-
     .course-thumb {
-      height: 130px;
+      height: 100px;
+      background: var(--bg-alt);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 36px;
       background-size: cover;
       background-position: center;
-      background-color: var(--bg-alt);
       position: relative;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 42px;
     }
+    .course-body { padding: 12px; }
+    .course-body h4 { font-size: 13px; margin-bottom: 4px; }
+    .course-body p { font-size: 11px; color: var(--muted); }
 
-    .course-body {
-      padding: 14px;
-    }
-
-    .course-body h3 {
-      font-size: 15px;
-      font-weight: 800;
-      color: var(--text);
-      margin-bottom: 6px;
-    }
-
-    .course-body p {
-      font-size: 12px;
-      color: var(--muted);
-      margin-bottom: 10px;
-    }
-
-    /* LIVE PLAYER */
-    .live-box {
-      background: var(--card-bg);
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      overflow: hidden;
-    }
-
-    .live-header {
-      padding: 12px 18px;
-      background: linear-gradient(90deg, #dc2626, #b91c1c);
-      color: white;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .live-header .status {
-      font-weight: 900;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .live-header .dot {
-      width: 10px;
-      height: 10px;
-      background: white;
-      border-radius: 50%;
-      animation: pulse 1.5s infinite;
-    }
-
-    @keyframes pulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.3; }
-    }
-
-    .live-player {
-      position: relative;
-      padding-bottom: 45%;
-      background: black;
-    }
-
-    .live-player iframe {
-      position: absolute;
-      top: 0;
+    /* BOTTOM NAV (Mobile) */
+    .bottom-nav {
+      display: none;
+      position: fixed;
+      bottom: 0;
       left: 0;
-      width: 100%;
-      height: 100%;
-      border: 0;
-    }
-
-    .live-info {
-      padding: 15px 18px;
-    }
-
-    .live-info h3 {
-      font-size: 16px;
-      margin-bottom: 6px;
-      color: var(--text);
-    }
-
-    .live-info p {
-      font-size: 13px;
-      color: var(--muted);
-    }
-
-    /* EMPTY */
-    .empty-box {
-      padding: 40px 20px;
-      text-align: center;
-      color: var(--muted);
+      right: 0;
       background: var(--card-bg);
-      border: 1px dashed var(--border);
-      border-radius: 14px;
-      font-size: 14px;
+      border-top: 1px solid var(--border);
+      padding: 8px 0;
+      z-index: 99;
+      box-shadow: 0 -4px 20px rgba(0,0,0,0.3);
     }
-
-    /* FILTER TABS */
-    .filter-tabs {
+    .bottom-nav-inner {
       display: flex;
-      gap: 8px;
-      margin-bottom: 18px;
-      overflow-x: auto;
-      padding-bottom: 8px;
+      justify-content: space-around;
+      max-width: 500px;
+      margin: auto;
     }
-
-    .filter-tab {
-      padding: 8px 14px;
-      border-radius: 8px;
-      font-size: 13px;
+    .bottom-nav a {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 10px;
       font-weight: 700;
-      cursor: pointer;
-      border: 2px solid var(--border);
-      background: var(--card-bg);
-      color: var(--text);
+      padding: 4px 12px;
+      border-radius: 8px;
       transition: all 0.2s;
-      white-space: nowrap;
     }
-
-    .filter-tab:hover {
-      border-color: var(--primary);
-    }
-
-    .filter-tab.active {
-      background: var(--gradient-blue);
-      color: white;
-      border-color: transparent;
-    }
-
-    .filter-tab.free.active {
-      background: linear-gradient(135deg, #16a34a, #059669);
-    }
-
-    .filter-tab.paid.active {
-      background: linear-gradient(135deg, #f59e0b, #d97706);
-    }
+    .bottom-nav a .ic { font-size: 20px; }
+    .bottom-nav a.active { color: var(--primary); }
 
     /* RESPONSIVE */
-    @media (max-width: 1000px) {
-      .stats-grid { grid-template-columns: repeat(2, 1fr); }
-      .course-grid, .test-grid { grid-template-columns: repeat(2, 1fr); }
+    @media (max-width: 900px) {
+      .layout { grid-template-columns: 1fr; padding: 15px; }
+      .sidebar { display: none; }
+      .bottom-nav { display: block; }
+      .stats-row { grid-template-columns: repeat(2, 1fr); }
+      .grid-2 { grid-template-columns: 1fr; }
     }
-
-    @media (max-width: 768px) {
-      .dash-layout { grid-template-columns: 1fr; }
-      .dash-sidebar {
-        position: static;
-        height: auto;
-        display: flex;
-        overflow-x: auto;
-        padding: 10px;
-        gap: 6px;
-      }
-      .dash-sidebar .brand { display: none; }
-      .side-link { white-space: nowrap; margin-bottom: 0; }
-      .dash-main { padding: 18px; }
-      .hero-banner { padding: 25px 20px; }
-      .hero-banner h2 { font-size: 22px; }
-    }
-
     @media (max-width: 500px) {
-      .stats-grid { grid-template-columns: 1fr; }
-      .course-grid, .test-grid { grid-template-columns: 1fr; }
+      .stats-row { grid-template-columns: repeat(2, 1fr); }
+      .quick-grid { grid-template-columns: repeat(3, 1fr); }
+      .welcome h1 { font-size: 18px; }
     }
   </style>
 </head>
 <body>
 
-  <!-- HEADER -->
-  <header class="header">
-    <div class="header-inner">
-      <a href="/dashboard.html" class="logo">🏆 ExamPrepHub</a>
-      <div class="header-actions">
-        <a href="/admin.html" class="btn-header" id="adminBtn" style="display:none;">👑 Admin</a>
-        <span class="btn-header" id="userGreet" style="cursor:default;">👤 Student</span>
-        <button class="btn-header" id="logoutBtn">Logout</button>
-      </div>
+  <!-- TOP BAR -->
+  <div class="top-bar">
+    <div class="logo">🏆 ExamPrepHub</div>
+    <div class="actions">
+      <button class="icon-btn" onclick="location.href='/home-class.html'" title="Search">🔍</button>
+      <button class="icon-btn" id="notifBtn" title="Notifications">
+        🔔
+        <span class="notif-badge" id="notifCount" style="display:none;">0</span>
+      </button>
+      <button class="icon-btn" onclick="location.href='/profile.html'" title="Profile">👤</button>
     </div>
-  </header>
+  </div>
 
-  <!-- DASHBOARD LAYOUT -->
-  <div class="dash-layout">
+  <!-- LAYOUT -->
+  <div class="layout">
 
-    <!-- SIDEBAR -->
-    <aside class="dash-sidebar">
-      <div class="brand">
-        <div class="brand-logo">🏆</div>
-        <span class="brand-name">ExamPrepHub</span>
-        <span class="brand-sub">Learn • Practice • Win</span>
-      </div>
-
+    <!-- SIDEBAR (Desktop) -->
+    <aside class="sidebar">
+      <h3>Menu</h3>
       <a href="/dashboard.html" class="side-link active">
-        <span class="icon">📊</span> Dashboard
+        <span class="icon">🏠</span> Dashboard
       </a>
       <a href="/home-class.html" class="side-link">
-        <span class="icon">🏠</span> Home Class
+        <span class="icon">📚</span> Learn
       </a>
-      <a href="#testSeries" class="side-link">
-        <span class="icon">📝</span> Test Series
+      <a href="/test-center.html" class="side-link">
+        <span class="icon">📝</span> Tests
       </a>
-      <a href="/home-class.html" class="side-link">
-        <span class="icon">📺</span> Live Classes
+      <a href="/progress.html" class="side-link">
+        <span class="icon">📊</span> Progress
       </a>
-      <a href="/home-class.html" class="side-link">
-        <span class="icon">📚</span> Study Material
+      <a href="/saved.html" class="side-link">
+        <span class="icon">🔖</span> Saved
       </a>
-      <a href="/results.html" class="side-link">
-        <span class="icon">📈</span> My Results
+      <a href="/schedule.html" class="side-link">
+        <span class="icon">📅</span> Schedule
+      </a>
+      <a href="/profile.html" class="side-link">
+        <span class="icon">👤</span> Profile
       </a>
     </aside>
 
     <!-- MAIN -->
-    <main class="dash-main">
+    <main class="main">
 
-      <!-- HEADER -->
-      <div class="dash-header">
-        <div class="greet">Hello <span id="userName">Student</span>, Welcome Back!</div>
-        <h1>Your Dashboard Today</h1>
+      <!-- WELCOME -->
+      <div class="welcome">
+        <h1>👋 Welcome back, <span id="userName">Student</span>!</h1>
+        <p>Ready to continue your preparation? 🚀</p>
       </div>
 
-      <!-- HERO BANNER -->
-      <div class="hero-banner">
-        <h2>🎯 Free Mock Tests & Study Material</h2>
-        <p>SSC, Railway, Defence, Police, UPSSSC — sabhi exams ke liye taiyari karo. Live classes, notes, aur tests — sab ek jagah!</p>
-        <a href="/home-class.html" class="cta">🚀 Start Learning →</a>
+      <!-- TARGET EXAM -->
+      <div class="sec-head">
+        <h2>🎯 My Target</h2>
+      </div>
+      <div class="target-card" id="targetCard" onclick="location.href='/target-exam.html'">
+        <div class="left">
+          <div class="emoji" id="targetEmoji">🎯</div>
+          <div>
+            <div class="label">Target Exam</div>
+            <div class="name" id="targetName">Set Your Target</div>
+          </div>
+        </div>
+        <div class="change">Change ▼</div>
+      </div>
+
+      <!-- LIVE CLASS -->
+      <div class="sec-head">
+        <h2>🔴 Live Now</h2>
+      </div>
+      <div id="liveBox">
+        <div class="live-card">
+          <div class="live-body" style="justify-content:center; color: var(--muted); font-size: 13px;">
+            Loading live classes...
+          </div>
+        </div>
+      </div>
+
+      <!-- CONTINUE LEARNING -->
+      <div class="sec-head">
+        <h2>📚 Continue Learning</h2>
+        <a href="/home-class.html">See All →</a>
+      </div>
+      <div id="continueBox">
+        <div class="continue-card">
+          <div style="color: var(--muted); font-size: 13px; padding: 8px;">
+            Abhi tak kuch nahi padha. Classes dekhna shuru karo!
+          </div>
+        </div>
       </div>
 
       <!-- STATS -->
-      <div class="stats-grid">
-        <div class="stat-box blue">
-          <div class="icon-box">📝</div>
-          <div>
-            <div class="num" id="testCount">0</div>
-            <div class="label">Available Tests</div>
-          </div>
+      <div class="sec-head">
+        <h2>📊 Your Progress</h2>
+      </div>
+      <div class="stats-row">
+        <div class="stat-mini">
+          <div class="num" id="statTests">0</div>
+          <div class="lbl">Tests</div>
         </div>
-
-        <div class="stat-box green">
-          <div class="icon-box">📚</div>
-          <div>
-            <div class="num" id="notesCount">0</div>
-            <div class="label">PDF Notes</div>
-          </div>
+        <div class="stat-mini">
+          <div class="num" id="statScore">0%</div>
+          <div class="lbl">Avg Score</div>
         </div>
-
-        <div class="stat-box orange">
-          <div class="icon-box">🔴</div>
-          <div>
-            <div class="num" id="liveCount">0</div>
-            <div class="label">Live Classes</div>
-          </div>
+        <div class="stat-mini">
+          <div class="num" id="statQs">0</div>
+          <div class="lbl">Questions</div>
         </div>
-
-        <div class="stat-box purple">
-          <div class="icon-box">📈</div>
-          <div>
-            <div class="num" id="resultCount">0</div>
-            <div class="label">My Results</div>
-          </div>
+        <div class="stat-mini">
+          <div class="num" id="statClasses">0</div>
+          <div class="lbl">Classes</div>
         </div>
       </div>
 
-      <!-- ============================================= -->
-      <!-- TEST SERIES WITH FREE/PAID FILTER            -->
-      <!-- ============================================= -->
-      <div class="dash-section" id="testSeries">
-        <div class="dash-section-head">
-          <h2>📝 Test Series</h2>
-          <a href="/home-class.html">View All →</a>
-        </div>
-
-        <!-- FILTER TABS -->
-        <div class="filter-tabs">
-          <button class="filter-tab active" data-filter="all">
-            All <span class="badge badge-blue" id="countAll">0</span>
-          </button>
-          <button class="filter-tab free" data-filter="free">
-            🆓 Free <span class="badge badge-green" id="countFree">0</span>
-          </button>
-          <button class="filter-tab paid" data-filter="paid">
-            💰 Paid <span class="badge badge-yellow" id="countPaid">0</span>
-          </button>
-        </div>
-
-        <!-- TEST GRID -->
-        <div class="test-grid" id="testGrid">
-          <div class="empty-box">Loading tests...</div>
-        </div>
+      <!-- QUICK ACCESS -->
+      <div class="sec-head">
+        <h2>⚡ Quick Access</h2>
       </div>
-
-      <!-- LIVE CLASSES -->
-      <div class="dash-section">
-        <div class="dash-section-head">
-          <h2>📺 Live Classes</h2>
-          <a href="/home-class.html">View All →</a>
-        </div>
-
-        <div id="liveBox">
-          <div class="empty-box">Abhi koi live class nahi chal rahi.</div>
-        </div>
-      </div>
-
-      <!-- EXAM LIBRARY -->
-      <div class="dash-section">
-        <div class="dash-section-head">
-          <h2>📚 Exam Library</h2>
-          <a href="/home-class.html">View All →</a>
-        </div>
-
-        <div class="course-grid" id="examGrid">
-          <div class="empty-box">Loading exams...</div>
-        </div>
+      <div class="quick-grid">
+        <a href="/test-center.html" class="quick-card">
+          <div class="ico">📝</div>
+          <div class="ttl">Tests</div>
+        </a>
+        <a href="/home-class.html" class="quick-card">
+          <div class="ico">📺</div>
+          <div class="ttl">Classes</div>
+        </a>
+        <a href="/study-material.html" class="quick-card">
+          <div class="ico">📄</div>
+          <div class="ttl">PDFs</div>
+        </a>
       </div>
 
       <!-- RECENT CLASSES -->
-      <div class="dash-section">
-        <div class="dash-section-head">
-          <h2>🎓 Recent Classes</h2>
-          <a href="/home-class.html">View All →</a>
-        </div>
-
-        <div class="course-grid" id="recentClasses">
-          <div class="empty-box">Loading classes...</div>
+      <div class="sec-head">
+        <h2>🎓 Recent Classes</h2>
+        <a href="/home-class.html">See All →</a>
+      </div>
+      <div class="grid-2" id="recentClasses">
+        <div class="course-card" style="padding: 20px; text-align: center; color: var(--muted); font-size: 13px;">
+          Loading...
         </div>
       </div>
 
     </main>
-
   </div>
+
+  <!-- BOTTOM NAV (Mobile) -->
+  <nav class="bottom-nav">
+    <div class="bottom-nav-inner">
+      <a href="/dashboard.html" class="active">
+        <span class="ic">🏠</span> Home
+      </a>
+      <a href="/home-class.html">
+        <span class="ic">📚</span> Learn
+      </a>
+      <a href="/test-center.html">
+        <span class="ic">📝</span> Tests
+      </a>
+      <a href="/progress.html">
+        <span class="ic">📊</span> Progress
+      </a>
+      <a href="/profile.html">
+        <span class="ic">👤</span> Profile
+      </a>
+    </div>
+  </nav>
 
   <!-- COMMON JS -->
   <script src="/js/common.js"></script>
 
   <script>
-    let allTests = [];
-    let currentTestFilter = "all";
+    let currentUser = null;
 
     // ==========================================
-    // LOAD USER
+    // LOAD USER (with ADMIN redirect)
     // ==========================================
     async function loadUser() {
       try {
-        const response = await fetch("/api/auth/me", { credentials: "include" });
-        const data = await response.json();
+        const r = await fetch("/api/auth/me", { credentials: "include" });
+        const data = await r.json();
 
-        if (!response.ok || !data.success || !data.user) {
+        if (!r.ok || !data.success || !data.user) {
           window.location.href = "/login.html";
           return false;
         }
 
-        const name = data.user.name || "Student";
-        document.getElementById("userName").textContent = name;
-        document.getElementById("userGreet").textContent = "👤 " + name;
-
+        // ADMIN ko admin-dashboard pe bhejo
         if (String(data.user.role || "").trim().toLowerCase() === "admin") {
-          document.getElementById("adminBtn").style.display = "inline-flex";
+          window.location.href = "/admin-dashboard.html";
+          return false;
+        }
+
+        currentUser = data.user;
+        document.getElementById("userName").textContent = data.user.name || "Student";
+
+        // Target exam
+        if (data.user.targetExam) {
+          document.getElementById("targetName").textContent = data.user.targetExam;
+          document.getElementById("targetEmoji").textContent = getExamEmoji(data.user.targetExam);
         }
 
         return true;
-      } catch (error) {
+      } catch (e) {
         window.location.href = "/login.html";
         return false;
       }
     }
 
-    // ==========================================
-    // LOAD TESTS (with Free/Paid filter)
-    // ==========================================
-    async function loadTests() {
-      const grid = document.getElementById("testGrid");
-      grid.innerHTML = '<div class="empty-box">Loading tests...</div>';
-
-      try {
-        const r = await fetch("/api/tests", { credentials: "include" });
-        const data = await r.json();
-
-        allTests = data.tests || [];
-
-        // Counts
-        const total = allTests.length;
-        const free = allTests.filter(t => !t.isPaid).length;
-        const paid = allTests.filter(t => t.isPaid).length;
-
-        document.getElementById("countAll").textContent = total;
-        document.getElementById("countFree").textContent = free;
-        document.getElementById("countPaid").textContent = paid;
-
-        const oldCount = document.getElementById("testCount");
-        if (oldCount) oldCount.textContent = total;
-
-        renderTests();
-
-      } catch (e) {
-        console.error("Tests Error:", e);
-        grid.innerHTML = '<div class="empty-box">Tests load nahi ho paye.</div>';
-      }
-    }
-
-    function renderTests() {
-      const grid = document.getElementById("testGrid");
-
-      let filtered = allTests;
-      if (currentTestFilter === "free") {
-        filtered = allTests.filter(t => !t.isPaid);
-      } else if (currentTestFilter === "paid") {
-        filtered = allTests.filter(t => t.isPaid);
-      }
-
-      if (!filtered.length) {
-        grid.innerHTML = '<div class="empty-box">Is category me koi test nahi hai.</div>';
-        return;
-      }
-
-      grid.innerHTML = filtered.map(test => `
-        <div class="test-card-box" onclick="handleTestClick('${test._id}', ${test.isPaid ? 'true' : 'false'}, '${escapeHtml(test.name || "")}', ${test.price || 0})">
-          <div style="display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 10px;">
-            <span class="badge badge-blue" style="font-size: 10px;">
-              ${escapeHtml(test.exam || "Exam")}
-            </span>
-            <span class="badge ${test.isPaid ? 'badge-yellow' : 'badge-green'}">
-              ${test.isPaid ? `💰 ₹${test.price || 0}` : '🆓 Free'}
-            </span>
-          </div>
-
-          <h3 style="font-size: 15px; margin-bottom: 10px; color: var(--text);">
-            ${escapeHtml(test.name || "Mock Test")}
-          </h3>
-
-          <div style="font-size: 12px; color: var(--muted); line-height: 1.7; margin-bottom: 12px;">
-            📚 ${escapeHtml(test.subject || "General")}<br>
-            ⏱️ ${Number(test.duration) || 0} min<br>
-            ❓ ${Number(test.totalQuestions) || 0} Q
-          </div>
-
-          ${test.isPaid ? `
-            <div class="btn btn-sm btn-red btn-block" style="pointer-events: none;">
-              🔒 Unlock ₹${test.price || 0}
-            </div>
-          ` : `
-            <div class="btn btn-sm btn-blue btn-block" style="pointer-events: none;">
-              ▶ Start Test
-            </div>
-          `}
-        </div>
-      `).join("");
-    }
-
-    function handleTestClick(id, isPaid, title, price) {
-      if (isPaid) {
-        window.location.href = `/payment.html?type=test&id=${encodeURIComponent(id)}&title=${encodeURIComponent(title)}&price=${price}`;
-      } else {
-        window.location.href = "/test-instructions.html?id=" + encodeURIComponent(id);
-      }
-    }
-
-    // Filter tabs
-    document.querySelectorAll(".filter-tab").forEach(tab => {
-      tab.addEventListener("click", () => {
-        document.querySelectorAll(".filter-tab").forEach(t => t.classList.remove("active"));
-        tab.classList.add("active");
-        currentTestFilter = tab.dataset.filter;
-        renderTests();
-      });
-    });
-
-    // ==========================================
-    // LOAD RESULTS COUNT
-    // ==========================================
-    async function loadResults() {
-      try {
-        const r = await fetch("/api/results", { credentials: "include" });
-        const data = await r.json();
-        document.getElementById("resultCount").textContent = (data.results || []).length;
-      } catch (e) {
-        document.getElementById("resultCount").textContent = "0";
-      }
-    }
-
-    // ==========================================
-    // LOAD NOTES COUNT
-    // ==========================================
-    async function loadNotes() {
-      try {
-        const r = await fetch("/api/notes", { credentials: "include" });
-        const data = await r.json();
-        document.getElementById("notesCount").textContent = (data.data || []).length;
-      } catch (e) {
-        document.getElementById("notesCount").textContent = "0";
-      }
+    function getExamEmoji(exam) {
+      const map = {
+        "SSC GD": "🪖", "SSC CGL": "📘", "SSC CHSL": "📖", "SSC MTS": "📝",
+        "Railway": "🚆", "BSF HCM": "🛡️", "CRPF": "🛡️", "CISF": "🛡️",
+        "ITBP": "🛡️", "UPSSSC PET": "🏛️", "UP Police": "👮", "Agniveer": "🎖️"
+      };
+      return map[exam] || "🎯";
     }
 
     // ==========================================
@@ -795,98 +625,68 @@
         const data = await r.json();
         const live = data.data || [];
 
-        document.getElementById("liveCount").textContent = live.length;
-
         if (!live.length) {
-          const r2 = await fetch("/api/classes?status=scheduled", { credentials: "include" });
-          const data2 = await r2.json();
-          const upcoming = (data2.data || []).slice(0, 1);
-
-          if (upcoming.length) {
-            const c = upcoming[0];
-            box.innerHTML = `
-              <div class="live-box">
-                <div style="padding: 20px; text-align: center;">
-                  <div style="font-size: 32px; margin-bottom: 10px;">📅</div>
-                  <h3 style="margin-bottom: 8px;">${escapeHtml(c.title)}</h3>
-                  <p class="text-muted" style="font-size: 13px;">
-                    ${escapeHtml(c.subject)} • ${escapeHtml(c.teacher || "")}<br>
-                    ${c.scheduledDate ? new Date(c.scheduledDate).toLocaleDateString("en-IN") : ""}
-                    ${c.scheduledTime ? " • " + escapeHtml(c.scheduledTime) : ""}
-                  </p>
-                  <a href="/class-detail.html?id=${c._id}" class="btn btn-blue" style="margin-top: 12px;">
-                    🔔 Remind Me
-                  </a>
-                </div>
-              </div>
-            `;
-          } else {
-            box.innerHTML = '<div class="empty-box">🔴 Abhi koi live class nahi chal rahi.</div>';
-          }
+          box.innerHTML = '<div class="live-card"><div class="live-body" style="justify-content:center; color: var(--muted); font-size: 13px;">📴 Abhi koi live class nahi chal rahi</div></div>';
           return;
         }
 
         const c = live[0];
-        const vid = getYouTubeId(c.liveUrl || "");
-        box.innerHTML = `
-          <div class="live-box">
-            <div class="live-header">
-              <span class="status"><span class="dot"></span> LIVE NOW</span>
-              <span style="font-size: 13px;">${escapeHtml(c.subject)}</span>
-            </div>
-            <div class="live-player">
-              <iframe src="https://www.youtube.com/embed/${vid}?autoplay=1" allowfullscreen></iframe>
-            </div>
-            <div class="live-info">
-              <h3>${escapeHtml(c.title)}</h3>
-              <p>${escapeHtml(c.examName || "")} ${c.teacher ? "• " + escapeHtml(c.teacher) : ""}</p>
-              <a href="/class-detail.html?id=${c._id}" class="btn btn-red" style="margin-top: 10px;">
-                💬 Join Class
-              </a>
-            </div>
-          </div>
-        `;
-
+        const thumb = c.thumbnail ? `background-image: url('${c.thumbnail}');` : "";
+        box.innerHTML = '<div class="live-card"><div class="live-header"><span class="live-dot"></span> LIVE NOW</div><div class="live-body"><div class="live-thumb" style="' + thumb + '">' + (!c.thumbnail ? "📺" : "") + '</div><div class="live-info"><h3>' + escapeHtml(c.title || "Live Class") + '</h3><p>' + escapeHtml(c.subject || "") + ' • ' + escapeHtml(c.teacher || "") + '</p></div><a href="/class-detail.html?id=' + c._id + '" class="join-btn">JOIN →</a></div></div>';
       } catch (e) {
-        box.innerHTML = '<div class="empty-box">Live classes load nahi ho payi.</div>';
+        box.innerHTML = '<div class="live-card"><div class="live-body" style="justify-content:center; color: var(--muted); font-size: 13px;">📴 No live classes</div></div>';
       }
     }
 
     // ==========================================
-    // LOAD EXAM LIBRARY
+    // LOAD CONTINUE LEARNING
     // ==========================================
-    async function loadExamLibrary() {
-      const grid = document.getElementById("examGrid");
+    async function loadContinue() {
+      const box = document.getElementById("continueBox");
       try {
-        const r = await fetch("/api/exam-links", { credentials: "include" });
+        const r = await fetch("/api/progress/continue", { credentials: "include" });
         const data = await r.json();
-        const exams = (data.data || []).slice(0, 6);
 
-        if (!exams.length) {
-          grid.innerHTML = '<div class="empty-box">Koi exam add nahi kiya abhi.</div>';
+        if (!data.success) throw new Error();
+
+        const cls = data.data.class;
+        const test = data.data.test;
+
+        if (!cls && !test) {
+          box.innerHTML = '<div class="continue-card"><div style="color: var(--muted); font-size: 13px; padding: 8px;">📚 Abhi tak kuch nahi padha. Classes dekhna shuru karo!</div></div>';
           return;
         }
 
-        grid.innerHTML = exams.map(e => `
-          <div class="course-card" onclick="window.location.href='/home-class.html'">
-            <div class="course-thumb" style="${e.thumbnail ? `background-image: url('${escapeHtml(e.thumbnail)}')` : ""}">
-              ${!e.thumbnail ? escapeHtml(e.icon || "🏆") : ""}
-            </div>
-            <div class="course-body">
-              <h3>${escapeHtml(e.examName)}</h3>
-              <p>${escapeHtml(e.description || e.category || "")}</p>
-              <div style="display:flex; gap:6px;">
-                ${e.pdfUrl ? `<a href="${escapeHtml(e.pdfUrl)}" target="_blank" onclick="event.stopPropagation()" class="btn btn-sm btn-red">📄</a>` : ""}
-                ${e.testUrl ? `<a href="${escapeHtml(e.testUrl)}" onclick="event.stopPropagation()" class="btn btn-sm btn-blue">📝</a>` : ""}
-                ${e.demoUrl ? `<a href="${escapeHtml(e.demoUrl)}" target="_blank" onclick="event.stopPropagation()" class="btn btn-sm btn-green">🎬</a>` : ""}
-              </div>
-            </div>
-          </div>
-        `).join("");
+        if (cls) {
+          const percent = cls.completedPercent || 0;
+          const classData = cls.classId || {};
+          box.innerHTML = '<div class="continue-card"><div class="continue-icon">▶</div><div class="continue-info"><h4>' + escapeHtml(classData.title || "Class") + '</h4><div class="progress-bar"><div class="progress-fill" style="width: ' + percent + '%;"></div></div><div class="progress-text">' + percent + '% complete</div></div><a href="/class-detail.html?id=' + classData._id + '" class="resume-btn">RESUME ▶</a></div>';
+          return;
+        }
 
+        if (test) {
+          const testData = test.testId || {};
+          box.innerHTML = '<div class="continue-card"><div class="continue-icon">📝</div><div class="continue-info"><h4>' + escapeHtml(testData.name || "Test") + '</h4><div class="progress-bar"><div class="progress-fill" style="width: 50%;"></div></div><div class="progress-text">Continue test</div></div><a href="/test-instructions.html?id=' + testData._id + '" class="resume-btn">RESUME ▶</a></div>';
+        }
       } catch (e) {
-        grid.innerHTML = '<div class="empty-box">Exams load nahi ho payi.</div>';
+        box.innerHTML = '<div class="continue-card"><div style="color: var(--muted); font-size: 13px; padding: 8px;">📚 Classes dekhna shuru karo!</div></div>';
       }
+    }
+
+    // ==========================================
+    // LOAD STATS
+    // ==========================================
+    async function loadStats() {
+      try {
+        const r = await fetch("/api/progress/stats", { credentials: "include" });
+        const data = await r.json();
+        if (!data.success) return;
+
+        document.getElementById("statTests").textContent = data.data.testsAttempted || 0;
+        document.getElementById("statScore").textContent = (data.data.avgScore || 0) + "%";
+        document.getElementById("statQs").textContent = data.data.totalQuestions || 0;
+        document.getElementById("statClasses").textContent = data.data.classesWatched || 0;
+      } catch (e) { console.error("Stats error:", e); }
     }
 
     // ==========================================
@@ -897,36 +697,37 @@
       try {
         const r = await fetch("/api/classes", { credentials: "include" });
         const data = await r.json();
-        const classes = (data.data || []).slice(0, 6);
+        const classes = (data.data || []).slice(0, 4);
 
         if (!classes.length) {
-          grid.innerHTML = '<div class="empty-box">Koi class available nahi hai.</div>';
+          grid.innerHTML = '<div class="course-card" style="padding: 20px; text-align: center; color: var(--muted); font-size: 13px; grid-column: 1/-1;">Koi class available nahi hai.</div>';
           return;
         }
 
-        const statusColors = { scheduled: "badge-yellow", live: "badge-red", recorded: "badge-green" };
-        const statusIcons = { scheduled: "📅", live: "🔴", recorded: "📹" };
-
-        grid.innerHTML = classes.map(c => `
-          <div class="course-card" onclick="window.location.href='/class-detail.html?id=${c._id}'">
-            <div class="course-thumb" style="${c.thumbnail ? `background-image: url('${escapeHtml(c.thumbnail)}')` : "font-size: 32px;"}">
-              ${!c.thumbnail ? "📹" : ""}
-              <span class="badge ${statusColors[c.status]}" style="position: absolute; top: 10px; right: 10px;">
-                ${statusIcons[c.status]} ${c.status}
-              </span>
-            </div>
-            <div class="course-body">
-              <h3>${escapeHtml(c.title)}</h3>
-              <p>${escapeHtml(c.subject)}${c.topic ? " • " + escapeHtml(c.topic) : ""}</p>
-              <div class="btn btn-sm btn-blue btn-block">▶ Watch</div>
-            </div>
-          </div>
-        `).join("");
-
+        grid.innerHTML = classes.map(c => '<div class="course-card" onclick="location.href=\'/class-detail.html?id=' + c._id + '\'"><div class="course-thumb" style="' + (c.thumbnail ? "background-image: url('" + escapeHtml(c.thumbnail) + "')" : "") + '">' + (!c.thumbnail ? "📹" : "") + '</div><div class="course-body"><h4>' + escapeHtml(c.title || "Class") + '</h4><p>' + escapeHtml(c.subject || "") + ' • ' + escapeHtml(c.teacher || "") + '</p></div></div>').join("");
       } catch (e) {
-        grid.innerHTML = '<div class="empty-box">Classes load nahi ho payi.</div>';
+        grid.innerHTML = '<div class="course-card" style="padding: 20px; text-align: center; color: var(--muted); font-size: 13px; grid-column: 1/-1;">Classes load nahi ho payi.</div>';
       }
     }
+
+    // ==========================================
+    // LOAD NOTIFICATIONS COUNT
+    // ==========================================
+    async function loadNotifCount() {
+      try {
+        const r = await fetch("/api/notifications/my", { credentials: "include" });
+        const data = await r.json();
+        if (data.success && data.unreadCount > 0) {
+          const badge = document.getElementById("notifCount");
+          badge.textContent = data.unreadCount;
+          badge.style.display = "block";
+        }
+      } catch (e) {}
+    }
+
+    document.getElementById("notifBtn").addEventListener("click", () => {
+      location.href = "/notifications.html";
+    });
 
     // ==========================================
     // INIT
@@ -936,12 +737,11 @@
       if (!ok) return;
 
       await Promise.all([
-        loadTests(),
-        loadResults(),
-        loadNotes(),
         loadLive(),
-        loadExamLibrary(),
-        loadRecentClasses()
+        loadContinue(),
+        loadStats(),
+        loadRecentClasses(),
+        loadNotifCount()
       ]);
     }
 

@@ -1,0 +1,176 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Study Material - ExamPrepHub</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', Arial, sans-serif; background: var(--bg); color: var(--text); padding-bottom: 70px; }
+    .top-bar { background: linear-gradient(135deg, #1e1b4b, #312e81); padding: 14px 20px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; }
+    .back-btn { background: rgba(255,255,255,0.1); border: none; width: 38px; height: 38px; border-radius: 10px; color: white; cursor: pointer; font-size: 18px; }
+    .title-bar { color: white; font-size: 16px; font-weight: 900; flex: 1; text-align: center; }
+    .container { max-width: 900px; margin: auto; padding: 20px; }
+
+    .page-header { text-align: center; margin-bottom: 20px; }
+    .page-header h1 { font-size: 24px; font-weight: 900; margin-bottom: 6px; }
+    .page-header p { color: var(--muted); font-size: 14px; }
+
+    .search-box { margin-bottom: 15px; }
+    .search-input { width: 100%; padding: 12px 16px; background: var(--card-bg); border: 2px solid var(--border); border-radius: 12px; color: var(--text); font-size: 14px; }
+    .search-input:focus { outline: none; border-color: var(--primary); }
+
+    .filters { display: flex; gap: 6px; margin-bottom: 20px; overflow-x: auto; padding-bottom: 6px; }
+    .f-btn { background: var(--card-bg); border: 1px solid var(--border); padding: 8px 14px; border-radius: 20px; font-size: 12px; font-weight: 700; cursor: pointer; white-space: nowrap; color: var(--text-light); }
+    .f-btn.active { background: var(--gradient-blue); color: white; border-color: transparent; }
+
+    .pdf-list { display: grid; gap: 12px; }
+    .pdf-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 14px; padding: 16px; display: flex; align-items: center; gap: 14px; transition: all 0.2s; }
+    .pdf-card:hover { transform: translateY(-3px); border-color: var(--primary); }
+    .pdf-icon { width: 50px; height: 50px; background: linear-gradient(135deg, #dc2626, #b91c1c); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 24px; color: white; flex-shrink: 0; }
+    .pdf-info { flex: 1; min-width: 0; }
+    .pdf-info h4 { font-size: 15px; margin-bottom: 6px; line-height: 1.3; }
+    .pdf-meta { font-size: 11px; color: var(--muted); display: flex; flex-wrap: wrap; gap: 8px; }
+    .pdf-meta span { display: inline-flex; align-items: center; gap: 3px; }
+    .pdf-actions { display: flex; gap: 6px; flex-shrink: 0; }
+    .btn-view { background: var(--gradient-blue); color: white; border: none; padding: 8px 14px; border-radius: 8px; font-size: 12px; font-weight: 800; cursor: pointer; text-decoration: none; }
+    .btn-dl { background: var(--gradient-green); color: white; border: none; padding: 8px 14px; border-radius: 8px; font-size: 12px; font-weight: 800; cursor: pointer; text-decoration: none; }
+
+    .empty-box { text-align: center; padding: 50px 20px; color: var(--muted); background: var(--card-bg); border: 1px dashed var(--border); border-radius: 14px; font-size: 14px; }
+    .loading-box { text-align: center; padding: 40px; color: var(--muted); }
+
+    .bottom-nav { display: none; position: fixed; bottom: 0; left: 0; right: 0; background: var(--card-bg); border-top: 1px solid var(--border); padding: 8px 0; z-index: 99; }
+    .bottom-nav-inner { display: flex; justify-content: space-around; max-width: 500px; margin: auto; }
+    .bottom-nav a { display: flex; flex-direction: column; align-items: center; gap: 3px; color: var(--muted); text-decoration: none; font-size: 10px; font-weight: 700; padding: 4px 12px; }
+    .bottom-nav a .ic { font-size: 20px; }
+    .bottom-nav a.active { color: var(--primary); }
+
+    @media (max-width: 700px) { .bottom-nav { display: block; } .container { padding: 15px; } .pdf-card { padding: 12px; gap: 10px; } .pdf-icon { width: 40px; height: 40px; font-size: 18px; } .pdf-info h4 { font-size: 13px; } .btn-view, .btn-dl { padding: 6px 10px; font-size: 11px; } }
+  </style>
+</head>
+<body>
+
+<div class="top-bar">
+  <button class="back-btn" onclick="location.href='/dashboard.html'">←</button>
+  <div class="title-bar">📄 Study Material</div>
+  <button class="back-btn" onclick="location.href='/dashboard.html'">🏠</button>
+</div>
+
+<div class="container">
+
+  <div class="page-header">
+    <h1>📄 Study Material</h1>
+    <p>Notes, PDFs aur study material</p>
+  </div>
+
+  <div class="search-box">
+    <input type="text" id="searchInput" class="search-input" placeholder="🔍 PDF search karo..." />
+  </div>
+
+  <div class="filters" id="filters">
+    <div class="f-btn active" data-filter="all">All</div>
+    <div class="f-btn" data-filter="Class 10">Class 10</div>
+    <div class="f-btn" data-filter="Class 11">Class 11</div>
+    <div class="f-btn" data-filter="Class 12">Class 12</div>
+    <div class="f-btn" data-filter="Competitive">Competitive</div>
+  </div>
+
+  <div class="pdf-list" id="pdfList">
+    <div class="loading-box">Loading PDFs...</div>
+  </div>
+
+</div>
+
+<nav class="bottom-nav">
+  <div class="bottom-nav-inner">
+    <a href="/dashboard.html"><span class="ic">🏠</span> Home</a>
+    <a href="/home-class.html"><span class="ic">📚</span> Learn</a>
+    <a href="/test-center.html"><span class="ic">📝</span> Tests</a>
+    <a href="/progress.html"><span class="ic">📊</span> Progress</a>
+    <a href="/profile.html"><span class="ic">👤</span> Profile</a>
+  </div>
+</nav>
+
+<script src="/js/common.js"></script>
+<script>
+  let allNotes = [];
+  let currentFilter = "all";
+  let searchQuery = "";
+
+  async function loadNotes() {
+    const list = document.getElementById("pdfList");
+    try {
+      const r = await fetch("/api/notes", { credentials: "include" });
+      const data = await r.json();
+      allNotes = data.data || [];
+      renderNotes();
+    } catch (e) {
+      list.innerHTML = '<div class="empty-box">❌ PDFs load nahi ho payi</div>';
+    }
+  }
+
+  function renderNotes() {
+    const list = document.getElementById("pdfList");
+    let filtered = allNotes;
+
+    if (currentFilter !== "all") {
+      filtered = filtered.filter(n => n.class === currentFilter);
+    }
+
+    if (searchQuery) {
+      const q = searchQuery.toLowerCase();
+      filtered = filtered.filter(n =>
+        (n.title || "").toLowerCase().includes(q) ||
+        (n.subject || "").toLowerCase().includes(q) ||
+        (n.chapter || "").toLowerCase().includes(q)
+      );
+    }
+
+    if (!filtered.length) {
+      list.innerHTML = '<div class="empty-box">Koi PDF available nahi hai.</div>';
+      return;
+    }
+
+    list.innerHTML = filtered.map(n => {
+      const pdfUrl = escapeHtml(n.pdfUrl || "#");
+      return '<div class="pdf-card">' +
+        '<div class="pdf-icon">📄</div>' +
+        '<div class="pdf-info">' +
+          '<h4>' + escapeHtml(n.title || "Notes") + '</h4>' +
+          '<div class="pdf-meta">' +
+            '<span>📚 ' + escapeHtml(n.subject || "-") + '</span>' +
+            (n.chapter ? '<span>📖 ' + escapeHtml(n.chapter) + '</span>' : '') +
+            '<span>🎓 ' + escapeHtml(n.class || "-") + '</span>' +
+          '</div>' +
+        '</div>' +
+        '<div class="pdf-actions">' +
+          '<a href="' + pdfUrl + '" target="_blank" class="btn-view">👁 View</a>' +
+          '<a href="' + pdfUrl + '" download class="btn-dl">⬇</a>' +
+        '</div>' +
+      '</div>';
+    }).join("");
+  }
+
+  document.getElementById("searchInput").addEventListener("input", debounce((e) => {
+    searchQuery = e.target.value.trim();
+    renderNotes();
+  }, 300));
+
+  document.querySelectorAll(".f-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      document.querySelectorAll(".f-btn").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      currentFilter = btn.dataset.filter;
+      renderNotes();
+    });
+  });
+
+  (async function() {
+    const user = await requireLogin();
+    if (!user) return;
+    loadNotes();
+  })();
+</script>
+</body>
+</html>
