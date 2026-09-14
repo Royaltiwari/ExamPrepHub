@@ -94,13 +94,8 @@
     .main { min-height: 400px; }
 
     /* WELCOME */
-    .welcome {
-      margin-bottom: 20px;
-    }
-    .welcome h1 {
-      font-size: 22px; font-weight: 900;
-      margin-bottom: 4px;
-    }
+    .welcome { margin-bottom: 20px; }
+    .welcome h1 { font-size: 22px; font-weight: 900; margin-bottom: 4px; }
     .welcome p { color: var(--muted); font-size: 14px; }
 
     /* SECTION HEADER */
@@ -151,7 +146,7 @@
       font-weight: 700;
     }
 
-    /* LIVE CARD */
+    /* ✅ LIVE CARD - FIXED THUMBNAIL */
     .live-card {
       background: var(--card-bg);
       border: 1px solid var(--border);
@@ -180,22 +175,53 @@
       50% { opacity: 0.3; }
     }
     .live-body {
-      padding: 16px;
+      padding: 14px;
       display: flex;
       align-items: center;
       gap: 14px;
     }
+
+    /* ✅ THUMBNAIL FIX — object-fit: cover */
     .live-thumb {
-      width: 80px; height: 60px;
-      background: var(--bg-alt);
-      border-radius: 8px;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 28px;
+      width: 90px;
+      height: 70px;
+      background: #1e1b4b;
+      border-radius: 10px;
       flex-shrink: 0;
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      overflow: hidden;
+      border: 1px solid var(--border);
     }
-    .live-info { flex: 1; }
-    .live-info h3 { font-size: 15px; margin-bottom: 4px; }
-    .live-info p { font-size: 12px; color: var(--muted); }
+    .live-thumb img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center;
+      display: block;
+      border-radius: 10px;
+    }
+
+    .live-info { flex: 1; min-width: 0; }
+    .live-info h3 {
+      font-size: 15px;
+      margin-bottom: 4px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .live-info p {
+      font-size: 12px;
+      color: var(--muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
     .join-btn {
       background: var(--gradient-red);
       color: white;
@@ -205,6 +231,7 @@
       font-size: 12px;
       text-decoration: none;
       white-space: nowrap;
+      flex-shrink: 0;
     }
 
     /* CONTINUE LEARNING */
@@ -302,14 +329,8 @@
       transform: translateY(-3px);
       border-color: var(--primary);
     }
-    .quick-card .ico {
-      font-size: 26px;
-      margin-bottom: 6px;
-    }
-    .quick-card .ttl {
-      font-size: 12px;
-      font-weight: 700;
-    }
+    .quick-card .ico { font-size: 26px; margin-bottom: 6px; }
+    .quick-card .ttl { font-size: 12px; font-weight: 700; }
 
     /* CONTINUE SECTION GRID */
     .grid-2 {
@@ -319,7 +340,7 @@
       margin-bottom: 20px;
     }
 
-    /* COURSE CARDS */
+    /* ✅ COURSE CARDS - FIXED THUMBNAIL */
     .course-card {
       background: var(--card-bg);
       border: 1px solid var(--border);
@@ -333,17 +354,40 @@
       border-color: var(--primary);
     }
     .course-thumb {
-      height: 100px;
+      height: 120px;
       background: var(--bg-alt);
-      display: flex; align-items: center; justify-content: center;
-      font-size: 36px;
       background-size: cover;
       background-position: center;
+      background-repeat: no-repeat;
       position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 36px;
+      overflow: hidden;
+    }
+    .course-thumb img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center;
+      display: block;
     }
     .course-body { padding: 12px; }
-    .course-body h4 { font-size: 13px; margin-bottom: 4px; }
-    .course-body p { font-size: 11px; color: var(--muted); }
+    .course-body h4 {
+      font-size: 13px;
+      margin-bottom: 4px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .course-body p {
+      font-size: 11px;
+      color: var(--muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
 
     /* BOTTOM NAV (Mobile) */
     .bottom-nav {
@@ -416,27 +460,13 @@
     <!-- SIDEBAR (Desktop) -->
     <aside class="sidebar">
       <h3>Menu</h3>
-      <a href="/dashboard.html" class="side-link active">
-        <span class="icon">🏠</span> Dashboard
-      </a>
-      <a href="/home-class.html" class="side-link">
-        <span class="icon">📚</span> Learn
-      </a>
-      <a href="/test-center.html" class="side-link">
-        <span class="icon">📝</span> Tests
-      </a>
-      <a href="/progress.html" class="side-link">
-        <span class="icon">📊</span> Progress
-      </a>
-      <a href="/saved.html" class="side-link">
-        <span class="icon">🔖</span> Saved
-      </a>
-      <a href="/schedule.html" class="side-link">
-        <span class="icon">📅</span> Schedule
-      </a>
-      <a href="/profile.html" class="side-link">
-        <span class="icon">👤</span> Profile
-      </a>
+      <a href="/dashboard.html" class="side-link active"><span class="icon">🏠</span> Dashboard</a>
+      <a href="/home-class.html" class="side-link"><span class="icon">📚</span> Learn</a>
+      <a href="/test-center.html" class="side-link"><span class="icon">📝</span> Tests</a>
+      <a href="/progress.html" class="side-link"><span class="icon">📊</span> Progress</a>
+      <a href="/saved.html" class="side-link"><span class="icon">🔖</span> Saved</a>
+      <a href="/schedule.html" class="side-link"><span class="icon">📅</span> Schedule</a>
+      <a href="/profile.html" class="side-link"><span class="icon">👤</span> Profile</a>
     </aside>
 
     <!-- MAIN -->
@@ -449,9 +479,7 @@
       </div>
 
       <!-- TARGET EXAM -->
-      <div class="sec-head">
-        <h2>🎯 My Target</h2>
-      </div>
+      <div class="sec-head"><h2>🎯 My Target</h2></div>
       <div class="target-card" id="targetCard" onclick="location.href='/target-exam.html'">
         <div class="left">
           <div class="emoji" id="targetEmoji">🎯</div>
@@ -464,9 +492,7 @@
       </div>
 
       <!-- LIVE CLASS -->
-      <div class="sec-head">
-        <h2>🔴 Live Now</h2>
-      </div>
+      <div class="sec-head"><h2>🔴 Live Now</h2></div>
       <div id="liveBox">
         <div class="live-card">
           <div class="live-body" style="justify-content:center; color: var(--muted); font-size: 13px;">
@@ -489,45 +515,20 @@
       </div>
 
       <!-- STATS -->
-      <div class="sec-head">
-        <h2>📊 Your Progress</h2>
-      </div>
+      <div class="sec-head"><h2>📊 Your Progress</h2></div>
       <div class="stats-row">
-        <div class="stat-mini">
-          <div class="num" id="statTests">0</div>
-          <div class="lbl">Tests</div>
-        </div>
-        <div class="stat-mini">
-          <div class="num" id="statScore">0%</div>
-          <div class="lbl">Avg Score</div>
-        </div>
-        <div class="stat-mini">
-          <div class="num" id="statQs">0</div>
-          <div class="lbl">Questions</div>
-        </div>
-        <div class="stat-mini">
-          <div class="num" id="statClasses">0</div>
-          <div class="lbl">Classes</div>
-        </div>
+        <div class="stat-mini"><div class="num" id="statTests">0</div><div class="lbl">Tests</div></div>
+        <div class="stat-mini"><div class="num" id="statScore">0%</div><div class="lbl">Avg Score</div></div>
+        <div class="stat-mini"><div class="num" id="statQs">0</div><div class="lbl">Questions</div></div>
+        <div class="stat-mini"><div class="num" id="statClasses">0</div><div class="lbl">Classes</div></div>
       </div>
 
       <!-- QUICK ACCESS -->
-      <div class="sec-head">
-        <h2>⚡ Quick Access</h2>
-      </div>
+      <div class="sec-head"><h2>⚡ Quick Access</h2></div>
       <div class="quick-grid">
-        <a href="/test-center.html" class="quick-card">
-          <div class="ico">📝</div>
-          <div class="ttl">Tests</div>
-        </a>
-        <a href="/home-class.html" class="quick-card">
-          <div class="ico">📺</div>
-          <div class="ttl">Classes</div>
-        </a>
-        <a href="/study-material.html" class="quick-card">
-          <div class="ico">📄</div>
-          <div class="ttl">PDFs</div>
-        </a>
+        <a href="/test-center.html" class="quick-card"><div class="ico">📝</div><div class="ttl">Tests</div></a>
+        <a href="/home-class.html" class="quick-card"><div class="ico">📺</div><div class="ttl">Classes</div></a>
+        <a href="/study-material.html" class="quick-card"><div class="ico">📄</div><div class="ttl">PDFs</div></a>
       </div>
 
       <!-- RECENT CLASSES -->
@@ -536,9 +537,7 @@
         <a href="/home-class.html">See All →</a>
       </div>
       <div class="grid-2" id="recentClasses">
-        <div class="course-card" style="padding: 20px; text-align: center; color: var(--muted); font-size: 13px;">
-          Loading...
-        </div>
+        <div class="course-card" style="padding: 20px; text-align: center; color: var(--muted); font-size: 13px;">Loading...</div>
       </div>
 
     </main>
@@ -547,58 +546,37 @@
   <!-- BOTTOM NAV (Mobile) -->
   <nav class="bottom-nav">
     <div class="bottom-nav-inner">
-      <a href="/dashboard.html" class="active">
-        <span class="ic">🏠</span> Home
-      </a>
-      <a href="/home-class.html">
-        <span class="ic">📚</span> Learn
-      </a>
-      <a href="/test-center.html">
-        <span class="ic">📝</span> Tests
-      </a>
-      <a href="/progress.html">
-        <span class="ic">📊</span> Progress
-      </a>
-      <a href="/profile.html">
-        <span class="ic">👤</span> Profile
-      </a>
+      <a href="/dashboard.html" class="active"><span class="ic">🏠</span> Home</a>
+      <a href="/home-class.html"><span class="ic">📚</span> Learn</a>
+      <a href="/test-center.html"><span class="ic">📝</span> Tests</a>
+      <a href="/progress.html"><span class="ic">📊</span> Progress</a>
+      <a href="/profile.html"><span class="ic">👤</span> Profile</a>
     </div>
   </nav>
 
-  <!-- COMMON JS -->
   <script src="/js/common.js"></script>
 
   <script>
     let currentUser = null;
 
-    // ==========================================
-    // LOAD USER (with ADMIN redirect)
-    // ==========================================
     async function loadUser() {
       try {
         const r = await fetch("/api/auth/me", { credentials: "include" });
         const data = await r.json();
-
         if (!r.ok || !data.success || !data.user) {
           window.location.href = "/login.html";
           return false;
         }
-
-        // ADMIN ko admin-dashboard pe bhejo
         if (String(data.user.role || "").trim().toLowerCase() === "admin") {
           window.location.href = "/admin-dashboard.html";
           return false;
         }
-
         currentUser = data.user;
         document.getElementById("userName").textContent = data.user.name || "Student";
-
-        // Target exam
         if (data.user.targetExam) {
           document.getElementById("targetName").textContent = data.user.targetExam;
           document.getElementById("targetEmoji").textContent = getExamEmoji(data.user.targetExam);
         }
-
         return true;
       } catch (e) {
         window.location.href = "/login.html";
@@ -615,9 +593,6 @@
       return map[exam] || "🎯";
     }
 
-    // ==========================================
-    // LOAD LIVE CLASSES
-    // ==========================================
     async function loadLive() {
       const box = document.getElementById("liveBox");
       try {
@@ -631,22 +606,30 @@
         }
 
         const c = live[0];
-        const thumb = c.thumbnail ? `background-image: url('${c.thumbnail}');` : "";
-        box.innerHTML = '<div class="live-card"><div class="live-header"><span class="live-dot"></span> LIVE NOW</div><div class="live-body"><div class="live-thumb" style="' + thumb + '">' + (!c.thumbnail ? "📺" : "") + '</div><div class="live-info"><h3>' + escapeHtml(c.title || "Live Class") + '</h3><p>' + escapeHtml(c.subject || "") + ' • ' + escapeHtml(c.teacher || "") + '</p></div><a href="/class-detail.html?id=' + c._id + '" class="join-btn">JOIN →</a></div></div>';
+        const thumbStyle = c.thumbnail ? 'background-image: url(\'' + escapeHtml(c.thumbnail) + '\');' : '';
+        const thumbContent = c.thumbnail ? '' : '📺';
+
+        box.innerHTML = '<div class="live-card">' +
+          '<div class="live-header"><span class="live-dot"></span> LIVE NOW</div>' +
+          '<div class="live-body">' +
+            '<div class="live-thumb" style="' + thumbStyle + '">' + thumbContent + '</div>' +
+            '<div class="live-info">' +
+              '<h3>' + escapeHtml(c.title || "Live Class") + '</h3>' +
+              '<p>' + escapeHtml(c.subject || "") + ' • ' + escapeHtml(c.teacher || "") + '</p>' +
+            '</div>' +
+            '<a href="/class-detail.html?id=' + c._id + '" class="join-btn">JOIN →</a>' +
+          '</div>' +
+        '</div>';
       } catch (e) {
         box.innerHTML = '<div class="live-card"><div class="live-body" style="justify-content:center; color: var(--muted); font-size: 13px;">📴 No live classes</div></div>';
       }
     }
 
-    // ==========================================
-    // LOAD CONTINUE LEARNING
-    // ==========================================
     async function loadContinue() {
       const box = document.getElementById("continueBox");
       try {
         const r = await fetch("/api/progress/continue", { credentials: "include" });
         const data = await r.json();
-
         if (!data.success) throw new Error();
 
         const cls = data.data.class;
@@ -673,15 +656,11 @@
       }
     }
 
-    // ==========================================
-    // LOAD STATS
-    // ==========================================
     async function loadStats() {
       try {
         const r = await fetch("/api/progress/stats", { credentials: "include" });
         const data = await r.json();
         if (!data.success) return;
-
         document.getElementById("statTests").textContent = data.data.testsAttempted || 0;
         document.getElementById("statScore").textContent = (data.data.avgScore || 0) + "%";
         document.getElementById("statQs").textContent = data.data.totalQuestions || 0;
@@ -689,9 +668,6 @@
       } catch (e) { console.error("Stats error:", e); }
     }
 
-    // ==========================================
-    // LOAD RECENT CLASSES
-    // ==========================================
     async function loadRecentClasses() {
       const grid = document.getElementById("recentClasses");
       try {
@@ -704,15 +680,22 @@
           return;
         }
 
-        grid.innerHTML = classes.map(c => '<div class="course-card" onclick="location.href=\'/class-detail.html?id=' + c._id + '\'"><div class="course-thumb" style="' + (c.thumbnail ? "background-image: url('" + escapeHtml(c.thumbnail) + "')" : "") + '">' + (!c.thumbnail ? "📹" : "") + '</div><div class="course-body"><h4>' + escapeHtml(c.title || "Class") + '</h4><p>' + escapeHtml(c.subject || "") + ' • ' + escapeHtml(c.teacher || "") + '</p></div></div>').join("");
+        grid.innerHTML = classes.map(c => {
+          const thumbStyle = c.thumbnail ? 'background-image: url(\'' + escapeHtml(c.thumbnail) + '\');' : '';
+          const thumbContent = c.thumbnail ? '' : '📹';
+          return '<div class="course-card" onclick="location.href=\'/class-detail.html?id=' + c._id + '\'">' +
+            '<div class="course-thumb" style="' + thumbStyle + '">' + thumbContent + '</div>' +
+            '<div class="course-body">' +
+              '<h4>' + escapeHtml(c.title || "Class") + '</h4>' +
+              '<p>' + escapeHtml(c.subject || "") + ' • ' + escapeHtml(c.teacher || "") + '</p>' +
+            '</div>' +
+          '</div>';
+        }).join("");
       } catch (e) {
         grid.innerHTML = '<div class="course-card" style="padding: 20px; text-align: center; color: var(--muted); font-size: 13px; grid-column: 1/-1;">Classes load nahi ho payi.</div>';
       }
     }
 
-    // ==========================================
-    // LOAD NOTIFICATIONS COUNT
-    // ==========================================
     async function loadNotifCount() {
       try {
         const r = await fetch("/api/notifications/my", { credentials: "include" });
@@ -729,13 +712,9 @@
       location.href = "/notifications.html";
     });
 
-    // ==========================================
-    // INIT
-    // ==========================================
     async function init() {
       const ok = await loadUser();
       if (!ok) return;
-
       await Promise.all([
         loadLive(),
         loadContinue(),
@@ -747,6 +726,5 @@
 
     init();
   </script>
-
 </body>
 </html>
