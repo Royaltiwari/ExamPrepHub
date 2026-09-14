@@ -1,4 +1,4 @@
-﻿const express = require("express");
+const express = require("express");
 const mongoose = require("mongoose");
 const session = require("express-session");
 const cors = require("cors");
@@ -8,6 +8,7 @@ require("dotenv").config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+const isProduction = process.env.NODE_ENV === "production";
 
 // =====================================================
 // REGISTER MODELS
@@ -67,17 +68,23 @@ app.use(
 );
 
 // =====================================================
-// SESSION (Simple - memory store)
+// TRUST PROXY (Render के लिए ज़रूरी)
+// =====================================================
+app.set("trust proxy", 1);
+
+// =====================================================
+// SESSION
 // =====================================================
 app.use(
   session({
     secret: process.env.SESSION_SECRET || "exam-prep-hub-secret",
     resave: false,
     saveUninitialized: false,
+    proxy: true,
     cookie: {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+      secure: isProduction,
+      sameSite: "lax",
       maxAge: 7 * 24 * 60 * 60 * 1000
     }
   })
