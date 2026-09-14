@@ -1,15 +1,11 @@
-const express = require("express");
+﻿const express = require("express");
 const bcrypt = require("bcryptjs");
 const nodemailer = require("nodemailer");
-
 const User = require("../models/User");
 const OTP = require("../models/OTP");
 
 const router = express.Router();
 
-// =====================================================
-// EMAIL TRANSPORTER
-// =====================================================
 const transporter = nodemailer.createTransport({
   service: "gmail",
   auth: {
@@ -22,9 +18,7 @@ function generateOTP() {
   return Math.floor(100000 + Math.random() * 900000).toString();
 }
 
-// =====================================================
-// REGISTER STUDENT
-// =====================================================
+// REGISTER
 router.post("/register", async (req, res) => {
   try {
     const { name, email, mobile, password } = req.body;
@@ -78,16 +72,26 @@ router.post("/register", async (req, res) => {
       role: user.role
     };
 
-    res.status(201).json({
-      success: true,
-      message: "Registration successful",
-      user: {
-        id: user._id,
-        name: user.name,
-        email: user.email,
-        mobile: user.mobile,
-        role: user.role
+    req.session.save(function(sessionError) {
+      if (sessionError) {
+        console.error("Session Save Error:", sessionError);
+        return res.status(500).json({
+          success: false,
+          message: "Session could not be saved"
+        });
       }
+
+      return res.status(201).json({
+        success: true,
+        message: "Registration successful",
+        user: {
+          id: user._id,
+          name: user.name,
+          email: user.email,
+          mobile: user.mobile,
+          role: user.role
+        }
+      });
     });
 
   } catch (error) {
@@ -99,9 +103,7 @@ router.post("/register", async (req, res) => {
   }
 });
 
-// =====================================================
-// LOGIN (Email OR Mobile)
-// =====================================================
+// LOGIN
 router.post("/login", async (req, res) => {
   try {
     const { email, mobile, password } = req.body;
@@ -152,7 +154,7 @@ router.post("/login", async (req, res) => {
       role: user.role
     };
 
-    req.session.save((sessionError) => {
+    req.session.save(function(sessionError) {
       if (sessionError) {
         console.error("Session Save Error:", sessionError);
         return res.status(500).json({
@@ -183,9 +185,7 @@ router.post("/login", async (req, res) => {
   }
 });
 
-// =====================================================
 // CURRENT USER
-// =====================================================
 router.get("/me", async (req, res) => {
   try {
     if (!req.session.userId) {
@@ -204,14 +204,6 @@ router.get("/me", async (req, res) => {
       });
     }
 
-    req.session.user = {
-      id: user._id.toString(),
-      name: user.name,
-      email: user.email,
-      mobile: user.mobile,
-      role: user.role
-    };
-
     res.json({
       success: true,
       user
@@ -226,11 +218,9 @@ router.get("/me", async (req, res) => {
   }
 });
 
-// =====================================================
 // LOGOUT
-// =====================================================
-router.post("/logout", (req, res) => {
-  req.session.destroy((error) => {
+router.post("/logout", function(req, res) {
+  req.session.destroy(function(error) {
     if (error) {
       console.error("Logout Error:", error);
       return res.status(500).json({
@@ -247,64 +237,7 @@ router.post("/logout", (req, res) => {
   });
 });
 
-// =====================================================
-// UPDATE TARGET EXAM (PHASE 2)
-// POST /api/auth/update-target
-// Body: { targetExam }
-// =====================================================
-router.post("/update-target", async (req, res) => {
-  try {
-    if (!req.session.userId) {
-      return res.status(401).json({
-        success: false,
-        message: "Please login first"
-      });
-    }
-
-    const { targetExam } = req.body;
-
-    if (!targetExam) {
-      return res.status(400).json({
-        success: false,
-        message: "Target exam required"
-      });
-    }
-
-    const user = await User.findByIdAndUpdate(
-      req.session.userId,
-      { targetExam: targetExam.trim() },
-      { new: true }
-    ).select("-password");
-
-    if (!user) {
-      return res.status(404).json({
-        success: false,
-        message: "User not found"
-      });
-    }
-
-    // Update session
-    req.session.user.targetExam = user.targetExam;
-
-    res.json({
-      success: true,
-      message: "Target exam saved",
-      user
-    });
-
-  } catch (error) {
-    console.error("Update target error:", error);
-    res.status(500).json({
-      success: false,
-      message: "Failed to update target"
-    });
-  }
-});
-
-// =====================================================
-// FORGOT PASSWORD - STEP 1: Send OTP
-// POST /api/auth/forgot-password
-// =====================================================
+// FORGOT PASSWORD
 router.post("/forgot-password", async (req, res) => {
   try {
     const { email, mobile } = req.body;
@@ -339,34 +272,15 @@ router.post("/forgot-password", async (req, res) => {
     const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
 
     await OTP.deleteMany({ identifier });
-
-    await OTP.create({
-      identifier,
-      identifierType,
-      otp,
-      expiresAt
-    });
+    await OTP.create({ identifier, identifierType, otp, expiresAt });
 
     if (identifierType === "email") {
       try {
         await transporter.sendMail({
-          from: `"ExamPrepHub" <${process.env.EMAIL_USER}>`,
+          from: '"ExamPrepHub" <' + process.env.EMAIL_USER + '>',
           to: identifier,
           subject: "Password Reset OTP - ExamPrepHub",
-          html: `
-            <div style="font-family: Arial; max-width: 500px; margin: auto; padding: 20px; background: #f4f7fb; border-radius: 12px;">
-              <h2 style="color: #2563eb;">🔐 Password Reset</h2>
-              <p>Namaste <strong>${user.name}</strong>,</p>
-              <p>Aapka password reset karne ke liye ye OTP use karo:</p>
-              <div style="background: white; padding: 20px; border-radius: 8px; text-align: center; margin: 20px 0;">
-                <h1 style="color: #2563eb; letter-spacing: 8px; font-size: 36px; margin: 0;">${otp}</h1>
-              </div>
-              <p style="color: #64748b; font-size: 13px;">Ye OTP 10 minute me expire ho jayega.</p>
-              <p style="color: #64748b; font-size: 13px;">Agar aapne ye request nahi ki, to ignore karo.</p>
-              <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 20px 0;">
-              <p style="color: #64748b; font-size: 12px; text-align: center;">© ExamPrepHub</p>
-            </div>
-          `
+          html: "<h2>Password Reset</h2><p>Aapka OTP: <b>" + otp + "</b></p><p>Ye 10 minute me expire ho jayega.</p>"
         });
 
         res.json({
@@ -378,11 +292,11 @@ router.post("/forgot-password", async (req, res) => {
         console.error("Email send error:", emailErr);
         return res.status(500).json({
           success: false,
-          message: "Email bhejne me problem aayi. Please try again."
+          message: "Email bhejne me problem aayi"
         });
       }
     } else {
-      console.log(`📱 OTP for ${identifier}: ${otp}`);
+      console.log("OTP for " + identifier + ": " + otp);
       res.json({
         success: true,
         message: "OTP aapke mobile pe bhej diya gaya hai",
@@ -394,67 +308,47 @@ router.post("/forgot-password", async (req, res) => {
     console.error("Forgot password error:", error);
     res.status(500).json({
       success: false,
-      message: "Server error. Please try again."
+      message: "Server error"
     });
   }
 });
 
-// =====================================================
-// FORGOT PASSWORD - STEP 2: Verify OTP
-// =====================================================
+// VERIFY OTP
 router.post("/verify-otp", async (req, res) => {
   try {
     const { email, mobile, otp } = req.body;
 
     if (!otp) {
-      return res.status(400).json({
-        success: false,
-        message: "OTP required"
-      });
+      return res.status(400).json({ success: false, message: "OTP required" });
     }
 
     const identifier = email ? email.trim().toLowerCase() : mobile.trim();
 
-    const otpRecord = await OTP.findOne({
-      identifier,
-      otp,
-      verified: false
-    });
+    const otpRecord = await OTP.findOne({ identifier, otp, verified: false });
 
     if (!otpRecord) {
-      return res.status(400).json({
-        success: false,
-        message: "Invalid OTP"
-      });
+      return res.status(400).json({ success: false, message: "Invalid OTP" });
     }
 
     if (otpRecord.expiresAt < new Date()) {
       return res.status(400).json({
         success: false,
-        message: "OTP expire ho gaya. Dobara request karo."
+        message: "OTP expire ho gaya"
       });
     }
 
     otpRecord.verified = true;
     await otpRecord.save();
 
-    res.json({
-      success: true,
-      message: "OTP verified successfully"
-    });
+    res.json({ success: true, message: "OTP verified successfully" });
 
   } catch (error) {
     console.error("Verify OTP error:", error);
-    res.status(500).json({
-      success: false,
-      message: "Server error"
-    });
+    res.status(500).json({ success: false, message: "Server error" });
   }
 });
 
-// =====================================================
-// FORGOT PASSWORD - STEP 3: Reset Password
-// =====================================================
+// RESET PASSWORD
 router.post("/reset-password", async (req, res) => {
   try {
     const { email, mobile, otp, newPassword } = req.body;
@@ -468,16 +362,12 @@ router.post("/reset-password", async (req, res) => {
 
     const identifier = email ? email.trim().toLowerCase() : mobile.trim();
 
-    const otpRecord = await OTP.findOne({
-      identifier,
-      otp,
-      verified: true
-    });
+    const otpRecord = await OTP.findOne({ identifier, otp, verified: true });
 
     if (!otpRecord) {
       return res.status(400).json({
         success: false,
-        message: "OTP verify nahi hua. Pehle OTP verify karo."
+        message: "OTP verify nahi hua"
       });
     }
 
@@ -489,10 +379,7 @@ router.post("/reset-password", async (req, res) => {
     }
 
     if (!user) {
-      return res.status(404).json({
-        success: false,
-        message: "User nahi mila"
-      });
+      return res.status(404).json({ success: false, message: "User nahi mila" });
     }
 
     const hashed = await bcrypt.hash(newPassword, 12);
@@ -503,15 +390,12 @@ router.post("/reset-password", async (req, res) => {
 
     res.json({
       success: true,
-      message: "Password successfully reset ho gaya! Ab login karo."
+      message: "Password successfully reset ho gaya!"
     });
 
   } catch (error) {
     console.error("Reset password error:", error);
-    res.status(500).json({
-      success: false,
-      message: "Server error"
-    });
+    res.status(500).json({ success: false, message: "Server error" });
   }
 });
 

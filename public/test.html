@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="hi">
 <head>
 <meta charset="UTF-8">
@@ -26,7 +26,6 @@
   .filters { display: flex; gap: 12px; margin: 30px 0; flex-wrap: wrap; }
   .filters select, .filters input { padding: 12px 16px; border-radius: 8px; border: 1px solid #334155; background: #1e293b; color: #e2e8f0; font-size: 14px; min-width: 200px; outline: none; }
   .filters select:focus, .filters input:focus { border-color: #fbbf24; }
-  .filters select option { background: #1e293b; color: #e2e8f0; }
   
   .tests-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px; margin-top: 20px; }
   
@@ -40,9 +39,17 @@
   .test-card .start-btn { width: 100%; padding: 12px; background: #fbbf24; color: #0f172a; border: none; border-radius: 8px; font-weight: 700; font-size: 15px; cursor: pointer; margin-top: 12px; transition: background 0.2s; }
   .test-card .start-btn:hover { background: #f59e0b; }
   
+  .section-divider { margin: 60px 0 40px; padding-top: 40px; border-top: 2px solid #334155; }
+  .section-title { color: #fbbf24; font-size: 28px; text-align: center; margin-bottom: 10px; }
+  .section-subtitle { color: #94a3b8; text-align: center; margin-bottom: 30px; }
+  
   .empty { text-align: center; padding: 60px 20px; color: #94a3b8; }
   .empty h3 { font-size: 20px; margin-bottom: 10px; }
   .loading { text-align: center; padding: 60px; color: #94a3b8; }
+  
+  .btn-center { text-align: center; margin-top: 30px; }
+  .btn-lg { display: inline-block; padding: 14px 32px; background: #fbbf24; color: #0f172a; border-radius: 8px; text-decoration: none; font-weight: 700; font-size: 16px; }
+  .btn-lg:hover { background: #f59e0b; }
   
   @media (max-width: 600px) {
     .hero h2 { font-size: 24px; }
@@ -90,90 +97,44 @@
   <div id="emptyState" class="empty" style="display: none;">
     <h3>कोई Test नहीं मिला</h3>
     <p>कृपया filter बदलें या बाद में try करें।</p>
-  <!-- NOTES / STUDY MATERIAL SECTION -->
-  <section style="margin-top:60px;padding-top:40px;border-top:2px solid #334155;">
-    <h2 style="color:#fbbf24;font-size:28px;text-align:center;margin-bottom:10px;">📚 Study Material (PDF Notes)</h2>
-    <p style="color:#94a3b8;text-align:center;margin-bottom:30px;">Subject-wise PDF Notes — बिल्कुल Free डाउनलोड करें</p>
-    
+  </div>
+
+  <section class="section-divider">
+    <h2 class="section-title">📚 Study Material (PDF Notes)</h2>
+    <p class="section-subtitle">Subject-wise PDF Notes डाउनलोड करें — बिल्कुल Free!</p>
     <div id="studyNotesGrid" class="tests-grid">
       <div class="loading">⏳ Loading PDFs...</div>
     </div>
-    
-    <div style="text-align:center;margin-top:30px;">
-      <a href="/study-material.html" style="display:inline-block;padding:14px 32px;background:#fbbf24;color:#0f172a;border-radius:8px;text-decoration:none;font-weight:700;font-size:16px;">📄 सभी PDF Notes देखें →</a>
+    <div class="btn-center">
+      <a href="/study-material.html" class="btn-lg">📄 सभी PDF Notes देखें →</a>
     </div>
   </section>
-
 </div>
-  </div>
-</div>
-// =====================================================
-// Load Study Material for Test Page
-// =====================================================
-async function loadTestPageNotes() {
-  try {
-    const res = await fetch('/api/study-material');
-    const data = await res.json();
-    const list = data.data || [];
-    const grid = document.getElementById('studyNotesGrid');
-    
-    if (!grid) return;
-    
-    if (!list.length) {
-      grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:#94a3b8;">📭 अभी कोई PDF upload नहीं हुई। Admin जल्द ही upload करेगा।</div>';
-      return;
-    }
-    
-    grid.innerHTML = list.slice(0, 4).map(m => `
-      <a href="${m.file_url}" target="_blank" class="test-card" style="text-decoration:none;display:block;">
-        <div class="subject-icon">📄</div>
-        <h3>${m.title_hi || m.title_en || 'PDF Notes'}</h3>
-        <div class="meta">
-          <span>📖 ${m.subject || 'General'}</span>
-          ${m.exam ? '<span>🎯 ' + m.exam + '</span>' : ''}
-        </div>
-        <button class="start-btn" style="margin-top:12px;">👁️ View PDF</button>
-      </a>
-    `).join('');
-  } catch (e) {
-    console.error('Study material load failed:', e);
-  }
-}
 
-// Test page load होने पर notes भी load करें
-loadTestPageNotes();
 <script>
-const API_SUBJECTS = '/api/subjects';
-const API_CHAPTERS = '/api/chapters';
-const API_EXAMS = '/api/exams';
-const API_QUESTIONS = '/api/questions';
-
-let allTests = [];
-let allSubjects = [];
-let allChapters = [];
-let allExams = [];
+var allTests = [];
+var allSubjects = [];
+var allChapters = [];
+var allExams = [];
 
 async function loadData() {
   try {
-    const [subRes, chapRes, examRes, qRes] = await Promise.all([
-      fetch(API_SUBJECTS).then(r => r.json()).catch(() => ({ data: [] })),
-      fetch(API_CHAPTERS).then(r => r.json()).catch(() => ({ data: [] })),
-      fetch(API_EXAMS).then(r => r.json()).catch(() => ({ data: [] })),
-      fetch(API_QUESTIONS).then(r => r.json()).catch(() => ({ data: [] }))
+    var results = await Promise.all([
+      fetch('/api/subjects').then(function(r){ return r.json(); }).catch(function(){ return { data: [] }; }),
+      fetch('/api/chapters').then(function(r){ return r.json(); }).catch(function(){ return { data: [] }; }),
+      fetch('/api/exams').then(function(r){ return r.json(); }).catch(function(){ return { data: [] }; }),
+      fetch('/api/questions').then(function(r){ return r.json(); }).catch(function(){ return { data: [] }; })
     ]);
 
-    allSubjects = subRes.data || [];
-    allChapters = chapRes.data || [];
-    allExams = examRes.data || [];
-    
-    const allQuestions = qRes.data || [];
+    allSubjects = results[0].data || [];
+    allChapters = results[1].data || [];
+    allExams = results[2].data || [];
+    var allQuestions = results[3].data || [];
 
-    // Chapter-wise tests बनाएँ
-    const chapterTests = generateTestsFromQuestions(allQuestions);
+    allTests = generateTestsFromQuestions(allQuestions);
 
-    // साथ में एक "All Questions" test भी बनाएँ
     if (allQuestions.length > 5) {
-      const allTest = {
+      var allTest = {
         id: 'all_questions',
         title: 'All Questions Test',
         title_hi: '📚 सभी प्रश्नों का Test (' + allQuestions.length + ' प्रश्न)',
@@ -181,49 +142,45 @@ async function loadData() {
         subject_name: 'सभी Subjects',
         chapter: 'All',
         chapter_id: 'all',
-        exam: '',
         duration: Math.max(30, Math.ceil(allQuestions.length / 2)),
         total_questions: allQuestions.length,
-        questions: allQuestions.map(q => ({
-          question_hi: q.question_hi,
-          question_en: q.question_en,
-          options: q.options || [],
-          options_en: q.options_en || [],
-          answer: q.answer,
-          explanation_hi: q.explanation_hi,
-          explanation_en: q.explanation_en,
-          key_points: q.key_points || []
-        }))
+        questions: allQuestions.map(function(q) {
+          return {
+            question_hi: q.question_hi,
+            question_en: q.question_en,
+            options: q.options || [],
+            options_en: q.options_en || [],
+            answer: q.answer,
+            explanation_hi: q.explanation_hi,
+            explanation_en: q.explanation_en,
+            key_points: q.key_points || []
+          };
+        })
       };
-      chapterTests.unshift(allTest); // सबसे ऊपर दिखाएँ
+      allTests.unshift(allTest);
     }
-
-    allTests = chapterTests;
 
     populateSubjectFilter();
     populateChapterFilter();
     populateExamFilter();
     renderTests(allTests);
-
     applyUrlFilters();
   } catch (err) {
     console.error(err);
-    document.getElementById('testsGrid').innerHTML = 
-      '<div class="empty"><h3>❌ Load failed</h3><p>' + err.message + '</p></div>';
+    document.getElementById('testsGrid').innerHTML = '<div class="empty"><h3>Load failed</h3><p>' + err.message + '</p></div>';
   }
 }
 
 function generateTestsFromQuestions(questions) {
-  const grouped = {};
+  var grouped = {};
 
-  questions.forEach(q => {
-    const subjId = q.subject_id ? (q.subject_id._id || q.subject_id) : 'general';
-    const subjName = q.subject_id ? (q.subject_id.name || 'सामान्य') : 'सामान्य';
-    const chapId = q.chapter_id ? (q.chapter_id._id || q.chapter_id) : 'general';
-    const chapName = q.chapter_id ? (q.chapter_id.chapter_name || 'General') : 'General';
-    
-    const key = subjId + '_' + chapId;
-    
+  questions.forEach(function(q) {
+    var subjId = q.subject_id ? (q.subject_id._id || q.subject_id) : 'general';
+    var subjName = q.subject_id ? (q.subject_id.name || 'सामान्य') : 'सामान्य';
+    var chapId = q.chapter_id ? (q.chapter_id._id || q.chapter_id) : 'general';
+    var chapName = q.chapter_id ? (q.chapter_id.chapter_name || 'General') : 'General';
+    var key = subjId + '_' + chapId;
+
     if (!grouped[key]) {
       grouped[key] = {
         id: key,
@@ -233,13 +190,12 @@ function generateTestsFromQuestions(questions) {
         subject_name: subjName,
         chapter: chapName,
         chapter_id: chapId,
-        exam: '',
         duration: 15,
         total_questions: 0,
         questions: []
       };
     }
-    
+
     grouped[key].questions.push({
       question_hi: q.question_hi,
       question_en: q.question_en,
@@ -250,7 +206,6 @@ function generateTestsFromQuestions(questions) {
       explanation_en: q.explanation_en,
       key_points: q.key_points || []
     });
-    
     grouped[key].total_questions = grouped[key].questions.length;
   });
 
@@ -258,32 +213,32 @@ function generateTestsFromQuestions(questions) {
 }
 
 function populateSubjectFilter() {
-  const sel = document.getElementById('subjectFilter');
+  var sel = document.getElementById('subjectFilter');
   sel.innerHTML = '<option value="">-- सभी Subjects --</option>';
-  allSubjects.forEach(s => {
+  allSubjects.forEach(function(s) {
     sel.innerHTML += '<option value="' + s._id + '">' + (s.icon || '📚') + ' ' + (s.name_hi || s.name) + '</option>';
   });
 }
 
 function populateChapterFilter() {
-  const sel = document.getElementById('chapterFilter');
+  var sel = document.getElementById('chapterFilter');
   sel.innerHTML = '<option value="">-- सभी Chapters --</option>';
-  allChapters.forEach(c => {
+  allChapters.forEach(function(c) {
     sel.innerHTML += '<option value="' + c._id + '">' + c.chapter_name + '</option>';
   });
 }
 
 function populateExamFilter() {
-  const sel = document.getElementById('examFilter');
+  var sel = document.getElementById('examFilter');
   sel.innerHTML = '<option value="">-- सभी Exams --</option>';
-  allExams.forEach(e => {
+  allExams.forEach(function(e) {
     sel.innerHTML += '<option value="' + e._id + '">' + e.name + '</option>';
   });
 }
 
 function renderTests(tests) {
-  const grid = document.getElementById('testsGrid');
-  const empty = document.getElementById('emptyState');
+  var grid = document.getElementById('testsGrid');
+  var empty = document.getElementById('emptyState');
 
   if (tests.length === 0) {
     grid.innerHTML = '';
@@ -292,29 +247,21 @@ function renderTests(tests) {
   }
   empty.style.display = 'none';
 
-  grid.innerHTML = tests.map(test => {
-    const subj = allSubjects.find(s => s._id === test.subject);
-    const icon = subj ? subj.icon : '📝';
-    return `
-      <div class="test-card" onclick="startTest('${test.id}')">
-        <div class="subject-icon">${icon}</div>
-        <h3>${test.title_hi}</h3>
-        <div class="meta">
-          <span>📝 ${test.total_questions} प्रश्न</span>
-          <span>⏱️ ${test.duration} मिनट</span>
-        </div>
-        <div>
-          ${test.subject_name ? '<span class="badge">📖 ' + test.subject_name + '</span>' : ''}
-          ${test.chapter && test.chapter !== 'All' ? '<span class="badge">📑 ' + test.chapter + '</span>' : ''}
-        </div>
-        <button class="start-btn">🚀 Test शुरू करें</button>
-      </div>
-    `;
+  grid.innerHTML = tests.map(function(test) {
+    var subj = allSubjects.find(function(s) { return s._id === test.subject; });
+    var icon = subj ? subj.icon : '📝';
+    return '<div class="test-card" onclick="startTest(\'' + test.id + '\')">' +
+      '<div class="subject-icon">' + icon + '</div>' +
+      '<h3>' + test.title_hi + '</h3>' +
+      '<div class="meta"><span>📝 ' + test.total_questions + ' प्रश्न</span><span>⏱️ ' + test.duration + ' मिनट</span></div>' +
+      '<div>' + (test.subject_name ? '<span class="badge">📖 ' + test.subject_name + '</span>' : '') + (test.chapter && test.chapter !== 'All' ? '<span class="badge">📑 ' + test.chapter + '</span>' : '') + '</div>' +
+      '<button class="start-btn">🚀 Test शुरू करें</button>' +
+    '</div>';
   }).join('');
 }
 
 function startTest(testId) {
-  const test = allTests.find(t => t.id === testId);
+  var test = allTests.find(function(t) { return t.id === testId; });
   if (test) {
     sessionStorage.setItem('currentTest', JSON.stringify(test));
   }
@@ -327,40 +274,34 @@ document.getElementById('examFilter').addEventListener('change', applyFilters);
 document.getElementById('searchInput').addEventListener('input', applyFilters);
 
 function applyFilters() {
-  const subj = document.getElementById('subjectFilter').value;
-  const chapter = document.getElementById('chapterFilter').value;
-  const exam = document.getElementById('examFilter').value;
-  const search = document.getElementById('searchInput').value.toLowerCase();
+  var subj = document.getElementById('subjectFilter').value;
+  var chapter = document.getElementById('chapterFilter').value;
+  var exam = document.getElementById('examFilter').value;
+  var search = document.getElementById('searchInput').value.toLowerCase();
 
-  let filtered = allTests;
-
-  if (subj) filtered = filtered.filter(t => t.subject === subj);
-  if (chapter) filtered = filtered.filter(t => t.chapter_id === chapter);
-  if (exam) filtered = filtered.filter(t => t.exam === exam);
-
+  var filtered = allTests;
+  if (subj) filtered = filtered.filter(function(t) { return t.subject === subj; });
+  if (chapter) filtered = filtered.filter(function(t) { return t.chapter_id === chapter; });
+  if (exam) filtered = filtered.filter(function(t) { return t.exam === exam; });
   if (search) {
-    filtered = filtered.filter(t =>
-      (t.title + ' ' + t.title_hi).toLowerCase().includes(search)
-    );
+    filtered = filtered.filter(function(t) {
+      return (t.title + ' ' + t.title_hi).toLowerCase().includes(search);
+    });
   }
-
   renderTests(filtered);
 }
 
 function applyUrlFilters() {
-  const params = new URLSearchParams(window.location.search);
-  const urlSubject = params.get('subject');
-  const urlExam = params.get('exam');
-
-  let info = [];
-  let applied = false;
+  var params = new URLSearchParams(window.location.search);
+  var urlSubject = params.get('subject');
+  var urlExam = params.get('exam');
+  var info = [];
+  var applied = false;
 
   if (urlSubject) {
-    const matched = allSubjects.find(s =>
-      s._id === urlSubject ||
-      s.name.toLowerCase().includes(urlSubject.toLowerCase()) ||
-      (s.name_hi && s.name_hi.includes(urlSubject))
-    );
+    var matched = allSubjects.find(function(s) {
+      return s._id === urlSubject || s.name.toLowerCase().includes(urlSubject.toLowerCase()) || (s.name_hi && s.name_hi.includes(urlSubject));
+    });
     if (matched) {
       document.getElementById('subjectFilter').value = matched._id;
       info.push((matched.icon || '📚') + ' ' + (matched.name_hi || matched.name));
@@ -375,14 +316,40 @@ function applyUrlFilters() {
   }
 
   if (applied) {
-    const fi = document.getElementById('filterInfo');
+    var fi = document.getElementById('filterInfo');
     fi.innerHTML = '🔍 <strong>Filter:</strong> ' + info.join(' • ');
     fi.classList.add('show');
     applyFilters();
   }
 }
 
+async function loadTestPageNotes() {
+  try {
+    var res = await fetch('/api/study-material');
+    var data = await res.json();
+    var list = data.data || [];
+    var grid = document.getElementById('studyNotesGrid');
+
+    if (!list.length) {
+      grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:#94a3b8;">📭 अभी कोई PDF upload नहीं हुई। Admin जल्द ही upload करेगा।</div>';
+      return;
+    }
+
+    grid.innerHTML = list.slice(0, 4).map(function(m) {
+      return '<a href="' + m.file_url + '" target="_blank" class="test-card" style="text-decoration:none;display:block;">' +
+        '<div class="subject-icon">📄</div>' +
+        '<h3>' + (m.title_hi || m.title_en || 'PDF Notes') + '</h3>' +
+        '<div class="meta"><span>📖 ' + (m.subject || 'General') + '</span>' + (m.exam ? '<span>🎯 ' + m.exam + '</span>' : '') + '</div>' +
+        '<button class="start-btn" style="margin-top:12px;">👁️ View PDF</button>' +
+      '</a>';
+    }).join('');
+  } catch (e) {
+    console.error('Study material load failed:', e);
+  }
+}
+
 loadData();
+loadTestPageNotes();
 </script>
 </body>
 </html>

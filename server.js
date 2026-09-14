@@ -1,4 +1,4 @@
-const express = require("express");
+﻿const express = require("express");
 const mongoose = require("mongoose");
 const session = require("express-session");
 const cors = require("cors");
@@ -10,7 +10,7 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // =====================================================
-// REGISTER ALL MODELS (Important for populate)
+// REGISTER MODELS
 // =====================================================
 require("./models/User");
 require("./models/Exam");
@@ -67,7 +67,7 @@ app.use(
 );
 
 // =====================================================
-// SESSION (सिर्फ एक बार)
+// SESSION (Simple - memory store)
 // =====================================================
 app.use(
   session({
@@ -152,7 +152,7 @@ app.use("/api", (req, res) => {
 });
 
 // =====================================================
-// GENERAL ERROR HANDLER
+// ERROR HANDLER
 // =====================================================
 app.use((error, req, res, next) => {
   console.error("Server Error:", error);
