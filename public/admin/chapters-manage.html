@@ -1,0 +1,142 @@
+﻿<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<title>Manage Chapters - ExamPrepHub</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+  body { background: #0f172a; color: #e2e8f0; min-height: 100vh; }
+  .header { background: #1e293b; padding: 16px 24px; display: flex; justify-content: space-between; align-items: center; }
+  .header h1 { font-size: 20px; color: #fbbf24; }
+  .header nav a { color: #e2e8f0; text-decoration: none; padding: 8px 16px; border-radius: 6px; background: #334155; margin-left: 8px; font-size: 14px; }
+  .container { max-width: 1200px; margin: 0 auto; padding: 24px; }
+  .card { background: #1e293b; border: 1px solid #334155; border-radius: 10px; padding: 24px; margin-bottom: 20px; }
+  .card h2 { color: #fbbf24; margin-bottom: 16px; font-size: 18px; }
+  .form-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-bottom: 16px; }
+  .form-group label { display: block; color: #94a3b8; font-size: 12px; margin-bottom: 4px; font-weight: 600; }
+  .form-group input, .form-group select { width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #334155; background: #0f172a; color: #e2e8f0; font-size: 14px; outline: none; }
+  .btn { padding: 10px 20px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 14px; }
+  .btn-primary { background: #fbbf24; color: #0f172a; }
+  .btn-danger { background: #dc2626; color: white; padding: 6px 12px; font-size: 12px; }
+  table { width: 100%; border-collapse: collapse; }
+  th, td { padding: 12px; text-align: left; border-bottom: 1px solid #334155; font-size: 14px; }
+  th { background: #0f172a; color: #94a3b8; font-size: 12px; text-transform: uppercase; }
+  .status { padding: 12px; border-radius: 6px; margin-bottom: 16px; display: none; }
+  .status.success { background: #064e3b; color: #10b981; display: block; }
+  .status.error { background: #7f1d1d; color: #f87171; display: block; }
+  .empty { text-align: center; padding: 40px; color: #94a3b8; }
+</style>
+</head>
+<body>
+<div class="header">
+  <h1>📑 Manage Chapters</h1>
+  <nav><a href="/admin-dashboard.html">← Admin</a></nav>
+</div>
+<div class="container">
+  <div id="status" class="status"></div>
+  <div class="card">
+    <h2>➕ नया Chapter जोड़ें</h2>
+    <div class="form-row">
+      <div class="form-group"><label>Subject *</label><select id="subjectSelect"><option value="">-- Select --</option></select></div>
+      <div class="form-group"><label>Chapter Name (English) *</label><input type="text" id="chapName" placeholder="Indus Valley"></div>
+      <div class="form-group"><label>Chapter Name (Hindi)</label><input type="text" id="chapNameHi" placeholder="सिंधु घाटी"></div>
+      <div class="form-group"><label>Order</label><input type="number" id="chapOrder" placeholder="0"></div>
+    </div>
+    <button class="btn btn-primary" onclick="addChapter()">💾 Save Chapter</button>
+  </div>
+  <div class="card">
+    <h2>📋 All Chapters <span id="countBadge" style="color:#fbbf24;"></span></h2>
+    <div style="margin-bottom:16px;">
+      <select id="filterSubject" style="padding:10px;border-radius:6px;background:#0f172a;color:#e2e8f0;border:1px solid #334155;">
+        <option value="">-- Filter by Subject --</option>
+      </select>
+    </div>
+    <table>
+      <thead><tr><th>#</th><th>Subject</th><th>Chapter (EN)</th><th>Chapter (HI)</th><th>Actions</th></tr></thead>
+      <tbody id="chaptersTable"><tr><td colspan="5" class="empty">⏳ Loading...</td></tr></tbody>
+    </table>
+  </div>
+</div>
+<script>
+let allChapters = [];
+function showStatus(msg, type) {
+  const el = document.getElementById('status');
+  el.textContent = msg;
+  el.className = 'status ' + type;
+  setTimeout(() => el.className = 'status', 4000);
+}
+async function loadSubjects() {
+  try {
+    const res = await fetch('/api/subjects');
+    const data = await res.json();
+    const sel1 = document.getElementById('subjectSelect');
+    const sel2 = document.getElementById('filterSubject');
+    (data.data || []).forEach(s => {
+      sel1.innerHTML += '<option value="' + s._id + '">' + (s.icon || '📚') + ' ' + s.name + '</option>';
+      sel2.innerHTML += '<option value="' + s._id + '">' + (s.icon || '📚') + ' ' + s.name + '</option>';
+    });
+  } catch (e) {}
+}
+async function loadChapters() {
+  try {
+    const res = await fetch('/api/chapters');
+    const data = await res.json();
+    allChapters = data.data || [];
+    renderTable(allChapters);
+  } catch (e) { showStatus('❌ ' + e.message, 'error'); }
+}
+function renderTable(chapters) {
+  document.getElementById('countBadge').textContent = '(' + chapters.length + ')';
+  const tbody = document.getElementById('chaptersTable');
+  if (!chapters.length) {
+    tbody.innerHTML = '<tr><td colspan="5" class="empty">कोई chapter नहीं है</td></tr>';
+    return;
+  }
+  tbody.innerHTML = chapters.map((c, i) => {
+    const subj = c.subject_id ? (c.subject_id.name || '-') : '-';
+    return '<tr><td>' + (i + 1) + '</td><td>' + subj + '</td><td><strong>' + c.chapter_name + '</strong></td><td>' + (c.chapter_name_hi || '-') + '</td><td><button class="btn btn-danger" onclick="deleteChapter(\'' + c._id + '\')">🗑️ Delete</button></td></tr>';
+  }).join('');
+}
+async function addChapter() {
+  const subject_id = document.getElementById('subjectSelect').value;
+  const chapter_name = document.getElementById('chapName').value.trim();
+  const chapter_name_hi = document.getElementById('chapNameHi').value.trim();
+  const order = parseInt(document.getElementById('chapOrder').value) || 0;
+  if (!subject_id) { showStatus('❌ Subject required', 'error'); return; }
+  if (!chapter_name) { showStatus('❌ Chapter name required', 'error'); return; }
+  try {
+    const res = await fetch('/api/chapters', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ subject_id, chapter_name, chapter_name_hi, order })
+    });
+    const data = await res.json();
+    if (data.success) {
+      showStatus('✅ Chapter added', 'success');
+      document.getElementById('chapName').value = '';
+      document.getElementById('chapNameHi').value = '';
+      document.getElementById('chapOrder').value = '';
+      loadChapters();
+    } else { showStatus('❌ ' + data.message, 'error'); }
+  } catch (e) { showStatus('❌ ' + e.message, 'error'); }
+}
+async function deleteChapter(id) {
+  if (!confirm('Delete करें?')) return;
+  try {
+    const res = await fetch('/api/chapters/' + id, { method: 'DELETE', credentials: 'include' });
+    const data = await res.json();
+    if (data.success) { showStatus('✅ Deleted', 'success'); loadChapters(); }
+    else { showStatus('❌ ' + data.message, 'error'); }
+  } catch (e) { showStatus('❌ ' + e.message, 'error'); }
+}
+document.getElementById('filterSubject').addEventListener('change', function() {
+  const sid = this.value;
+  if (!sid) { renderTable(allChapters); return; }
+  renderTable(allChapters.filter(c => c.subject_id && c.subject_id._id === sid));
+});
+loadSubjects();
+loadChapters();
+</script>
+</body>
+</html>

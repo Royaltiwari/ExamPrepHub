@@ -1,0 +1,96 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Admin Login - ExamPrepHub</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+  body { background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%); min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
+  .card { background: white; padding: 40px; border-radius: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.2); width: 100%; max-width: 420px; }
+  h1 { color: #1e3a8a; margin-bottom: 8px; font-size: 26px; }
+  p.subtitle { color: #666; margin-bottom: 30px; font-size: 14px; }
+  .form-group { margin-bottom: 20px; }
+  label { display: block; font-size: 13px; font-weight: 600; color: #333; margin-bottom: 6px; }
+  input { width: 100%; padding: 12px 14px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; }
+  input:focus { outline: none; border-color: #2563eb; }
+  .btn { width: 100%; padding: 13px; border: none; border-radius: 6px; background: #2563eb; color: white; font-size: 15px; font-weight: 600; cursor: pointer; }
+  .btn:hover { background: #1e40af; }
+  .btn:disabled { background: #999; cursor: not-allowed; }
+  .status { padding: 12px; border-radius: 6px; margin-bottom: 20px; display: none; font-size: 13px; }
+  .status.success { background: #d1fae5; color: #065f46; display: block; }
+  .status.error { background: #fee2e2; color: #991b1b; display: block; }
+  .links { margin-top: 20px; text-align: center; font-size: 13px; }
+  .links a { color: #2563eb; text-decoration: none; margin: 0 10px; }
+</style>
+</head>
+<body>
+<div class="card">
+  <h1>🔐 Admin Login</h1>
+  <p class="subtitle">ExamPrepHub - Admin Panel</p>
+
+  <div id="status" class="status"></div>
+
+  <div class="form-group">
+    <label>📧 Email</label>
+    <input type="email" id="email" value="admin@examprephub.com" placeholder="admin@examprephub.com">
+  </div>
+
+  <div class="form-group">
+    <label>🔒 Password</label>
+    <input type="password" id="password" value="Admin@123" placeholder="••••••••">
+  </div>
+
+  <button class="btn" id="loginBtn" onclick="doLogin()">Login</button>
+
+  <div class="links">
+    <a href="/">← Home</a>
+  </div>
+</div>
+
+<script>
+function showStatus(msg, type) {
+  const el = document.getElementById("status");
+  el.textContent = msg;
+  el.className = "status " + type;
+}
+
+async function doLogin() {
+  const email = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value;
+  const btn = document.getElementById("loginBtn");
+
+  if (!email || !password) {
+    showStatus("❌ Email aur password required", "error");
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = "Logging in...";
+
+  try {
+    const res = await fetch("/api/auth/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({ email, password })
+    });
+    const data = await res.json();
+
+    if (data.success) {
+      showStatus("✅ Login successful! Redirecting...", "success");
+      setTimeout(() => {
+        window.location.href = "/admin/upload-questions.html";
+      }, 1000);
+    } else {
+      showStatus("❌ " + (data.message || "Login failed"), "error");
+    }
+  } catch (err) {
+    showStatus("❌ " + err.message, "error");
+  } finally {
+    btn.disabled = false;
+    btn.textContent = "Login";
+  }
+}
+</script>
+</body>
+</html>

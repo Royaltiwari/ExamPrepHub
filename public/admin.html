@@ -1,452 +1,157 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="hi">
 <head>
+  <title>Admin Panel - ExamPrepHub</title>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-  <title>Admin Panel - ExamPrepHub</title>
-
   <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: Arial, sans-serif;
-    }
-
-    body {
-      background: #f1f5f9;
-      color: #1e293b;
-    }
-
-    header {
-      background: #0f172a;
-      color: white;
-      padding: 16px 20px;
-    }
-
-    .header-inner {
-      max-width: 1100px;
-      margin: auto;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .logo {
-      font-size: 21px;
-      font-weight: 800;
-    }
-
-    .admin-badge {
-      background: #dc2626;
-      padding: 7px 12px;
-      border-radius: 20px;
-      font-size: 12px;
-      font-weight: bold;
-    }
-
-    main {
-      max-width: 1100px;
-      margin: auto;
-      padding: 25px 15px 50px;
-    }
-
-    .welcome {
-      background: white;
-      padding: 25px;
-      border-radius: 15px;
-      box-shadow: 0 5px 20px rgba(0,0,0,.06);
-      margin-bottom: 20px;
-    }
-
-    .welcome h1 {
-      font-size: 25px;
-      margin-bottom: 7px;
-    }
-
-    .welcome p {
-      color: #64748b;
-    }
-
-    .cards {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 18px;
-      margin-bottom: 25px;
-    }
-
-    .card {
-      background: white;
-      padding: 25px;
-      border-radius: 15px;
-      box-shadow: 0 5px 20px rgba(0,0,0,.05);
-    }
-
-    .card-icon {
-      font-size: 32px;
-      margin-bottom: 12px;
-    }
-
-    .card h2 {
-      font-size: 19px;
-      margin-bottom: 7px;
-    }
-
-    .card p {
-      color: #64748b;
-      font-size: 14px;
-      line-height: 1.5;
-      margin-bottom: 18px;
-    }
-
-    .btn {
-      display: inline-block;
-      border: none;
-      text-decoration: none;
-      cursor: pointer;
-      padding: 11px 17px;
-      border-radius: 8px;
-      font-weight: 700;
-      font-size: 14px;
-    }
-
-    .blue {
-      background: #2563eb;
-      color: white;
-    }
-
-    .green {
-      background: #16a34a;
-      color: white;
-    }
-
-    .purple {
-      background: #7c3aed;
-      color: white;
-    }
-
-    .red {
-      background: #dc2626;
-      color: white;
-    }
-
-    .actions {
-      background: white;
-      padding: 22px;
-      border-radius: 15px;
-      box-shadow: 0 5px 20px rgba(0,0,0,.05);
-    }
-
-    .actions h2 {
-      margin-bottom: 15px;
-      font-size: 19px;
-    }
-
-    .action-buttons {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
-
-    #loading {
-      text-align: center;
-      padding: 30px;
-      background: white;
-      border-radius: 15px;
-    }
-
-    #adminContent {
-      display: none;
-    }
-
-    .error {
-      color: #b91c1c;
-      background: #fee2e2;
-      padding: 15px;
-      border-radius: 10px;
-      text-align: center;
-    }
-
-    @media (max-width: 750px) {
-      .cards {
-        grid-template-columns: 1fr;
-      }
-
-      .header-inner {
-        gap: 10px;
-      }
-    }
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+    body { background: #f0f2f5; min-height: 100vh; }
+    
+    .header { background: #1e3a8a; color: white; padding: 16px 24px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.1); position: sticky; top: 0; z-index: 100; }
+    .header h1 { font-size: 20px; }
+    .header nav a { color: white; text-decoration: none; padding: 8px 16px; border-radius: 6px; background: rgba(255,255,255,0.15); margin-left: 8px; font-size: 14px; }
+    .header nav a:hover { background: rgba(255,255,255,0.25); }
+    
+    .container { max-width: 1200px; margin: 0 auto; padding: 24px; }
+    
+    .welcome { background: white; border-radius: 10px; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+    .welcome h2 { color: #1e3a8a; margin-bottom: 8px; }
+    .welcome p { color: #666; }
+    
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin-bottom: 24px; }
+    .stat-card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); border-left: 4px solid #2563eb; }
+    .stat-card .num { font-size: 32px; font-weight: 700; color: #1e3a8a; }
+    .stat-card .label { color: #666; font-size: 13px; margin-top: 4px; }
+    
+    .actions-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 16px; }
+    .action-card { background: white; padding: 24px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); text-decoration: none; color: #333; transition: all 0.2s; display: block; }
+    .action-card:hover { transform: translateY(-4px); box-shadow: 0 8px 24px rgba(0,0,0,0.1); }
+    .action-card .icon { font-size: 36px; margin-bottom: 12px; }
+    .action-card h3 { color: #1e3a8a; margin-bottom: 6px; font-size: 16px; }
+    .action-card p { color: #666; font-size: 13px; line-height: 1.5; }
+    
+    .loading { text-align: center; padding: 40px; color: #666; }
   </style>
 </head>
-
 <body>
 
-  <header>
-    <div class="header-inner">
-
-      <div class="logo">
-        🏆 ExamPrepHub
-      </div>
-
-      <div class="admin-badge">
-        ADMIN PANEL
-      </div>
-
-    </div>
-  </header>
-
-
-  <main>
-
-    <div id="loading">
-      🔄 Checking admin access...
-    </div>
-
-
-    <div id="adminContent">
-
-      <section class="welcome">
-
-        <h1>👋 Welcome, Admin</h1>
-
-        <p>
-          यहाँ से आप ExamPrepHub के Tests और Questions को manage कर सकते हैं।
-        </p>
-
-      </section>
-
-
-      <section class="cards">
-
-        <!-- TEST MANAGEMENT -->
-
-        <div class="card">
-
-          <div class="card-icon">
-            📝
-          </div>
-
-          <h2>
-            Test Management
-          </h2>
-
-          <p>
-            नया test बनाएँ, test details बदलें और
-            Visible / Non-visible status manage करें।
-          </p>
-
-          <a
-            href="/admin-tests.html"
-            class="btn blue"
-          >
-            Manage Tests
-          </a>
-
-        </div>
-
-
-        <!-- QUESTION MANAGEMENT -->
-
-        <div class="card">
-
-          <div class="card-icon">
-            ❓
-          </div>
-
-          <h2>
-            Question Management
-          </h2>
-
-          <p>
-            Questions add करें, options और correct answer
-            सेट करें तथा explanation जोड़ें।
-          </p>
-
-          <a
-            href="/admin-questions.html"
-            class="btn green"
-          >
-            Manage Questions
-          </a>
-
-        </div>
-
-
-        <!-- RESULT MANAGEMENT -->
-
-        <div class="card">
-
-          <div class="card-icon">
-            📊
-          </div>
-
-          <h2>
-            Results
-          </h2>
-
-          <p>
-            Students के test results और performance
-            देखने के लिए result management खोलें।
-          </p>
-
-          <a
-            href="/admin-results.html"
-            class="btn purple"
-          >
-            View Results
-          </a>
-
-        </div>
-
-      </section>
-
-
-      <section class="actions">
-
-        <h2>
-          ⚡ Quick Actions
-        </h2>
-
-        <div class="action-buttons">
-
-          <a
-            href="/admin-tests.html"
-            class="btn blue"
-          >
-            ➕ Create Test
-          </a>
-
-          <a
-            href="/dashboard.html"
-            class="btn green"
-          >
-            👨‍🎓 Student Dashboard
-          </a>
-
-          <button
-            onclick="logout()"
-            class="btn red"
-          >
-            🚪 Logout
-          </button>
-
-        </div>
-
-      </section>
-
-    </div>
-
-  </main>
-
-
-  <script>
-
-    // =====================================
-    // CHECK ADMIN
-    // =====================================
-
-    async function checkAdmin() {
-
-      try {
-
-        const response = await fetch(
-          "/api/auth/me",
-          {
-            credentials: "include"
-          }
-        );
-
-        const data = await response.json();
-
-        if (!response.ok || !data.success) {
-
-          window.location.href = "/login.html";
-
-          return;
-        }
-
-
-        const user = data.user;
-
-
-        // Admin check
-        if (user.role !== "admin") {
-
-          document.getElementById("loading").innerHTML = `
-            <div class="error">
-              ❌ Access Denied<br><br>
-              केवल Admin इस page को access कर सकता है।
-              <br><br>
-              <a href="/dashboard.html" class="btn blue">
-                Go to Dashboard
-              </a>
-            </div>
-          `;
-
-          return;
-        }
-
-
-        // Show admin panel
-
-        document.getElementById("loading").style.display =
-          "none";
-
-        document.getElementById("adminContent").style.display =
-          "block";
-
-      } catch (error) {
-
-        console.error(error);
-
-        document.getElementById("loading").innerHTML = `
-          <div class="error">
-            ❌ Server से connection नहीं हो पाया।
-          </div>
-        `;
-
-      }
-
+<div class="header">
+  <h1>👑 ExamPrepHub Admin Panel</h1>
+  <nav>
+    <a href="/">🏠 Home</a>
+    <a href="#" onclick="logout()">🚪 Logout</a>
+  </nav>
+</div>
+
+<div class="container">
+  <div class="welcome">
+    <h2 id="welcomeMsg">⏳ Loading...</h2>
+    <p>यहाँ से अपने ExamPrepHub को manage करें</p>
+  </div>
+  
+  <div class="stats-grid" id="statsGrid">
+    <div class="stat-card"><div class="num">-</div><div class="label">Exams</div></div>
+    <div class="stat-card"><div class="num">-</div><div class="label">Subjects</div></div>
+    <div class="stat-card"><div class="num">-</div><div class="label">Chapters</div></div>
+    <div class="stat-card"><div class="num">-</div><div class="label">Questions</div></div>
+  </div>
+  
+  <h2 style="color:#1e3a8a; margin-bottom:16px;">🎯 Quick Actions</h2>
+  
+  <div class="actions-grid">
+    <a href="/admin/upload-questions.html" class="action-card">
+      <div class="icon">📄</div>
+      <h3>Upload Questions</h3>
+      <p>PDF/Word से questions bulk upload करें</p>
+    </a>
+    
+    <a href="/test.html" class="action-card">
+      <div class="icon">📝</div>
+      <h3>Manage Tests</h3>
+      <p>Tests बनाएँ और manage करें</p>
+    </a>
+    
+    <a href="/api/exams" target="_blank" class="action-card">
+      <div class="icon">📚</div>
+      <h3>View Exams</h3>
+      <p>सभी exams की list देखें (API)</p>
+    </a>
+    
+    <a href="/api/subjects" target="_blank" class="action-card">
+      <div class="icon">📖</div>
+      <h3>View Subjects</h3>
+      <p>सभी subjects की list देखें (API)</p>
+    </a>
+    
+    <a href="/api/chapters" target="_blank" class="action-card">
+      <div class="icon">📑</div>
+      <h3>View Chapters</h3>
+      <p>सभी chapters की list देखें (API)</p>
+    </a>
+    
+    <a href="/api/questions" target="_blank" class="action-card">
+      <div class="icon">❓</div>
+      <h3>View Questions</h3>
+      <p>सभी questions की list देखें (API)</p>
+    </a>
+  </div>
+</div>
+
+<script>
+async function checkAuth() {
+  try {
+    const r = await fetch("/api/auth/me", { credentials: "include" });
+    const data = await r.json();
+    const user = data.user || data;
+    
+    if (!user || user.role !== "admin") {
+      alert("❌ आप admin नहीं हैं। पहले login करें।");
+      window.location.href = "/login.html";
+      return;
     }
+    
+    document.getElementById("welcomeMsg").textContent = "👋 Welcome, " + (user.name || "Admin");
+    loadStats();
+  } catch (e) {
+    alert("❌ Authentication failed");
+    window.location.href = "/login.html";
+  }
+}
 
+async function loadStats() {
+  try {
+    const [examsRes, subjectsRes, chaptersRes, questionsRes] = await Promise.all([
+      fetch("/api/exams").then(r => r.json()).catch(() => ({count: 0})),
+      fetch("/api/subjects").then(r => r.json()).catch(() => ({count: 0})),
+      fetch("/api/chapters").then(r => r.json()).catch(() => ({count: 0})),
+      fetch("/api/questions").then(r => r.json()).catch(() => ({count: 0}))
+    ]);
+    
+    const stats = [
+      { num: examsRes.count || 0, label: "Exams" },
+      { num: subjectsRes.count || 0, label: "Subjects" },
+      { num: chaptersRes.count || 0, label: "Chapters" },
+      { num: questionsRes.count || 0, label: "Questions" }
+    ];
+    
+    document.getElementById("statsGrid").innerHTML = stats.map(s => `
+      <div class="stat-card">
+        <div class="num">${s.num}</div>
+        <div class="label">${s.label}</div>
+      </div>
+    `).join('');
+  } catch (e) {
+    console.error(e);
+  }
+}
 
-    // =====================================
-    // LOGOUT
-    // =====================================
+async function logout() {
+  await fetch("/api/auth/logout", { method: "POST", credentials: "include" });
+  window.location.href = "/";
+}
 
-    async function logout() {
-
-      try {
-
-        await fetch(
-          "/api/auth/logout",
-          {
-            method: "POST",
-            credentials: "include"
-          }
-        );
-
-        window.location.href = "/login.html";
-
-      } catch (error) {
-
-        console.error(error);
-
-        window.location.href = "/login.html";
-
-      }
-
-    }
-
-
-    // =====================================
-    // START
-    // =====================================
-
-    checkAdmin();
-
-  </script>
-
+checkAuth();
+</script>
 </body>
 </html>

@@ -1,0 +1,16 @@
+{
+  "subjects": [
+    { "id": "gk", "name": "General Knowledge", "name_hi": "सामान्य ज्ञान", "icon": "🌍" },
+    { "id": "gs", "name": "General Studies", "name_hi": "सामान्य अध्ययन", "icon": "💬" },
+    { "id": "polity", "name": "Indian Polity", "name_hi": "भारतीय राजव्यवस्था", "icon": "🏛️" },
+    { "id": "history", "name": "History", "name_hi": "इतिहास", "icon": "📜" },
+    { "id": "geography", "name": "Geography", "name_hi": "भूगोल", "icon": "🌍" },
+    { "id": "math", "name": "Mathematics", "name_hi": "गणित", "icon": "➗" },
+    { "id": "reasoning", "name": "Reasoning", "name_hi": "तर्कशक्ति", "icon": "🧩" },
+    { "id": "english", "name": "English", "name_hi": "अंग्रेजी", "icon": "🔤" },
+    { "id": "hindi", "name": "Hindi", "name_hi": "हिंदी", "icon": "🔥" },
+    { "id": "science", "name": "Science", "name_hi": "विज्ञान", "icon": "🔬" },
+    { "id": "current", "name": "Current Affairs", "name_hi": "करेंट अफेयर्स", "icon": "📰" },
+    { "id": "computer", "name": "Computer", "name_hi": "कंप्यूटर", "icon": "💻" }
+  ]
+}

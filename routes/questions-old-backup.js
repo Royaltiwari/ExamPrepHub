@@ -1,4 +1,4 @@
-const express = require("express");
+﻿const express = require("express");
 const router = express.Router();
 const multer = require("multer");
 const pdfParse = require("pdf-parse");
@@ -7,17 +7,12 @@ const Question = require("../models/Question");
 const requireLogin = require("../middleware/auth");
 const requireAdmin = require("../middleware/admin");
 
-// =====================================================
-// MULTER SETUP
-// =====================================================
 const upload = multer({
   storage: multer.memoryStorage(),
-  limits: { fileSize: 10 * 1024 * 1024 } // 10MB
+  limits: { fileSize: 10 * 1024 * 1024 }
 });
 
-// =====================================================
-// GET ALL QUESTIONS (Public)
-// =====================================================
+// GET all questions (Public)
 router.get("/", async (req, res) => {
   try {
     const filter = { visible: true };
@@ -30,7 +25,7 @@ router.get("/", async (req, res) => {
       .populate("chapter_id", "chapter_name")
       .populate("exam_id", "name")
       .sort({ createdAt: -1 })
-      .limit(1000);
+      .limit(500);
 
     res.json({ success: true, count: list.length, data: list });
   } catch (e) {
@@ -38,28 +33,7 @@ router.get("/", async (req, res) => {
   }
 });
 
-// =====================================================
-// GET SINGLE QUESTION (Public)
-// =====================================================
-router.get("/:id", async (req, res) => {
-  try {
-    const q = await Question.findById(req.params.id)
-      .populate("subject_id", "name icon")
-      .populate("chapter_id", "chapter_name")
-      .populate("exam_id", "name");
-
-    if (!q) {
-      return res.status(404).json({ success: false, message: "Question not found" });
-    }
-    res.json({ success: true, data: q });
-  } catch (e) {
-    res.status(500).json({ success: false, message: e.message });
-  }
-});
-
-// =====================================================
-// CREATE SINGLE QUESTION (Admin)
-// =====================================================
+// Create single question (Admin)
 router.post("/", requireLogin, requireAdmin, async (req, res) => {
   try {
     const q = await Question.create(req.body);
@@ -69,58 +43,7 @@ router.post("/", requireLogin, requireAdmin, async (req, res) => {
   }
 });
 
-// =====================================================
-// PREVIEW PDF/WORD - Parse without saving to DB
-// =====================================================
-router.post(
-  "/preview",
-  requireLogin,
-  requireAdmin,
-  upload.single("file"),
-  async (req, res) => {
-    try {
-      if (!req.file) {
-        return res.status(400).json({ success: false, message: "No file uploaded" });
-      }
-
-      const mimetype = req.file.mimetype;
-      let text = "";
-
-      if (mimetype === "application/pdf") {
-        const data = await pdfParse(req.file.buffer);
-        text = data.text;
-      } else if (
-        mimetype === "application/vnd.openxmlformats-officedocument.wordprocessingml.document" ||
-        mimetype === "application/msword"
-      ) {
-        const result = await mammoth.extractRawText({ buffer: req.file.buffer });
-        text = result.value;
-      } else if (mimetype === "text/plain") {
-        text = req.file.buffer.toString("utf-8");
-      } else {
-        return res.status(400).json({
-          success: false,
-          message: "Only PDF, DOCX, DOC or TXT allowed"
-        });
-      }
-
-      const parsedQuestions = parseQuestionsFromText(text);
-
-      res.json({
-        success: true,
-        count: parsedQuestions.length,
-        data: parsedQuestions,
-        preview: text.substring(0, 500)
-      });
-    } catch (e) {
-      res.status(500).json({ success: false, message: e.message });
-    }
-  }
-);
-
-// =====================================================
-// UPLOAD PDF/WORD - Parse & Bulk Insert
-// =====================================================
+// Upload PDF / Word (Admin)
 router.post(
   "/upload",
   requireLogin,
@@ -176,8 +99,7 @@ router.post(
       res.json({
         success: true,
         message: inserted.length + " questions imported successfully",
-        count: inserted.length,
-        data: inserted
+        count: inserted.length
       });
     } catch (e) {
       res.status(500).json({ success: false, message: e.message });
@@ -185,24 +107,18 @@ router.post(
   }
 );
 
-// =====================================================
-// PARSE QUESTIONS FROM RAW TEXT
-// =====================================================
+// Parser
 function parseQuestionsFromText(text) {
   const questions = [];
   text = text.replace(/\r\n/g, "\n").replace(/\r/g, "\n");
 
-  // Question blocks split by Q1. / 1. etc.
   const blocks = text.split(/\n(?=(?:Q\.?\s*\d+|\d+)\.\s)/i);
 
   for (let block of blocks) {
     block = block.trim();
     if (!block) continue;
 
-    // Extract question number and question text
-    const qMatch = block.match(
-      /^(?:Q\.?\s*)?(\d+)\.\s*([\s\S]*?)(?=\n\s*[A-D]\.\s)/i
-    );
+    const qMatch = block.match(/^(?:Q\.?\s*)?(\d+)\.\s*([\s\S]*?)(?=\n\s*[A-D]\.\s)/i);
     if (!qMatch) continue;
 
     const fullQuestion = qMatch[2].trim().replace(/\n/g, " ");
@@ -216,7 +132,6 @@ function parseQuestionsFromText(text) {
       question_en = parts.slice(1).join("/").trim();
     }
 
-    // Extract options A, B, C, D
     const options = [];
     const options_en = [];
     const optMatches = block.matchAll(/([A-D])\.\s*([^\n]+)/g);
@@ -233,12 +148,10 @@ function parseQuestionsFromText(text) {
       }
     }
 
-    // Extract answer (A/B/C/D)
     let answer = "";
     const ansMatch = block.match(/(?:Answer|Ans|उत्तर)\s*:?\s*([A-D])/i);
     if (ansMatch) answer = ansMatch[1].toUpperCase();
 
-    // Extract explanation
     let explanation_hi = "";
     let explanation_en = "";
     const expMatch = block.match(
@@ -256,7 +169,6 @@ function parseQuestionsFromText(text) {
       }
     }
 
-    // Extract key points
     const key_points = [];
     const kpMatch = block.match(
       /(?:Key Points|मुख्य बिंदु)\s*:?\s*([\s\S]*?)(?=\n\s*(?:Q\.?\s*\d|\d+\.\s|$))/i
@@ -269,7 +181,6 @@ function parseQuestionsFromText(text) {
       });
     }
 
-    // Only add if valid
     if ((question_hi || question_en) && options.length >= 2 && answer) {
       questions.push({
         question_hi,
@@ -287,63 +198,11 @@ function parseQuestionsFromText(text) {
   return questions;
 }
 
-// =====================================================
-// DELETE SINGLE QUESTION (Admin)
-// =====================================================
-router.delete("/:id", requireLogin, requireAdmin, async (req, res) => {
-  try {
-    const q = await Question.findByIdAndDelete(req.params.id);
-    if (!q) {
-      return res.status(404).json({ success: false, message: "Question not found" });
-    }
-    res.json({ success: true, message: "Question deleted" });
-  } catch (e) {
-    res.status(500).json({ success: false, message: e.message });
-  }
-});
-
-// =====================================================
-// DELETE ALL QUESTIONS (DEV ONLY)
-// =====================================================
+// Delete all (DEV)
 router.delete("/all", requireLogin, requireAdmin, async (req, res) => {
   try {
     await Question.deleteMany({});
     res.json({ success: true, message: "All questions deleted" });
-  } catch (e) {
-    res.status(500).json({ success: false, message: e.message });
-  }
-});
-
-// =====================================================
-// REMOVE DUPLICATE QUESTIONS
-// =====================================================
-router.delete("/duplicates/remove", requireLogin, requireAdmin, async (req, res) => {
-  try {
-    const allQuestions = await Question.find({}).sort({ createdAt: 1 });
-    const seen = new Set();
-    const toDelete = [];
-
-    for (const q of allQuestions) {
-      const key = (q.question_hi || q.question_en || q.questionText || "").trim().toLowerCase();
-      if (!key) continue;
-
-      if (seen.has(key)) {
-        toDelete.push(q._id);
-      } else {
-        seen.add(key);
-      }
-    }
-
-    if (toDelete.length > 0) {
-      await Question.deleteMany({ _id: { $in: toDelete } });
-    }
-
-    res.json({
-      success: true,
-      message: toDelete.length + " duplicate questions removed",
-      deleted: toDelete.length,
-      remaining: await Question.countDocuments()
-    });
   } catch (e) {
     res.status(500).json({ success: false, message: e.message });
   }

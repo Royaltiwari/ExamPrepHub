@@ -1,0 +1,98 @@
+{
+  "tests": [
+    {
+      "id": "gk-test-01",
+      "title": "General Knowledge Mock Test 01",
+      "title_hi": "सामान्य ज्ञान मॉक टेस्ट 01",
+      "subject": "gk",
+      "chapter": "General",
+      "exam": "SSC GD",
+      "duration": 15,
+      "total_questions": 3,
+      "questions": [
+        {
+          "question_hi": "भारत का राष्ट्रीय पक्षी कौन है?",
+          "question_en": "Which is the national bird of India?",
+          "options": ["मोर", "कबूतर", "तोता", "बाज"],
+          "options_en": ["Peacock", "Pigeon", "Parrot", "Hawk"],
+          "answer": "A",
+          "explanation_hi": "मोर भारत का राष्ट्रीय पक्षी है। इसे 1963 में राष्ट्रीय पक्षी घोषित किया गया था।",
+          "explanation_en": "Peacock is the national bird of India. It was declared as the national bird in 1963.",
+          "key_points": [
+            "मोर = भारत का राष्ट्रीय पक्षी",
+            "राष्ट्रीय पक्षी घोषित: 1963",
+            "वैज्ञानिक नाम: Pavo cristatus"
+          ]
+        },
+        {
+          "question_hi": "भारत का राष्ट्रीय पशु कौन है?",
+          "question_en": "Which is the national animal of India?",
+          "options": ["शेर", "बाघ", "हाथी", "तेंदुआ"],
+          "options_en": ["Lion", "Tiger", "Elephant", "Leopard"],
+          "answer": "B",
+          "explanation_hi": "बाघ भारत का राष्ट्रीय पशु है। इसे 1973 में राष्ट्रीय पशु घोषित किया गया था।",
+          "explanation_en": "Tiger is the national animal of India. It was declared as the national animal in 1973.",
+          "key_points": [
+            "बाघ = भारत का राष्ट्रीय पशु",
+            "राष्ट्रीय पशु घोषित: 1973",
+            "वैज्ञानिक नाम: Panthera tigris"
+          ]
+        },
+        {
+          "question_hi": "भारत का राष्ट्रीय फल कौन है?",
+          "question_en": "Which is the national fruit of India?",
+          "options": ["सेब", "केला", "आम", "संतरा"],
+          "options_en": ["Apple", "Banana", "Mango", "Orange"],
+          "answer": "C",
+          "explanation_hi": "आम भारत का राष्ट्रीय फल है। इसे 'फलों का राजा' कहा जाता है।",
+          "explanation_en": "Mango is the national fruit of India. It is called the 'King of Fruits'.",
+          "key_points": [
+            "आम = भारत का राष्ट्रीय फल",
+            "फलों का राजा",
+            "वैज्ञानिक नाम: Mangifera indica"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "science-test-01",
+      "title": "Science Mock Test 01",
+      "title_hi": "विज्ञान मॉक टेस्ट 01",
+      "subject": "science",
+      "chapter": "General Science",
+      "exam": "SSC GD",
+      "duration": 10,
+      "total_questions": 2,
+      "questions": [
+        {
+          "question_hi": "मानव शरीर की सबसे बड़ी ग्रंथि कौन-सी है?",
+          "question_en": "Which is the largest gland in the human body?",
+          "options": ["अग्न्याशय", "यकृत (लीवर)", "थाइरॉइड", "पीयूष ग्रंथि"],
+          "options_en": ["Pancreas", "Liver", "Thyroid", "Pituitary Gland"],
+          "answer": "B",
+          "explanation_hi": "यकृत (Liver) मानव शरीर की सबसे बड़ी ग्रंथि है। यह पित्त (Bile Juice) का स्राव करती है जो वसा के पाचन में मदद करता है।",
+          "explanation_en": "Liver is the largest gland in the human body. It secretes bile juice, which helps in the digestion of fats.",
+          "key_points": [
+            "यकृत = सबसे बड़ी ग्रंथि",
+            "पित्त रस स्रावित करता है",
+            "वसा का पाचन"
+          ]
+        },
+        {
+          "question_hi": "विश्व स्वास्थ्य संगठन (WHO) का मुख्यालय कहां स्थित है?",
+          "question_en": "Where is the headquarters of WHO located?",
+          "options": ["पेरिस, फ्रांस", "जेनेवा, स्विट्जरलैंड", "न्यू यॉर्क, यूएसए", "वियना, ऑस्ट्रिया"],
+          "options_en": ["Paris, France", "Geneva, Switzerland", "New York, USA", "Vienna, Austria"],
+          "answer": "B",
+          "explanation_hi": "WHO की स्थापना 7 अप्रैल 1948 को हुई और इसका मुख्यालय जेनेवा, स्विट्जरलैंड में है।",
+          "explanation_en": "WHO was established on 7 April 1948 and its headquarters is in Geneva, Switzerland.",
+          "key_points": [
+            "WHO = World Health Organization",
+            "स्थापना: 7 अप्रैल 1948",
+            "मुख्यालय: जेनेवा, स्विट्जरलैंड"
+          ]
+        }
+      ]
+    }
+  ]
+}

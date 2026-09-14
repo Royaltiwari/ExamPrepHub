@@ -1,14 +1,17 @@
 {
   "name": "examprephub",
   "version": "1.0.0",
-  "description": "",
+  "description": "ExamPrepHub - Smart Competitive Exam Preparation Platform",
   "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node server.js"
   },
-  "keywords": [],
-  "author": "",
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  },
+  "keywords": ["exam", "education", "mock-test"],
+  "author": "ExamPrepHub",
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
@@ -18,7 +21,7 @@
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
     "express-session": "^1.19.0",
-    "mammoth": "^1.12.2",
+    "mammoth": "^1.12.3",
     "mongoose": "^9.9.5",
     "multer": "^2.3.0",
     "nodemailer": "^10.0.9",

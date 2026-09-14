@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PDF & Notes Manager - ExamPrepHub</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+  body { background: #0f172a; color: #e2e8f0; min-height: 100vh; }
+  .header { background: #1e293b; padding: 16px 24px; display: flex; justify-content: space-between; align-items: center; }
+  .header h1 { font-size: 20px; color: #fbbf24; }
+  .header nav a { color: #e2e8f0; text-decoration: none; padding: 8px 16px; border-radius: 6px; background: #334155; margin-left: 8px; font-size: 14px; }
+  .container { max-width: 1300px; margin: 0 auto; padding: 24px; }
+  .card { background: #1e293b; border: 1px solid #334155; border-radius: 10px; padding: 24px; margin-bottom: 20px; }
+  .card h2 { color: #fbbf24; margin-bottom: 16px; font-size: 18px; }
+  .form-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; margin-bottom: 16px; }
+  .form-group label { display: block; color: #94a3b8; font-size: 12px; margin-bottom: 4px; font-weight: 600; }
+  .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #334155; background: #0f172a; color: #e2e8f0; font-size: 14px; outline: none; }
+  .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: #fbbf24; }
+  .btn { padding: 10px 20px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 14px; }
+  .btn-primary { background: #fbbf24; color: #0f172a; }
+  .btn-primary:disabled { background: #64748b; cursor: not-allowed; }
+  .btn-danger { background: #dc2626; color: white; padding: 6px 12px; font-size: 12px; }
+  .btn-view { background: #2563eb; color: white; padding: 6px 12px; font-size: 12px; text-decoration: none; display: inline-block; border-radius: 6px; }
+  .btn-edit { background: #059669; color: white; padding: 6px 12px; font-size: 12px; }
+  table { width: 100%; border-collapse: collapse; }
+  th, td { padding: 12px; text-align: left; border-bottom: 1px solid #334155; font-size: 13px; }
+  th { background: #0f172a; color: #94a3b8; font-size: 11px; text-transform: uppercase; }
+  .status { padding: 12px; border-radius: 6px; margin-bottom: 16px; display: none; }
+  .status.success { background: #064e3b; color: #10b981; display: block; }
+  .status.error { background: #7f1d1d; color: #f87171; display: block; }
+  .empty { text-align: center; padding: 40px; color: #94a3b8; }
+  .badge { display: inline-block; padding: 3px 8px; background: #334155; color: #fbbf24; border-radius: 10px; font-size: 11px; margin-right: 4px; }
+  .badge-active { background: #064e3b; color: #10b981; }
+  .badge-draft { background: #78350f; color: #fbbf24; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>📚 PDF & Notes Manager</h1>
+  <nav>
+    <a href="/admin-dashboard.html">← Admin</a>
+    <a href="/study-material.html" target="_blank">👨‍🎓 Student View</a>
+  </nav>
+</div>
+
+<div class="container">
+  <div id="status" class="status"></div>
+
+  <!-- UPLOAD FORM -->
+  <div class="card">
+    <h2>➕ Add New PDF / Notes</h2>
+    
+    <div class="form-row">
+      <div class="form-group">
+        <label>Title (Hindi) *</label>
+        <input type="text" id="title_hi" placeholder="भारतीय संविधान नोट्स">
+      </div>
+      <div class="form-group">
+        <label>Title (English)</label>
+        <input type="text" id="title" placeholder="Indian Constitution Notes">
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label>Exam Category</label>
+        <select id="examCategory">
+          <option value="">-- Select --</option>
+          <option value="School">School (Class 6-12)</option>
+          <option value="Competitive">Competitive</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Exam / Class *</label>
+        <input type="text" id="exam" placeholder="SSC GD / Class 12" list="examOptions">
+        <datalist id="examOptions">
+          <option value="Class 6"><option value="Class 7"><option value="Class 8">
+          <option value="Class 9"><option value="Class 10"><option value="Class 11"><option value="Class 12">
+          <option value="SSC CGL"><option value="SSC GD"><option value="SSC MTS">
+          <option value="UPSSSC PET"><option value="Railway"><option value="Banking">
+          <option value="Police"><option value="Defence">
+        </datalist>
+      </div>
+      <div class="form-group">
+        <label>Subject *</label>
+        <input type="text" id="subject" placeholder="General Knowledge" list="subjectOptions">
+        <datalist id="subjectOptions">
+          <option value="General Knowledge"><option value="General Awareness">
+          <option value="Reasoning"><option value="Mathematics"><option value="Hindi">
+          <option value="English"><option value="Physics"><option value="Chemistry">
+          <option value="Biology"><option value="History"><option value="Geography">
+          <option value="Polity"><option value="Current Affairs"><option value="Computer">
+        </datalist>
+      </div>
+      <div class="form-group">
+        <label>Chapter</label>
+        <input type="text" id="chapter" placeholder="Ancient History">
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label>Description</label>
+        <input type="text" id="description" placeholder="Short description">
+      </div>
+      <div class="form-group">
+        <label>Total Pages</label>
+        <input type="number" id="pages" placeholder="42">
+      </div>
+      <div class="form-group">
+        <label>Language</label>
+        <select id="language">
+          <option value="Hindi">Hindi</option>
+          <option value="English">English</option>
+          <option value="Bilingual">Bilingual</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label>Tags (comma separated)</label>
+        <input type="text" id="tags" placeholder="Important, New, PYQ">
+      </div>
+      <div class="form-group">
+        <label>Publish Date</label>
+        <input type="date" id="publishDate">
+      </div>
+      <div class="form-group">
+        <label>Status</label>
+        <select id="status_field">
+          <option value="Active">Active (Publish)</option>
+          <option value="Draft">Draft</option>
+          <option value="Archived">Archived</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label>📄 PDF File * (Max 50MB)</label>
+        <input type="file" id="pdfFile" accept=".pdf" style="padding:8px;background:#0f172a;">
+      </div>
+      <div class="form-group">
+        <label>Thumbnail URL (Optional)</label>
+        <input type="text" id="thumbnail" placeholder="https://...">
+      </div>
+    </div>
+
+    <button class="btn btn-primary" id="uploadBtn" onclick="uploadMaterial()">🚀 Save & Publish</button>
+  </div>
+
+  <!-- MATERIALS LIST -->
+  <div class="card">
+    <h2>📋 All Materials <span id="countBadge" style="color:#fbbf24;"></span></h2>
+    
+    <div style="display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap;">
+      <input type="text" id="searchBox" placeholder="🔍 Search..." style="flex:1;min-width:200px;padding:10px;border-radius:6px;border:1px solid #334155;background:#0f172a;color:#e2e8f0;">
+      <select id="statusFilter" style="padding:10px;border-radius:6px;border:1px solid #334155;background:#0f172a;color:#e2e8f0;">
+        <option value="">All Status</option>
+        <option value="Active">Active</option>
+        <option value="Draft">Draft</option>
+      </select>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Title</th>
+          <th>Exam</th>
+          <th>Subject</th>
+          <th>Chapter</th>
+          <th>Views</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="materialsTable">
+        <tr><td colspan="8" class="empty">⏳ Loading...</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+let allMaterials = [];
+
+function showStatus(msg, type) {
+  const el = document.getElementById('status');
+  el.textContent = msg;
+  el.className = 'status ' + type;
+  setTimeout(() => el.className = 'status', 5000);
+}
+
+async function uploadMaterial() {
+  const btn = document.getElementById('uploadBtn');
+  const file = document.getElementById('pdfFile').files[0];
+  const titleHi = document.getElementById('title_hi').value.trim();
+  const title = document.getElementById('title').value.trim();
+  const exam = document.getElementById('exam').value.trim();
+  const subject = document.getElementById('subject').value.trim();
+
+  if (!titleHi && !title) { showStatus('❌ Title required', 'error'); return; }
+  if (!exam) { showStatus('❌ Exam required', 'error'); return; }
+  if (!subject) { showStatus('❌ Subject required', 'error'); return; }
+  if (!file) { showStatus('❌ PDF file required', 'error'); return; }
+
+  btn.disabled = true;
+  btn.textContent = '⏳ Uploading...';
+
+  const formData = new FormData();
+  formData.append('file', file);
+  formData.append('title_hi', titleHi);
+  formData.append('title', title);
+  formData.append('description', document.getElementById('description').value);
+  formData.append('examCategory', document.getElementById('examCategory').value);
+  formData.append('exam', exam);
+  formData.append('subject', subject);
+  formData.append('chapter', document.getElementById('chapter').value);
+  formData.append('pages', document.getElementById('pages').value);
+  formData.append('language', document.getElementById('language').value);
+  formData.append('tags', document.getElementById('tags').value);
+  formData.append('publishDate', document.getElementById('publishDate').value);
+  formData.append('status', document.getElementById('status_field').value);
+  formData.append('thumbnail', document.getElementById('thumbnail').value);
+
+  try {
+    const res = await fetch('/api/study-material/upload', {
+      method: 'POST',
+      body: formData,
+      credentials: 'include'
+    });
+    const data = await res.json();
+    if (data.success) {
+      showStatus('✅ PDF uploaded successfully!', 'success');
+      // Reset form
+      document.getElementById('pdfFile').value = '';
+      document.getElementById('title_hi').value = '';
+      document.getElementById('title').value = '';
+      document.getElementById('description').value = '';
+      document.getElementById('chapter').value = '';
+      document.getElementById('pages').value = '';
+      document.getElementById('tags').value = '';
+      loadMaterials();
+    } else {
+      showStatus('❌ ' + data.message, 'error');
+    }
+  } catch (e) {
+    showStatus('❌ ' + e.message, 'error');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '🚀 Save & Publish';
+  }
+}
+
+async function loadMaterials() {
+  try {
+    const res = await fetch('/api/study-material');
+    const data = await res.json();
+    allMaterials = data.data || [];
+    renderTable(allMaterials);
+  } catch (e) {
+    showStatus('❌ ' + e.message, 'error');
+  }
+}
+
+function renderTable(list) {
+  document.getElementById('countBadge').textContent = '(' + list.length + ')';
+  const tbody = document.getElementById('materialsTable');
+
+  if (!list.length) {
+    tbody.innerHTML = '<tr><td colspan="8" class="empty">कोई material upload नहीं है।</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = list.map((m, i) => {
+    const statusCls = m.status === 'Active' ? 'badge-active' : 'badge-draft';
+    return `
+      <tr>
+        <td>${i + 1}</td>
+        <td><strong>${m.title_hi || m.title || 'Untitled'}</strong></td>
+        <td>${m.exam || '-'}</td>
+        <td>${m.subject || '-'}</td>
+        <td>${m.chapter || '-'}</td>
+        <td>${m.views || 0}</td>
+        <td><span class="badge ${statusCls}">${m.status || 'Active'}</span></td>
+        <td>
+          <a href="${m.file_url}" target="_blank" class="btn-view">👁️</a>
+          <button class="btn-danger" onclick="deleteMaterial('${m._id}')">🗑️</button>
+        </td>
+      </tr>
+    `;
+  }).join('');
+}
+
+async function deleteMaterial(id) {
+  if (!confirm('Delete करें?')) return;
+  try {
+    const res = await fetch('/api/study-material/' + id, {
+      method: 'DELETE',
+      credentials: 'include'
+    });
+    const data = await res.json();
+    if (data.success) {
+      showStatus('✅ Deleted', 'success');
+      loadMaterials();
+    } else {
+      showStatus('❌ ' + data.message, 'error');
+    }
+  } catch (e) {
+    showStatus('❌ ' + e.message, 'error');
+  }
+}
+
+document.getElementById('searchBox').addEventListener('input', applyAdminFilters);
+document.getElementById('statusFilter').addEventListener('change', applyAdminFilters);
+
+function applyAdminFilters() {
+  const search = document.getElementById('searchBox').value.toLowerCase();
+  const status = document.getElementById('statusFilter').value;
+
+  let filtered = allMaterials;
+  if (status) filtered = filtered.filter(m => m.status === status);
+  if (search) filtered = filtered.filter(m =>
+    ((m.title_hi || '') + ' ' + (m.title || '') + ' ' + (m.subject || '')).toLowerCase().includes(search)
+  );
+  renderTable(filtered);
+}
+
+loadMaterials();
+</script>
+</body>
+</html>

@@ -1,7 +1,6 @@
-node_modules/
+﻿node_modules/
 .env
-*.log
-*.tmp
 .DS_Store
-uploads/payments/
-uploads/thumbnails/
+*.log
+public/uploads/*
+!public/uploads/.gitkeep

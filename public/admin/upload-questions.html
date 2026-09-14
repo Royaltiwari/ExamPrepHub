@@ -1,0 +1,423 @@
+﻿<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Upload Questions - ExamPrepHub</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+  body { background: #0f172a; color: #e2e8f0; min-height: 100vh; }
+  
+  .header { background: #1e293b; padding: 16px 24px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.3); }
+  .header h1 { font-size: 20px; color: #fbbf24; }
+  .header nav a { color: #e2e8f0; text-decoration: none; padding: 8px 16px; border-radius: 6px; background: #334155; margin-left: 8px; font-size: 14px; }
+  .header nav a:hover { background: #475569; }
+  
+  .container { max-width: 1200px; margin: 0 auto; padding: 24px; }
+  
+  .card { background: #1e293b; border: 1px solid #334155; border-radius: 12px; padding: 24px; margin-bottom: 20px; }
+  .card h2 { color: #fbbf24; margin-bottom: 16px; font-size: 18px; }
+  
+  .info-box { background: #1e3a8a33; border-left: 4px solid #3b82f6; padding: 12px 16px; border-radius: 6px; margin-bottom: 20px; font-size: 13px; color: #93c5fd; line-height: 1.7; }
+  .info-box code { background: #0f172a; padding: 2px 6px; border-radius: 4px; font-family: monospace; color: #fbbf24; font-size: 12px; display: inline-block; margin: 1px 0; }
+  
+  .form-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-bottom: 16px; }
+  .form-group label { display: block; color: #94a3b8; font-size: 12px; margin-bottom: 4px; font-weight: 600; }
+  .form-group input, .form-group select { width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #334155; background: #0f172a; color: #e2e8f0; font-size: 14px; outline: none; }
+  .form-group input:focus, .form-group select:focus { border-color: #fbbf24; }
+  .form-group input[type="file"] { padding: 8px; cursor: pointer; }
+  
+  .btn { padding: 12px 24px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 14px; transition: all 0.2s; }
+  .btn-primary { background: #fbbf24; color: #0f172a; }
+  .btn-primary:hover { background: #f59e0b; }
+  .btn-primary:disabled { background: #64748b; cursor: not-allowed; }
+  .btn-success { background: #10b981; color: white; }
+  .btn-success:hover { background: #059669; }
+  .btn-secondary { background: #334155; color: #e2e8f0; margin-left: 8px; }
+  .btn-secondary:hover { background: #475569; }
+  .btn-danger { background: #dc2626; color: white; padding: 6px 12px; font-size: 12px; }
+  .btn-danger:hover { background: #b91c1c; }
+  
+  .status { padding: 12px 16px; border-radius: 8px; margin-bottom: 16px; display: none; font-size: 14px; }
+  .status.success { background: #064e3b; color: #6ee7b7; display: block; border-left: 4px solid #10b981; }
+  .status.error { background: #7f1d1d; color: #fca5a5; display: block; border-left: 4px solid #dc2626; }
+  .status.info { background: #1e3a8a; color: #93c5fd; display: block; border-left: 4px solid #3b82f6; }
+  
+  #previewSection { display: none; }
+  #previewSection.show { display: block; }
+  
+  .preview-box { background: #0f172a; border: 1px solid #334155; border-radius: 8px; padding: 16px; max-height: 500px; overflow-y: auto; }
+  
+  .preview-question { background: #1e293b; border: 1px solid #334155; border-radius: 8px; padding: 16px; margin-bottom: 12px; }
+  .preview-question .q-num { color: #fbbf24; font-weight: 700; font-size: 12px; margin-bottom: 8px; }
+  .preview-question .q-text { color: #f1f5f9; font-size: 14px; margin-bottom: 4px; line-height: 1.5; }
+  .preview-question .q-text-en { color: #94a3b8; font-size: 13px; font-style: italic; margin-bottom: 10px; }
+  .preview-question .opts { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 8px; }
+  .preview-question .opt { padding: 6px 10px; background: #0f172a; border: 1px solid #334155; border-radius: 4px; font-size: 12px; }
+  .preview-question .opt.correct { border-color: #10b981; background: #064e3b; color: #6ee7b7; font-weight: 700; }
+  .preview-question .answer { color: #10b981; font-size: 13px; font-weight: 700; margin-top: 6px; }
+  
+  .questions-list { display: grid; gap: 12px; }
+  .question-card { background: #0f172a; border: 1px solid #334155; border-radius: 10px; padding: 16px; }
+  .question-card .q-num { color: #fbbf24; font-weight: 700; font-size: 12px; margin-bottom: 6px; }
+  .question-card .q-hi { color: #f1f5f9; font-size: 14px; margin-bottom: 4px; line-height: 1.5; }
+  .question-card .q-en { color: #94a3b8; font-size: 12px; font-style: italic; margin-bottom: 10px; }
+  .question-card .opts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 10px; }
+  .question-card .opt { padding: 6px 10px; background: #1e293b; border: 1px solid #334155; border-radius: 4px; font-size: 12px; }
+  .question-card .opt.correct { border-color: #10b981; background: #064e3b; color: #6ee7b7; font-weight: 700; }
+  .question-card .answer-line { color: #10b981; font-weight: 700; font-size: 13px; margin-bottom: 8px; }
+  .question-card .explanation { background: #1e293b; border-left: 3px solid #fbbf24; padding: 10px; border-radius: 4px; font-size: 12px; color: #cbd5e1; line-height: 1.6; margin-bottom: 10px; }
+  .question-card .actions { display: flex; gap: 8px; }
+  .question-card .badge { display: inline-block; padding: 3px 8px; background: #334155; color: #fbbf24; border-radius: 10px; font-size: 11px; margin-right: 4px; margin-bottom: 6px; }
+  
+  .loading { text-align: center; padding: 40px; color: #94a3b8; }
+  .empty { text-align: center; padding: 40px; color: #94a3b8; }
+  
+  .search-box { padding: 10px 16px; border-radius: 8px; border: 1px solid #334155; background: #0f172a; color: #e2e8f0; font-size: 14px; width: 100%; max-width: 400px; outline: none; }
+  .search-box:focus { border-color: #fbbf24; }
+  
+  .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 12px; }
+  .top-bar h2 { color: #fbbf24; font-size: 18px; }
+  
+  .action-buttons { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 16px; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>📄 Upload Questions (PDF / Word)</h1>
+  <nav>
+    <a href="/admin-dashboard.html">← Admin</a>
+    <a href="/test.html">📝 Tests</a>
+  </nav>
+</div>
+
+<div class="container">
+  
+  <div id="status" class="status"></div>
+  
+  <!-- UPLOAD FORM -->
+  <div class="card">
+    <h2>📤 PDF / Word से Questions Upload करें</h2>
+    
+    <div class="info-box">
+      <strong>📋 File Format (हर question इस format में):</strong><br>
+      <code>Q1. Question Hindi / Question English</code><br>
+      <code>A. Option1 / Option1_en</code><br>
+      <code>B. Option2 / Option2_en</code><br>
+      <code>C. Option3 / Option3_en</code><br>
+      <code>D. Option4 / Option4_en</code><br>
+      <code>Answer: D</code><br>
+      <code>Explanation: ...</code><br>
+      <code>Key Points:</code><br>
+      <code>- Point 1</code>
+    </div>
+    
+    <div class="form-row">
+      <div class="form-group">
+        <label>📁 File Select करें (PDF / DOCX / DOC / TXT)</label>
+        <input type="file" id="fileInput" accept=".pdf,.docx,.doc,.txt">
+      </div>
+    </div>
+    
+    <div class="form-row">
+      <div class="form-group">
+        <label>📚 Subject (Optional)</label>
+        <select id="subjectSelect">
+          <option value="">-- None --</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>📑 Chapter (Optional)</label>
+        <select id="chapterSelect">
+          <option value="">-- None --</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>🎯 Exam (Optional)</label>
+        <select id="examSelect">
+          <option value="">-- None --</option>
+        </select>
+      </div>
+    </div>
+    
+    <div class="action-buttons">
+      <button class="btn btn-primary" id="previewBtn" onclick="previewFile()">👁️ Preview</button>
+      <button class="btn btn-success" id="uploadBtn" onclick="uploadFile()" style="display:none;">🚀 Upload & Import</button>
+      <button class="btn btn-secondary" id="cancelBtn" onclick="cancelPreview()" style="display:none;">❌ Cancel</button>
+    </div>
+  </div>
+  
+  <!-- PREVIEW SECTION -->
+  <div class="card" id="previewSection">
+    <h2>👁️ Preview <span id="previewCount" style="color:#fbbf24;"></span></h2>
+    <p style="color:#94a3b8;font-size:13px;margin-bottom:12px;">ये questions upload होने वाले हैं — verify करें और फिर "Upload & Import" click करें।</p>
+    <div class="preview-box" id="previewBox"></div>
+  </div>
+  
+  <!-- IMPORTED QUESTIONS -->
+  <div class="card">
+    <div class="top-bar">
+      <h2>📚 Imported Questions <span id="importedCount" style="color:#fbbf24;"></span></h2>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <input type="text" id="searchBox" class="search-box" placeholder="🔍 Search questions...">
+        <button class="btn btn-secondary" onclick="loadQuestions()">🔄 Refresh</button>
+      </div>
+    </div>
+    <div class="questions-list" id="questionsList">
+      <div class="loading">⏳ Loading...</div>
+    </div>
+  </div>
+  
+</div>
+
+<script>
+let previewedQuestions = [];
+let allQuestions = [];
+
+function showStatus(msg, type) {
+  const el = document.getElementById('status');
+  el.textContent = msg;
+  el.className = 'status ' + type;
+  setTimeout(() => { el.className = 'status'; }, 5000);
+}
+
+async function loadSubjects() {
+  try {
+    const res = await fetch('/api/subjects');
+    const data = await res.json();
+    const sel = document.getElementById('subjectSelect');
+    (data.data || []).forEach(s => {
+      sel.innerHTML += '<option value="' + s._id + '">' + (s.icon || '📚') + ' ' + s.name + '</option>';
+    });
+  } catch (e) { console.error(e); }
+}
+
+async function loadChapters() {
+  try {
+    const res = await fetch('/api/chapters');
+    const data = await res.json();
+    const sel = document.getElementById('chapterSelect');
+    (data.data || []).forEach(c => {
+      sel.innerHTML += '<option value="' + c._id + '">' + c.chapter_name + '</option>';
+    });
+  } catch (e) { console.error(e); }
+}
+
+async function loadExams() {
+  try {
+    const res = await fetch('/api/exams');
+    const data = await res.json();
+    const sel = document.getElementById('examSelect');
+    (data.data || []).forEach(e => {
+      sel.innerHTML += '<option value="' + e._id + '">' + e.name + '</option>';
+    });
+  } catch (e) { console.error(e); }
+}
+
+async function previewFile() {
+  const file = document.getElementById('fileInput').files[0];
+  if (!file) {
+    showStatus('❌ कृपया पहले file select करें', 'error');
+    return;
+  }
+  
+  const btn = document.getElementById('previewBtn');
+  btn.disabled = true;
+  btn.textContent = '⏳ Previewing...';
+  
+  const formData = new FormData();
+  formData.append('file', file);
+  
+  try {
+    const res = await fetch('/api/questions/preview', {
+      method: 'POST',
+      body: formData,
+      credentials: 'include'
+    });
+    const data = await res.json();
+    
+    if (data.success) {
+      previewedQuestions = data.data || [];
+      renderPreview(previewedQuestions);
+      document.getElementById('previewSection').classList.add('show');
+      document.getElementById('uploadBtn').style.display = 'inline-block';
+      document.getElementById('cancelBtn').style.display = 'inline-block';
+      showStatus('✅ ' + data.count + ' questions parsed — नीचे preview देखें', 'success');
+      setTimeout(() => {
+        document.getElementById('previewSection').scrollIntoView({ behavior: 'smooth' });
+      }, 100);
+    } else {
+      showStatus('❌ ' + data.message, 'error');
+    }
+  } catch (e) {
+    showStatus('❌ ' + e.message, 'error');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '👁️ Preview';
+  }
+}
+
+function renderPreview(questions) {
+  document.getElementById('previewCount').textContent = '(' + questions.length + ')';
+  const box = document.getElementById('previewBox');
+  
+  if (!questions.length) {
+    box.innerHTML = '<div class="empty">कोई questions नहीं मिले। File format check करें।</div>';
+    return;
+  }
+  
+  box.innerHTML = questions.map((q, i) => {
+    const options = q.options || [];
+    return `
+      <div class="preview-question">
+        <div class="q-num">प्रश्न ${i + 1}</div>
+        <div class="q-text">${q.question_hi || '-'}</div>
+        ${q.question_en ? '<div class="q-text-en">' + q.question_en + '</div>' : ''}
+        <div class="opts">
+          ${options.map((opt, j) => {
+            const label = String.fromCharCode(65 + j);
+            const isCorrect = q.answer === label;
+            return '<div class="opt ' + (isCorrect ? 'correct' : '') + '">' + label + '. ' + opt + '</div>';
+          }).join('')}
+        </div>
+        <div class="answer">✅ सही उत्तर: ${q.answer}</div>
+      </div>
+    `;
+  }).join('');
+}
+
+function cancelPreview() {
+  previewedQuestions = [];
+  document.getElementById('previewSection').classList.remove('show');
+  document.getElementById('uploadBtn').style.display = 'none';
+  document.getElementById('cancelBtn').style.display = 'none';
+  document.getElementById('fileInput').value = '';
+  showStatus('❌ Preview cancelled', 'info');
+}
+
+async function uploadFile() {
+  const file = document.getElementById('fileInput').files[0];
+  if (!file) {
+    showStatus('❌ पहले Preview करें', 'error');
+    return;
+  }
+  
+  if (!confirm('क्या आप ' + previewedQuestions.length + ' questions upload करना चाहते हैं?')) return;
+  
+  const btn = document.getElementById('uploadBtn');
+  btn.disabled = true;
+  btn.textContent = '⏳ Uploading...';
+  
+  const formData = new FormData();
+  formData.append('file', file);
+  formData.append('subject_id', document.getElementById('subjectSelect').value);
+  formData.append('chapter_id', document.getElementById('chapterSelect').value);
+  formData.append('exam_id', document.getElementById('examSelect').value);
+  
+  try {
+    const res = await fetch('/api/questions/upload', {
+      method: 'POST',
+      body: formData,
+      credentials: 'include'
+    });
+    const data = await res.json();
+    
+    if (data.success) {
+      showStatus('✅ ' + data.message, 'success');
+      cancelPreview();
+      loadQuestions();
+    } else {
+      showStatus('❌ ' + data.message, 'error');
+    }
+  } catch (e) {
+    showStatus('❌ ' + e.message, 'error');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '🚀 Upload & Import';
+  }
+}
+
+async function loadQuestions() {
+  try {
+    const res = await fetch('/api/questions');
+    const data = await res.json();
+    allQuestions = data.data || [];
+    document.getElementById('importedCount').textContent = '(' + allQuestions.length + ')';
+    renderQuestions(allQuestions);
+  } catch (e) {
+    document.getElementById('questionsList').innerHTML = '<div class="empty">❌ Load failed: ' + e.message + '</div>';
+  }
+}
+
+function renderQuestions(questions) {
+  const list = document.getElementById('questionsList');
+  
+  if (!questions.length) {
+    list.innerHTML = '<div class="empty">कोई questions नहीं हैं। ऊपर से upload करें।</div>';
+    return;
+  }
+  
+  list.innerHTML = questions.map((q, i) => {
+    const options = q.options || [];
+    return `
+      <div class="question-card">
+        <div class="q-num">प्रश्न ${i + 1}</div>
+        <div class="q-hi">${q.question_hi || q.questionText || '-'}</div>
+        ${q.question_en ? '<div class="q-en">' + q.question_en + '</div>' : ''}
+        <div class="opts-grid">
+          ${options.map((opt, j) => {
+            const label = String.fromCharCode(65 + j);
+            const isCorrect = q.answer === label;
+            return '<div class="opt ' + (isCorrect ? 'correct' : '') + '">' + label + '. ' + opt + '</div>';
+          }).join('')}
+        </div>
+        <div class="answer-line">✅ सही उत्तर: ${q.answer}</div>
+        ${q.explanation_hi ? '<div class="explanation"><strong>व्याख्या:</strong> ' + q.explanation_hi.substring(0, 200) + (q.explanation_hi.length > 200 ? '...' : '') + '</div>' : ''}
+        <div style="margin-bottom:10px;">
+          ${q.subject_id ? '<span class="badge">📖 ' + (q.subject_id.name || 'Subject') + '</span>' : '<span class="badge" style="color:#dc2626;">⚠️ No Subject</span>'}
+          ${q.chapter_id ? '<span class="badge">📑 ' + (q.chapter_id.chapter_name || 'Chapter') + '</span>' : ''}
+        </div>
+        <div class="actions">
+          <button class="btn btn-danger" onclick="deleteQuestion('${q._id}')">🗑️ Delete</button>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+async function deleteQuestion(id) {
+  if (!confirm('Question delete करें?')) return;
+  try {
+    const res = await fetch('/api/questions/' + id, {
+      method: 'DELETE',
+      credentials: 'include'
+    });
+    const data = await res.json();
+    if (data.success) {
+      showStatus('✅ Question deleted', 'success');
+      loadQuestions();
+    } else {
+      showStatus('❌ ' + data.message, 'error');
+    }
+  } catch (e) {
+    showStatus('❌ ' + e.message, 'error');
+  }
+}
+
+document.getElementById('searchBox').addEventListener('input', function() {
+  const search = this.value.toLowerCase();
+  if (!search) { renderQuestions(allQuestions); return; }
+  const filtered = allQuestions.filter(q => 
+    ((q.question_hi || '') + ' ' + (q.question_en || '')).toLowerCase().includes(search)
+  );
+  renderQuestions(filtered);
+});
+
+loadSubjects();
+loadChapters();
+loadExams();
+loadQuestions();
+</script>
+</body>
+</html>

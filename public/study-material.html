@@ -1,176 +1,266 @@
 ﻿<!DOCTYPE html>
-<html lang="en">
+<html lang="hi">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Study Material - ExamPrepHub</title>
-  <link rel="stylesheet" href="/css/style.css">
-  <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: 'Segoe UI', Arial, sans-serif; background: var(--bg); color: var(--text); padding-bottom: 70px; }
-    .top-bar { background: linear-gradient(135deg, #1e1b4b, #312e81); padding: 14px 20px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; }
-    .back-btn { background: rgba(255,255,255,0.1); border: none; width: 38px; height: 38px; border-radius: 10px; color: white; cursor: pointer; font-size: 18px; }
-    .title-bar { color: white; font-size: 16px; font-weight: 900; flex: 1; text-align: center; }
-    .container { max-width: 900px; margin: auto; padding: 20px; }
-
-    .page-header { text-align: center; margin-bottom: 20px; }
-    .page-header h1 { font-size: 24px; font-weight: 900; margin-bottom: 6px; }
-    .page-header p { color: var(--muted); font-size: 14px; }
-
-    .search-box { margin-bottom: 15px; }
-    .search-input { width: 100%; padding: 12px 16px; background: var(--card-bg); border: 2px solid var(--border); border-radius: 12px; color: var(--text); font-size: 14px; }
-    .search-input:focus { outline: none; border-color: var(--primary); }
-
-    .filters { display: flex; gap: 6px; margin-bottom: 20px; overflow-x: auto; padding-bottom: 6px; }
-    .f-btn { background: var(--card-bg); border: 1px solid var(--border); padding: 8px 14px; border-radius: 20px; font-size: 12px; font-weight: 700; cursor: pointer; white-space: nowrap; color: var(--text-light); }
-    .f-btn.active { background: var(--gradient-blue); color: white; border-color: transparent; }
-
-    .pdf-list { display: grid; gap: 12px; }
-    .pdf-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 14px; padding: 16px; display: flex; align-items: center; gap: 14px; transition: all 0.2s; }
-    .pdf-card:hover { transform: translateY(-3px); border-color: var(--primary); }
-    .pdf-icon { width: 50px; height: 50px; background: linear-gradient(135deg, #dc2626, #b91c1c); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 24px; color: white; flex-shrink: 0; }
-    .pdf-info { flex: 1; min-width: 0; }
-    .pdf-info h4 { font-size: 15px; margin-bottom: 6px; line-height: 1.3; }
-    .pdf-meta { font-size: 11px; color: var(--muted); display: flex; flex-wrap: wrap; gap: 8px; }
-    .pdf-meta span { display: inline-flex; align-items: center; gap: 3px; }
-    .pdf-actions { display: flex; gap: 6px; flex-shrink: 0; }
-    .btn-view { background: var(--gradient-blue); color: white; border: none; padding: 8px 14px; border-radius: 8px; font-size: 12px; font-weight: 800; cursor: pointer; text-decoration: none; }
-    .btn-dl { background: var(--gradient-green); color: white; border: none; padding: 8px 14px; border-radius: 8px; font-size: 12px; font-weight: 800; cursor: pointer; text-decoration: none; }
-
-    .empty-box { text-align: center; padding: 50px 20px; color: var(--muted); background: var(--card-bg); border: 1px dashed var(--border); border-radius: 14px; font-size: 14px; }
-    .loading-box { text-align: center; padding: 40px; color: var(--muted); }
-
-    .bottom-nav { display: none; position: fixed; bottom: 0; left: 0; right: 0; background: var(--card-bg); border-top: 1px solid var(--border); padding: 8px 0; z-index: 99; }
-    .bottom-nav-inner { display: flex; justify-content: space-around; max-width: 500px; margin: auto; }
-    .bottom-nav a { display: flex; flex-direction: column; align-items: center; gap: 3px; color: var(--muted); text-decoration: none; font-size: 10px; font-weight: 700; padding: 4px 12px; }
-    .bottom-nav a .ic { font-size: 20px; }
-    .bottom-nav a.active { color: var(--primary); }
-
-    @media (max-width: 700px) { .bottom-nav { display: block; } .container { padding: 15px; } .pdf-card { padding: 12px; gap: 10px; } .pdf-icon { width: 40px; height: 40px; font-size: 18px; } .pdf-info h4 { font-size: 13px; } .btn-view, .btn-dl { padding: 6px 10px; font-size: 11px; } }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PDF & Notes - ExamPrepHub</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+  body { background: #0f172a; color: #e2e8f0; min-height: 100vh; }
+  
+  .header { background: #1e293b; padding: 16px 24px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.3); position: sticky; top: 0; z-index: 100; }
+  .header h1 { font-size: 20px; color: #fbbf24; }
+  .header nav { display: flex; gap: 8px; flex-wrap: wrap; }
+  .header nav a { color: #e2e8f0; text-decoration: none; padding: 8px 16px; border-radius: 6px; background: #334155; font-size: 14px; }
+  
+  .container { max-width: 1200px; margin: 0 auto; padding: 24px; }
+  
+  .hero { text-align: center; padding: 30px 20px; }
+  .hero h2 { font-size: 32px; color: #fbbf24; margin-bottom: 10px; }
+  .hero p { color: #94a3b8; font-size: 16px; }
+  
+  .search-bar { margin: 20px 0; }
+  .search-bar input { width: 100%; padding: 14px 20px; border-radius: 10px; border: 1px solid #334155; background: #1e293b; color: #e2e8f0; font-size: 15px; outline: none; }
+  .search-bar input:focus { border-color: #fbbf24; }
+  
+  .filter-section { margin: 20px 0; }
+  .filter-section h3 { color: #94a3b8; font-size: 13px; text-transform: uppercase; margin-bottom: 10px; letter-spacing: 1px; }
+  .filter-chips { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
+  .chip { padding: 8px 16px; background: #1e293b; border: 1px solid #334155; color: #e2e8f0; border-radius: 20px; font-size: 13px; cursor: pointer; transition: all 0.2s; }
+  .chip:hover { border-color: #fbbf24; }
+  .chip.active { background: #fbbf24; color: #0f172a; border-color: #fbbf24; font-weight: 700; }
+  
+  .materials-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; margin-top: 20px; }
+  
+  .material-card { background: #1e293b; border: 1px solid #334155; border-radius: 12px; padding: 20px; transition: all 0.2s; position: relative; }
+  .material-card:hover { transform: translateY(-4px); border-color: #fbbf24; box-shadow: 0 8px 24px rgba(0,0,0,0.3); }
+  
+  .material-card .card-tags { position: absolute; top: 12px; right: 12px; display: flex; gap: 4px; flex-wrap: wrap; justify-content: flex-end; max-width: 60%; }
+  .tag { font-size: 10px; padding: 3px 8px; border-radius: 10px; font-weight: 600; }
+  .tag-important { background: #dc2626; color: white; }
+  .tag-new { background: #10b981; color: white; }
+  .tag-hot { background: #f59e0b; color: white; }
+  .tag-pyq { background: #8b5cf6; color: white; }
+  .tag-revision { background: #06b6d4; color: white; }
+  
+  .material-card .pdf-icon { font-size: 36px; margin-bottom: 12px; }
+  .material-card h3 { font-size: 16px; color: #f1f5f9; margin-bottom: 6px; line-height: 1.4; padding-right: 60px; }
+  .material-card .subtitle { color: #94a3b8; font-size: 12px; margin-bottom: 12px; }
+  
+  .material-card .badges { display: flex; gap: 6px; flex-wrap: wrap; margin: 12px 0; }
+  .badge { padding: 4px 10px; background: #334155; color: #fbbf24; border-radius: 20px; font-size: 11px; }
+  
+  .material-card .meta { display: flex; gap: 12px; color: #94a3b8; font-size: 12px; margin: 10px 0; }
+  
+  .material-card .actions { display: flex; gap: 8px; margin-top: 14px; }
+  .btn-view-pdf, .btn-download { flex: 1; padding: 10px; border: none; border-radius: 8px; font-weight: 600; font-size: 13px; cursor: pointer; text-decoration: none; text-align: center; display: block; }
+  .btn-view-pdf { background: #fbbf24; color: #0f172a; }
+  .btn-view-pdf:hover { background: #f59e0b; }
+  .btn-download { background: #334155; color: #e2e8f0; }
+  .btn-download:hover { background: #475569; }
+  
+  .empty { text-align: center; padding: 60px 20px; color: #94a3b8; grid-column: 1/-1; }
+  .empty h3 { font-size: 20px; margin-bottom: 10px; }
+  .loading { text-align: center; padding: 60px; color: #94a3b8; grid-column: 1/-1; }
+  
+  @media (max-width: 600px) {
+    .hero h2 { font-size: 24px; }
+    .materials-grid { grid-template-columns: 1fr; }
+  }
+</style>
 </head>
 <body>
 
-<div class="top-bar">
-  <button class="back-btn" onclick="location.href='/dashboard.html'">←</button>
-  <div class="title-bar">📄 Study Material</div>
-  <button class="back-btn" onclick="location.href='/dashboard.html'">🏠</button>
-</div>
+<header class="header">
+  <h1>🏆 ExamPrepHub</h1>
+  <nav>
+    <a href="/">🏠 Home</a>
+    <a href="/test.html">📝 Tests</a>
+    <a href="/study-material.html">📚 PDF & Notes</a>
+  </nav>
+</header>
 
 <div class="container">
-
-  <div class="page-header">
-    <h1>📄 Study Material</h1>
-    <p>Notes, PDFs aur study material</p>
+  <div class="hero">
+    <h2>📚 PDF & Notes</h2>
+    <p>Subject-wise notes, PDF और revision material डाउनलोड करें — बिल्कुल Free!</p>
   </div>
 
-  <div class="search-box">
-    <input type="text" id="searchInput" class="search-input" placeholder="🔍 PDF search karo..." />
+  <div class="search-bar">
+    <input type="text" id="searchInput" placeholder="🔍 Search notes, PDF, subject...">
   </div>
 
-  <div class="filters" id="filters">
-    <div class="f-btn active" data-filter="all">All</div>
-    <div class="f-btn" data-filter="Class 10">Class 10</div>
-    <div class="f-btn" data-filter="Class 11">Class 11</div>
-    <div class="f-btn" data-filter="Class 12">Class 12</div>
-    <div class="f-btn" data-filter="Competitive">Competitive</div>
+  <!-- EXAM FILTER -->
+  <div class="filter-section">
+    <h3>Class / Exam</h3>
+    <div class="filter-chips" id="examChips">
+      <span class="chip active" data-value="">All</span>
+    </div>
   </div>
 
-  <div class="pdf-list" id="pdfList">
-    <div class="loading-box">Loading PDFs...</div>
+  <!-- SUBJECT FILTER -->
+  <div class="filter-section" id="subjectSection" style="display:none;">
+    <h3>Subject</h3>
+    <div class="filter-chips" id="subjectChips">
+      <span class="chip active" data-value="">All Subjects</span>
+    </div>
   </div>
 
+  <!-- MATERIALS GRID -->
+  <div id="materialsGrid" class="materials-grid">
+    <div class="loading">⏳ Loading PDFs...</div>
+  </div>
 </div>
 
-<nav class="bottom-nav">
-  <div class="bottom-nav-inner">
-    <a href="/dashboard.html"><span class="ic">🏠</span> Home</a>
-    <a href="/home-class.html"><span class="ic">📚</span> Learn</a>
-    <a href="/test-center.html"><span class="ic">📝</span> Tests</a>
-    <a href="/progress.html"><span class="ic">📊</span> Progress</a>
-    <a href="/profile.html"><span class="ic">👤</span> Profile</a>
-  </div>
-</nav>
-
-<script src="/js/common.js"></script>
 <script>
-  let allNotes = [];
-  let currentFilter = "all";
-  let searchQuery = "";
+let allMaterials = [];
+let currentExam = '';
+let currentSubject = '';
 
-  async function loadNotes() {
-    const list = document.getElementById("pdfList");
-    try {
-      const r = await fetch("/api/notes", { credentials: "include" });
-      const data = await r.json();
-      allNotes = data.data || [];
-      renderNotes();
-    } catch (e) {
-      list.innerHTML = '<div class="empty-box">❌ PDFs load nahi ho payi</div>';
-    }
+async function loadMaterials() {
+  try {
+    const res = await fetch('/api/study-material');
+    const data = await res.json();
+    allMaterials = data.data || [];
+    
+    buildExamChips();
+    renderMaterials(allMaterials);
+  } catch (e) {
+    document.getElementById('materialsGrid').innerHTML = 
+      '<div class="empty"><h3>❌ Load failed</h3><p>' + e.message + '</p></div>';
   }
+}
 
-  function renderNotes() {
-    const list = document.getElementById("pdfList");
-    let filtered = allNotes;
-
-    if (currentFilter !== "all") {
-      filtered = filtered.filter(n => n.class === currentFilter);
-    }
-
-    if (searchQuery) {
-      const q = searchQuery.toLowerCase();
-      filtered = filtered.filter(n =>
-        (n.title || "").toLowerCase().includes(q) ||
-        (n.subject || "").toLowerCase().includes(q) ||
-        (n.chapter || "").toLowerCase().includes(q)
-      );
-    }
-
-    if (!filtered.length) {
-      list.innerHTML = '<div class="empty-box">Koi PDF available nahi hai.</div>';
-      return;
-    }
-
-    list.innerHTML = filtered.map(n => {
-      const pdfUrl = escapeHtml(n.pdfUrl || "#");
-      return '<div class="pdf-card">' +
-        '<div class="pdf-icon">📄</div>' +
-        '<div class="pdf-info">' +
-          '<h4>' + escapeHtml(n.title || "Notes") + '</h4>' +
-          '<div class="pdf-meta">' +
-            '<span>📚 ' + escapeHtml(n.subject || "-") + '</span>' +
-            (n.chapter ? '<span>📖 ' + escapeHtml(n.chapter) + '</span>' : '') +
-            '<span>🎓 ' + escapeHtml(n.class || "-") + '</span>' +
-          '</div>' +
-        '</div>' +
-        '<div class="pdf-actions">' +
-          '<a href="' + pdfUrl + '" target="_blank" class="btn-view">👁 View</a>' +
-          '<a href="' + pdfUrl + '" download class="btn-dl">⬇</a>' +
-        '</div>' +
-      '</div>';
-    }).join("");
-  }
-
-  document.getElementById("searchInput").addEventListener("input", debounce((e) => {
-    searchQuery = e.target.value.trim();
-    renderNotes();
-  }, 300));
-
-  document.querySelectorAll(".f-btn").forEach(btn => {
-    btn.addEventListener("click", () => {
-      document.querySelectorAll(".f-btn").forEach(b => b.classList.remove("active"));
-      btn.classList.add("active");
-      currentFilter = btn.dataset.filter;
-      renderNotes();
-    });
+function buildExamChips() {
+  const exams = [...new Set(allMaterials.map(m => m.exam).filter(Boolean))].sort();
+  const container = document.getElementById('examChips');
+  container.innerHTML = '<span class="chip active" data-value="">All</span>';
+  exams.forEach(e => {
+    container.innerHTML += '<span class="chip" data-value="' + e + '">' + e + '</span>';
   });
 
-  (async function() {
-    const user = await requireLogin();
-    if (!user) return;
-    loadNotes();
-  })();
+  container.querySelectorAll('.chip').forEach(chip => {
+    chip.addEventListener('click', function() {
+      container.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+      this.classList.add('active');
+      currentExam = this.dataset.value;
+      currentSubject = '';
+      buildSubjectChips();
+      applyFilters();
+    });
+  });
+}
+
+function buildSubjectChips() {
+  const section = document.getElementById('subjectSection');
+  const container = document.getElementById('subjectChips');
+  
+  if (!currentExam) {
+    section.style.display = 'none';
+    return;
+  }
+
+  const subjects = [...new Set(
+    allMaterials.filter(m => m.exam === currentExam).map(m => m.subject).filter(Boolean)
+  )].sort();
+
+  if (!subjects.length) {
+    section.style.display = 'none';
+    return;
+  }
+
+  section.style.display = 'block';
+  container.innerHTML = '<span class="chip active" data-value="">All Subjects</span>';
+  subjects.forEach(s => {
+    container.innerHTML += '<span class="chip" data-value="' + s + '">' + s + '</span>';
+  });
+
+  container.querySelectorAll('.chip').forEach(chip => {
+    chip.addEventListener('click', function() {
+      container.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+      this.classList.add('active');
+      currentSubject = this.dataset.value;
+      applyFilters();
+    });
+  });
+}
+
+document.getElementById('searchInput').addEventListener('input', applyFilters);
+
+function applyFilters() {
+  const search = document.getElementById('searchInput').value.toLowerCase();
+  let filtered = allMaterials;
+
+  if (currentExam) filtered = filtered.filter(m => m.exam === currentExam);
+  if (currentSubject) filtered = filtered.filter(m => m.subject === currentSubject);
+  if (search) filtered = filtered.filter(m =>
+    ((m.title_hi || '') + ' ' + (m.title || '') + ' ' + (m.subject || '') + ' ' + (m.exam || '')).toLowerCase().includes(search)
+  );
+
+  renderMaterials(filtered);
+}
+
+function renderMaterials(list) {
+  const grid = document.getElementById('materialsGrid');
+
+  if (!list.length) {
+    grid.innerHTML = '<div class="empty"><h3>📭 कोई PDF नहीं मिली</h3><p>कृपया filter बदलें या बाद में try करें।</p></div>';
+    return;
+  }
+
+  grid.innerHTML = list.map(m => {
+    // Tags badges
+    let tagsHtml = '';
+    if (m.tags && m.tags.length) {
+      const tagMap = {
+        'Important': 'tag-important',
+        'New': 'tag-new',
+        'Most Viewed': 'tag-hot',
+        'PYQ': 'tag-pyq',
+        'Exam Special': 'tag-important',
+        'Chapter Notes': 'tag-revision',
+        'Revision Notes': 'tag-revision'
+      };
+      tagsHtml = m.tags.slice(0, 2).map(t => 
+        '<span class="tag ' + (tagMap[t] || 'tag-important') + '">' + t + '</span>'
+      ).join('');
+    }
+
+    return `
+      <div class="material-card">
+        ${tagsHtml ? '<div class="card-tags">' + tagsHtml + '</div>' : ''}
+        <div class="pdf-icon">📕</div>
+        <h3>${m.title_hi || m.title || 'Untitled'}</h3>
+        <div class="subtitle">${m.title && m.title_hi ? m.title : ''}</div>
+        ${m.description ? '<p style="color:#94a3b8;font-size:12px;margin:6px 0;">' + m.description + '</p>' : ''}
+        
+        <div class="badges">
+          ${m.exam ? '<span class="badge">🎯 ' + m.exam + '</span>' : ''}
+          ${m.subject ? '<span class="badge">📚 ' + m.subject + '</span>' : ''}
+          ${m.chapter ? '<span class="badge">📖 ' + m.chapter + '</span>' : ''}
+        </div>
+        
+        <div class="meta">
+          ${m.pages ? '<span>📄 ' + m.pages + ' Pages</span>' : ''}
+          <span>👁️ ' + (m.views || 0) + '</span>
+        </div>
+        
+        <div class="actions">
+          <a href="${m.file_url}" target="_blank" class="btn-view-pdf">👁️ View PDF</a>
+          <a href="${m.file_url}" download class="btn-download" onclick="trackDownload('${m._id}')">⬇️</a>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+async function trackDownload(id) {
+  try {
+    await fetch('/api/study-material/' + id + '/download', { method: 'POST' });
+  } catch (e) {}
+}
+
+loadMaterials();
 </script>
 </body>
 </html>

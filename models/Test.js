@@ -1,80 +1,17 @@
-const mongoose = require("mongoose");
+﻿const mongoose = require("mongoose");
 
 const testSchema = new mongoose.Schema(
   {
-    name: {
-      type: String,
-      required: true,
-      trim: true
-    },
-
-    exam: {
-      type: String,
-      required: true,
-      trim: true
-    },
-
-    batch: {
-      type: String,
-      trim: true,
-      default: ""
-    },
-
-    subject: {
-      type: String,
-      trim: true,
-      default: ""
-    },
-
-    chapter: {
-      type: String,
-      trim: true,
-      default: ""
-    },
-
-    language: {
-      type: String,
-      enum: ["Hindi", "English", "Bilingual"],
-      default: "Bilingual"
-    },
-
-    duration: {
-      type: Number,
-      required: true,
-      default: 30
-    },
-
-    totalQuestions: {
-      type: Number,
-      default: 0
-    },
-
-    description: {
-      type: String,
-      default: ""
-    },
-
-    visible: {
-      type: Boolean,
-      default: false
-    },
-  isPaid: {
-    type: Boolean,
-    default: false
+    test_name: { type: String, required: true, trim: true },
+    exam_id: { type: mongoose.Schema.Types.ObjectId, ref: "Exam" },
+    batch: { type: String, default: "" },
+    language: { type: String, default: "Hindi + English" },
+    duration: { type: Number, default: 30 },
+    total_questions: { type: Number, default: 0 },
+    question_ids: [{ type: mongoose.Schema.Types.ObjectId, ref: "Question" }],
+    visible: { type: Boolean, default: true }
   },
-
-  price: {
-    type: Number,
-    default: 0
-  },
-    createdBy: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User"
-    }
-  },
-  {
-    timestamps: true
-  }
+  { timestamps: true }
 );
 
 module.exports = mongoose.model("Test", testSchema);

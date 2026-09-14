@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Free Mock Tests - ExamPrepHub</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+  body { background: #0f172a; color: #e2e8f0; min-height: 100vh; }
+  
+  header { background: #1e293b; padding: 16px 24px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.3); position: sticky; top: 0; z-index: 100; flex-wrap: wrap; gap: 12px; }
+  header h1 { font-size: 20px; color: #fbbf24; }
+  header nav { display: flex; gap: 8px; flex-wrap: wrap; }
+  header nav a { color: #e2e8f0; text-decoration: none; padding: 8px 16px; border-radius: 6px; background: #334155; font-size: 14px; }
+  header nav a:hover { background: #475569; }
+  
+  .container { max-width: 1200px; margin: 0 auto; padding: 24px; }
+  
+  .hero { text-align: center; padding: 40px 20px; }
+  .hero h2 { font-size: 32px; color: #fbbf24; margin-bottom: 10px; }
+  .hero p { color: #94a3b8; font-size: 16px; }
+  
+  .filters { display: flex; gap: 12px; margin: 30px 0; flex-wrap: wrap; }
+  .filters select, .filters input { padding: 12px 16px; border-radius: 8px; border: 1px solid #334155; background: #1e293b; color: #e2e8f0; font-size: 14px; min-width: 200px; outline: none; }
+  .filters select:focus, .filters input:focus { border-color: #fbbf24; }
+  .filters select option { background: #1e293b; color: #e2e8f0; }
+  
+  .tests-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px; margin-top: 20px; }
+  
+  .test-card { background: #1e293b; border: 1px solid #334155; border-radius: 12px; padding: 24px; transition: transform 0.2s, border-color 0.2s; cursor: pointer; }
+  .test-card:hover { transform: translateY(-4px); border-color: #fbbf24; }
+  
+  .test-card .subject-icon { font-size: 40px; margin-bottom: 12px; }
+  .test-card h3 { font-size: 18px; color: #f1f5f9; margin-bottom: 8px; }
+  .test-card .meta { display: flex; gap: 16px; color: #94a3b8; font-size: 13px; margin: 12px 0; flex-wrap: wrap; }
+  .test-card .badge { display: inline-block; padding: 4px 10px; background: #334155; color: #fbbf24; border-radius: 20px; font-size: 11px; margin-right: 6px; margin-bottom: 6px; }
+  .test-card .start-btn { width: 100%; padding: 12px; background: #fbbf24; color: #0f172a; border: none; border-radius: 8px; font-weight: 700; font-size: 15px; cursor: pointer; margin-top: 12px; transition: background 0.2s; }
+  .test-card .start-btn:hover { background: #f59e0b; }
+  
+  .empty { text-align: center; padding: 60px 20px; color: #94a3b8; }
+  .empty h3 { font-size: 20px; margin-bottom: 10px; }
+  .loading { text-align: center; padding: 60px; color: #94a3b8; }
+  
+  .filter-info { background: #1e293b; border-left: 4px solid #fbbf24; padding: 12px 16px; border-radius: 8px; margin-bottom: 20px; color: #cbd5e1; font-size: 14px; display: none; }
+  .filter-info.show { display: block; }
+  
+  @media (max-width: 600px) {
+    .hero h2 { font-size: 24px; }
+    .filters select, .filters input { min-width: 100%; }
+    .tests-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🏆 ExamPrepHub</h1>
+  <nav>
+    <a href="/">🏠 Home</a>
+    <a href="/test.html">📝 Tests</a>
+    <a href="/admin.html">👑 Admin</a>
+  </nav>
+</header>
+
+<div class="container">
+  <div class="hero">
+    <h2>🎯 Free Mock Tests</h2>
+    <p>बिना register किए test दें और अपनी तैयारी जांचें!</p>
+  </div>
+
+  <div id="filterInfo" class="filter-info"></div>
+
+  <div class="filters">
+    <select id="subjectFilter">
+      <option value="">-- सभी Subjects --</option>
+    </select>
+    <select id="chapterFilter">
+      <option value="">-- सभी Chapters --</option>
+    </select>
+    <select id="examFilter">
+      <option value="">-- सभी Exams --</option>
+    </select>
+    <input type="text" id="searchInput" placeholder="🔍 Test खोजें...">
+  </div>
+
+  <div id="testsGrid" class="tests-grid">
+    <div class="loading">⏳ Tests load हो रहे हैं...</div>
+  </div>
+  <div id="emptyState" class="empty" style="display: none;">
+    <h3>कोई Test नहीं मिला</h3>
+    <p>कृपया filter बदलें या बाद में try करें।</p>
+  </div>
+</div>
+
+<script>
+const SUBJECTS_URL = '/data/subjects.json';
+const TESTS_URL = '/data/tests.json';
+
+let allTests = [];
+let allSubjects = [];
+
+async function loadData() {
+  try {
+    const [subsRes, testsRes] = await Promise.all([
+      fetch(SUBJECTS_URL),
+      fetch(TESTS_URL)
+    ]);
+    const subsData = await subsRes.json();
+    const testsData = await testsRes.json();
+    
+    allSubjects = subsData.subjects || [];
+    allTests = testsData.tests || [];
+    
+    populateSubjectFilter();
+    populateChapterFilter();
+    populateExamFilter();
+    renderTests(allTests);
+    
+    // URL parameters से auto-filter
+    applyUrlFilters();
+  } catch (err) {
+    console.error(err);
+    document.getElementById('testsGrid').innerHTML = 
+      '<div class="empty"><h3>❌ Tests load नहीं हो पाए</h3><p>' + err.message + '</p></div>';
+  }
+}
+
+function applyUrlFilters() {
+  const params = new URLSearchParams(window.location.search);
+  const urlSubject = params.get('subject');
+  const urlExam = params.get('exam');
+  const urlChapter = params.get('chapter');
+  
+  let infoText = [];
+  let filtersApplied = false;
+  
+  if (urlSubject) {
+    const matched = allSubjects.find(s => 
+      s.id === urlSubject || 
+      s.name.toLowerCase().includes(urlSubject.toLowerCase()) ||
+      (s.name_hi && s.name_hi.includes(urlSubject))
+    );
+    if (matched) {
+      document.getElementById('subjectFilter').value = matched.id;
+      infoText.push(matched.icon + ' ' + matched.name_hi);
+      filtersApplied = true;
+    }
+  }
+  
+  if (urlChapter) {
+    document.getElementById('chapterFilter').value = urlChapter;
+    infoText.push('📑 ' + urlChapter);
+    filtersApplied = true;
+  }
+  
+  if (urlExam) {
+    document.getElementById('examFilter').value = urlExam;
+    infoText.push('🎯 ' + urlExam);
+    filtersApplied = true;
+  }
+  
+  if (filtersApplied) {
+    const info = document.getElementById('filterInfo');
+    info.innerHTML = '🔍 <strong>Filter:</strong> ' + infoText.join(' • ');
+    info.classList.add('show');
+    applyFilters();
+  }
+}
+
+function populateSubjectFilter() {
+  const sel = document.getElementById('subjectFilter');
+  allSubjects.forEach(s => {
+    sel.innerHTML += '<option value="' + s.id + '">' + s.icon + ' ' + s.name_hi + '</option>';
+  });
+}
+
+function populateChapterFilter() {
+  const chapters = [...new Set(allTests.map(t => t.chapter).filter(Boolean))];
+  const sel = document.getElementById('chapterFilter');
+  chapters.forEach(c => {
+    sel.innerHTML += '<option value="' + c + '">' + c + '</option>';
+  });
+}
+
+function populateExamFilter() {
+  const exams = [...new Set(allTests.map(t => t.exam).filter(Boolean))];
+  const sel = document.getElementById('examFilter');
+  exams.forEach(e => {
+    sel.innerHTML += '<option value="' + e + '">' + e + '</option>';
+  });
+}
+
+function renderTests(tests) {
+  const grid = document.getElementById('testsGrid');
+  const empty = document.getElementById('emptyState');
+  
+  if (tests.length === 0) {
+    grid.innerHTML = '';
+    empty.style.display = 'block';
+    return;
+  }
+  empty.style.display = 'none';
+  
+  grid.innerHTML = tests.map(test => {
+    const subj = allSubjects.find(s => s.id === test.subject) || { icon: '📝', name_hi: test.subject || 'General' };
+    const qCount = test.total_questions || (test.questions || []).length;
+    return `
+      <div class="test-card" onclick="startTest('${test.id}')">
+        <div class="subject-icon">${subj.icon}</div>
+        <h3>${test.title_hi || test.title}</h3>
+        <div class="meta">
+          <span>📝 ${qCount} प्रश्न</span>
+          <span>⏱️ ${test.duration} मिनट</span>
+        </div>
+        <div>
+          ${subj.name_hi ? '<span class="badge">' + subj.icon + ' ' + subj.name_hi + '</span>' : ''}
+          ${test.exam ? '<span class="badge">🎯 ' + test.exam + '</span>' : ''}
+        </div>
+        <button class="start-btn">🚀 Test शुरू करें</button>
+      </div>
+    `;
+  }).join('');
+}
+
+function startTest(testId) {
+  window.location.href = '/test-attempt.html?id=' + testId;
+}
+
+document.getElementById('subjectFilter').addEventListener('change', applyFilters);
+document.getElementById('chapterFilter').addEventListener('change', applyFilters);
+document.getElementById('examFilter').addEventListener('change', applyFilters);
+document.getElementById('searchInput').addEventListener('input', applyFilters);
+
+function applyFilters() {
+  const subj = document.getElementById('subjectFilter').value;
+  const chapter = document.getElementById('chapterFilter').value;
+  const exam = document.getElementById('examFilter').value;
+  const search = document.getElementById('searchInput').value.toLowerCase();
+  
+  let filtered = allTests;
+  if (subj) filtered = filtered.filter(t => t.subject === subj);
+  if (chapter) filtered = filtered.filter(t => t.chapter === chapter);
+  if (exam) filtered = filtered.filter(t => t.exam === exam);
+  if (search) filtered = filtered.filter(t => 
+    ((t.title || '') + ' ' + (t.title_hi || '')).toLowerCase().includes(search)
+  );
+  
+  renderTests(filtered);
+}
+
+loadData();
+</script>
+</body>
+</html>

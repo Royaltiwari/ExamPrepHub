@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<title>Manage Tests - ExamPrepHub</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+  body { background: #0f172a; color: #e2e8f0; min-height: 100vh; }
+  .header { background: #1e293b; padding: 16px 24px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.3); }
+  .header h1 { font-size: 20px; color: #fbbf24; }
+  .header nav a { color: #e2e8f0; text-decoration: none; padding: 8px 16px; border-radius: 6px; background: #334155; margin-left: 8px; font-size: 14px; }
+  .container { max-width: 1200px; margin: 0 auto; padding: 24px; }
+  .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 12px; }
+  .top-bar h2 { color: #fbbf24; }
+  .btn { padding: 10px 20px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 14px; }
+  .btn-primary { background: #fbbf24; color: #0f172a; }
+  .btn-primary:hover { background: #f59e0b; }
+  .btn-danger { background: #dc2626; color: white; padding: 6px 12px; font-size: 12px; }
+  .btn-edit { background: #2563eb; color: white; padding: 6px 12px; font-size: 12px; }
+  .btn-secondary { background: #334155; color: #e2e8f0; }
+  .card { background: #1e293b; border: 1px solid #334155; border-radius: 10px; padding: 20px; margin-bottom: 16px; }
+  .form-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-bottom: 16px; }
+  .form-group label { display: block; color: #94a3b8; font-size: 12px; margin-bottom: 4px; font-weight: 600; }
+  .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #334155; background: #0f172a; color: #e2e8f0; font-size: 14px; outline: none; }
+  .form-group input:focus, .form-group select:focus { border-color: #fbbf24; }
+  table { width: 100%; border-collapse: collapse; }
+  th, td { padding: 12px; text-align: left; border-bottom: 1px solid #334155; font-size: 14px; }
+  th { background: #0f172a; color: #94a3b8; font-size: 12px; text-transform: uppercase; }
+  .status { padding: 12px; border-radius: 6px; margin-bottom: 16px; display: none; }
+  .status.success { background: #064e3b; color: #10b981; display: block; }
+  .status.error { background: #7f1d1d; color: #f87171; display: block; }
+  .modal { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); display: none; align-items: center; justify-content: center; z-index: 1000; padding: 20px; }
+  .modal.show { display: flex; }
+  .modal-box { background: #1e293b; border-radius: 12px; padding: 24px; width: 100%; max-width: 800px; max-height: 90vh; overflow-y: auto; }
+  .modal-box h3 { color: #fbbf24; margin-bottom: 20px; }
+  .loading { text-align: center; padding: 40px; color: #94a3b8; }
+  .empty { text-align: center; padding: 40px; color: #94a3b8; }
+  .badge { display: inline-block; padding: 3px 8px; background: #334155; color: #fbbf24; border-radius: 12px; font-size: 11px; margin-right: 4px; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>📝 Manage Tests</h1>
+  <nav>
+    <a href="/admin.html">← Admin</a>
+    <a href="/">🏠 Home</a>
+  </nav>
+</div>
+
+<div class="container">
+  <div class="top-bar">
+    <h2>🎯 सभी Tests</h2>
+    <button class="btn btn-primary" onclick="openCreateModal()">+ नया Test बनाएँ</button>
+  </div>
+
+  <div id="status" class="status"></div>
+
+  <div class="card">
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Test Name</th>
+          <th>Exam</th>
+          <th>Subject</th>
+          <th>Questions</th>
+          <th>Duration</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="testsTable">
+        <tr><td colspan="7" class="loading">⏳ Loading...</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- CREATE/EDIT MODAL -->
+<div id="testModal" class="modal">
+  <div class="modal-box">
+    <h3 id="modalTitle">➕ नया Test बनाएँ</h3>
+    
+    <input type="hidden" id="editTestId">
+    
+    <div class="form-row">
+      <div class="form-group">
+        <label>Test Name (Hindi) *</label>
+        <input type="text" id="testTitleHi" placeholder="सामान्य ज्ञान टेस्ट 01">
+      </div>
+      <div class="form-group">
+        <label>Test Name (English)</label>
+        <input type="text" id="testTitle" placeholder="GK Test 01">
+      </div>
+    </div>
+    
+    <div class="form-row">
+      <div class="form-group">
+        <label>Exam</label>
+        <select id="testExam">
+          <option value="">-- Select Exam --</option>
+          <option value="SSC GD">SSC GD</option>
+          <option value="SSC CGL">SSC CGL</option>
+          <option value="SSC CHSL">SSC CHSL</option>
+          <option value="UPSSSC PET">UPSSSC PET</option>
+          <option value="Railway">Railway</option>
+          <option value="UP Police">UP Police</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Subject</label>
+        <select id="testSubject">
+          <option value="">-- Select Subject --</option>
+          <option value="gk">General Knowledge</option>
+          <option value="gs">General Studies</option>
+          <option value="polity">Indian Polity</option>
+          <option value="history">History</option>
+          <option value="geography">Geography</option>
+          <option value="math">Mathematics</option>
+          <option value="reasoning">Reasoning</option>
+          <option value="english">English</option>
+          <option value="hindi">Hindi</option>
+          <option value="science">Science</option>
+          <option value="current">Current Affairs</option>
+          <option value="computer">Computer</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Chapter</label>
+        <input type="text" id="testChapter" placeholder="General">
+      </div>
+    </div>
+    
+    <div class="form-row">
+      <div class="form-group">
+        <label>Duration (minutes) *</label>
+        <input type="number" id="testDuration" value="15">
+      </div>
+      <div class="form-group">
+        <label>Total Questions</label>
+        <input type="number" id="testTotal" value="0" readonly style="background:#0a0f1a;">
+      </div>
+    </div>
+    
+    <div class="form-group" style="margin-top: 16px;">
+      <label>📄 Questions Upload (PDF/DOCX/TXT)</label>
+      <input type="file" id="questionsFile" accept=".pdf,.docx,.doc,.txt" style="padding: 8px; background: #0f172a;">
+      <small style="color:#94a3b8;display:block;margin-top:4px;">Optional — questions file upload करें</small>
+    </div>
+    
+    <div class="form-group" style="margin-top: 16px;">
+      <label>✍️ या Manual Questions (JSON format)</label>
+      <textarea id="questionsJson" rows="6" placeholder='[{"question_hi":"...","options":["A","B","C","D"],"answer":"A"}]'></textarea>
+    </div>
+    
+    <div style="display:flex;gap:12px;justify-content:flex-end;margin-top:20px;">
+      <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveTest()" id="saveBtn">💾 Save</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const API = '/api/tests';
+let allTests = [];
+
+function showStatus(msg, type) {
+  const el = document.getElementById('status');
+  el.textContent = msg;
+  el.className = 'status ' + type;
+  setTimeout(() => el.className = 'status', 4000);
+}
+
+async function loadTests() {
+  try {
+    const res = await fetch(API, { credentials: 'include' });
+    const data = await res.json();
+    allTests = data.data || [];
+    renderTable();
+  } catch (e) {
+    showStatus('❌ ' + e.message, 'error');
+  }
+}
+
+function renderTable() {
+  const tbody = document.getElementById('testsTable');
+  
+  if (!allTests.length) {
+    tbody.innerHTML = '<tr><td colspan="7" class="empty">कोई test नहीं है। "नया Test बनाएँ" पर click करें।</td></tr>';
+    return;
+  }
+  
+  tbody.innerHTML = allTests.map((t, i) => `
+    <tr>
+      <td>${i + 1}</td>
+      <td><strong>${t.test_name || t.title_hi || t.title}</strong></td>
+      <td>${t.exam_name || t.exam || '-'}</td>
+      <td>${t.subject || '-'}</td>
+      <td>${t.total_questions || 0}</td>
+      <td>${t.duration || 30} min</td>
+      <td>
+        <button class="btn btn-edit" onclick="editTest('${t._id}')">✏️ Edit</button>
+        <button class="btn btn-danger" onclick="deleteTest('${t._id}')">🗑️ Delete</button>
+      </td>
+    </tr>
+  `).join('');
+}
+
+function openCreateModal() {
+  document.getElementById('modalTitle').textContent = '➕ नया Test बनाएँ';
+  document.getElementById('editTestId').value = '';
+  document.getElementById('testTitleHi').value = '';
+  document.getElementById('testTitle').value = '';
+  document.getElementById('testExam').value = '';
+  document.getElementById('testSubject').value = '';
+  document.getElementById('testChapter').value = '';
+  document.getElementById('testDuration').value = 15;
+  document.getElementById('testTotal').value = 0;
+  document.getElementById('questionsFile').value = '';
+  document.getElementById('questionsJson').value = '';
+  document.getElementById('testModal').classList.add('show');
+}
+
+function closeModal() {
+  document.getElementById('testModal').classList.remove('show');
+}
+
+async function editTest(id) {
+  const test = allTests.find(t => t._id === id);
+  if (!test) return;
+  
+  document.getElementById('modalTitle').textContent = '✏️ Test Edit करें';
+  document.getElementById('editTestId').value = id;
+  document.getElementById('testTitleHi').value = test.test_name || test.title_hi || '';
+  document.getElementById('testTitle').value = test.title || '';
+  document.getElementById('testExam').value = test.exam_name || test.exam || '';
+  document.getElementById('testSubject').value = test.subject || '';
+  document.getElementById('testChapter').value = test.chapter || '';
+  document.getElementById('testDuration').value = test.duration || 30;
+  document.getElementById('testTotal').value = test.total_questions || 0;
+  document.getElementById('questionsFile').value = '';
+  document.getElementById('questionsJson').value = '';
+  document.getElementById('testModal').classList.add('show');
+}
+
+async function saveTest() {
+  const btn = document.getElementById('saveBtn');
+  btn.disabled = true;
+  btn.textContent = '⏳ Saving...';
+  
+  try {
+    const id = document.getElementById('editTestId').value;
+    const titleHi = document.getElementById('testTitleHi').value.trim();
+    const title = document.getElementById('testTitle').value.trim();
+    
+    if (!titleHi && !title) {
+      showStatus('❌ Test name required', 'error');
+      btn.disabled = false;
+      btn.textContent = '💾 Save';
+      return;
+    }
+    
+    const testData = {
+      test_name: titleHi || title,
+      title: title,
+      title_hi: titleHi,
+      exam_name: document.getElementById('testExam').value,
+      exam: document.getElementById('testExam').value,
+      subject: document.getElementById('testSubject').value,
+      chapter: document.getElementById('testChapter').value || 'General',
+      duration: parseInt(document.getElementById('testDuration').value) || 30
+    };
+    
+    // Parse manual questions
+    let manualQuestions = [];
+    const jsonText = document.getElementById('questionsJson').value.trim();
+    if (jsonText) {
+      try {
+        manualQuestions = JSON.parse(jsonText);
+      } catch (e) {
+        showStatus('❌ JSON format गलत है', 'error');
+        btn.disabled = false;
+        btn.textContent = '💾 Save';
+        return;
+      }
+    }
+    
+    testData.questions = manualQuestions;
+    testData.total_questions = manualQuestions.length;
+    
+    const url = id ? API + '/' + id : API;
+    const method = id ? 'PUT' : 'POST';
+    
+    const res = await fetch(url, {
+      method: method,
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify(testData)
+    });
+    
+    const data = await res.json();
+    
+    if (data.success) {
+      showStatus('✅ Test saved successfully', 'success');
+      closeModal();
+      loadTests();
+    } else {
+      showStatus('❌ ' + data.message, 'error');
+    }
+  } catch (e) {
+    showStatus('❌ ' + e.message, 'error');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '💾 Save';
+  }
+}
+
+async function deleteTest(id) {
+  if (!confirm('Test delete करें?')) return;
+  
+  try {
+    const res = await fetch(API + '/' + id, {
+      method: 'DELETE',
+      credentials: 'include'
+    });
+    const data = await res.json();
+    if (data.success) {
+      showStatus('✅ Test deleted', 'success');
+      loadTests();
+    } else {
+      showStatus('❌ ' + data.message, 'error');
+    }
+  } catch (e) {
+    showStatus('❌ ' + e.message, 'error');
+  }
+}
+
+loadTests();
+</script>
+</body>
+</html>

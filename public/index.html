@@ -14,8 +14,6 @@
       🇮🇳❤️ देश प्रेम से बड़ा कोई प्रेम नहीं होता ❤️🇮🇳
       &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
       🇮🇳 जय हिन्द • वन्दे मातरम् 🇮🇳
-      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-      🇮🇳 देश प्रेम से बड़ा कोई प्रेम नहीं होता ❤️🇮🇳
     </div>
   </div>
 
@@ -24,7 +22,7 @@
       <a href="/index.html" class="logo">🏆 ExamPrepHub</a>
       <div class="header-actions">
         <a href="/index.html" class="btn-header">🏠 Home</a>
-        <a href="/exam-test.html" class="btn-header">📝 Tests</a>
+        <a href="/test.html" class="btn-header">📝 Tests</a>
         <a href="/login.html" class="btn-header">Login</a>
         <a href="/register.html" class="btn-header">Register</a>
         <a href="/admin.html" id="adminBtn" class="btn-header" style="display:none;">👑 Admin Panel</a>
@@ -36,9 +34,9 @@
     <div class="hero-content">
       <h1>🏆 ExamPrepHub</h1>
       <h2>भारत की Smart Competitive Exam Preparation Platform 🇮🇳</h2>
-      <p>SSC, Railway, Defence, Banking, Police, UPSSSC, Teaching और अन्य प्रतियोगी परीक्षाओं की तैयारी करें। Free Mock Tests, Test Series, Subject-wise और Chapter-wise Practice के साथ अपनी तैयारी को बेहतर बनाएं।</p>
+      <p>SSC, Railway, Defence, Banking, Police, UPSSSC, Teaching और अन्य प्रतियोगी परीक्षाओं की तैयारी करें।</p>
       <div class="hero-buttons">
-        <a href="/exam-test.html" class="btn btn-lg">📝 Free Mock Tests शुरू करें</a>
+        <a href="/test.html" class="btn btn-lg">📝 Free Mock Tests शुरू करें</a>
         <a href="/register.html" class="btn btn-lg btn-green">🚀 Free Account बनाएं</a>
       </div>
     </div>
@@ -47,45 +45,39 @@
   <section class="section">
     <h2 class="section-title">🎯 सभी प्रमुख Competitive Exams</h2>
     <p class="section-subtitle">अपनी परीक्षा चुनें और बेहतर तैयारी की शुरुआत करें।</p>
-    <div class="grid grid-4">
-      <div class="card exam-card"><div class="exam-icon">📚</div><h3>SSC Exams</h3><p>CGL, CHSL, MTS, GD, CPO, JE और अन्य</p></div>
-      <div class="card exam-card"><div class="exam-icon">🚆</div><h3>Railway Exams</h3><p>RRB NTPC, Group D, ALP, Technician आदि</p></div>
-      <div class="card exam-card"><div class="exam-icon">🪖</div><h3>Defence Exams</h3><p>Army, Navy, Air Force, Agniveer आदि</p></div>
-      <div class="card exam-card"><div class="exam-icon">👮</div><h3>Police Exams</h3><p>SSC GD, UP Police, Constable, SI आदि</p></div>
-      <div class="card exam-card"><div class="exam-icon">🏛️</div><h3>UPSSSC Exams</h3><p>PET, Lekhpal, VDO और अन्य परीक्षाएँ</p></div>
-      <div class="card exam-card"><div class="exam-icon">🏦</div><h3>Banking Exams</h3><p>IBPS, SBI, RBI और अन्य Banking Exams</p></div>
-      <div class="card exam-card"><div class="exam-icon">👨‍🏫</div><h3>Teaching Exams</h3><p>CTET, UPTET, TET और Teaching Exams</p></div>
-      <div class="card exam-card"><div class="exam-icon">🎓</div><h3>Other Exams</h3><p>State और अन्य Competitive Examinations</p></div>
-    </div>
+    <div class="grid grid-4" id="examsGrid"></div>
   </section>
 
   <section class="section">
     <h2 class="section-title">📚 सभी प्रमुख Subjects</h2>
     <p class="section-subtitle">Subject-wise और Chapter-wise तैयारी करें</p>
-    <div class="grid grid-4">
-      <div class="card"><div class="exam-icon">🌍</div><h3>General Knowledge</h3></div>
-      <div class="card"><div class="exam-icon">🧠</div><h3>General Studies</h3></div>
-      <div class="card"><div class="exam-icon">🏛️</div><h3>Indian Polity</h3></div>
-      <div class="card"><div class="exam-icon">📜</div><h3>History</h3></div>
-      <div class="card"><div class="exam-icon">🌏</div><h3>Geography</h3></div>
-      <div class="card"><div class="exam-icon">➗</div><h3>Mathematics</h3></div>
-      <div class="card"><div class="exam-icon">🧩</div><h3>Reasoning</h3></div>
-      <div class="card"><div class="exam-icon">🔤</div><h3>English</h3></div>
-      <div class="card"><div class="exam-icon">🪔</div><h3>Hindi</h3></div>
-      <div class="card"><div class="exam-icon">🔬</div><h3>Science</h3></div>
-      <div class="card"><div class="exam-icon">📰</div><h3>Current Affairs</h3></div>
-      <div class="card"><div class="exam-icon">💻</div><h3>Computer</h3></div>
-    </div>
+    <div class="grid grid-4" id="subjectsGrid"></div>
   </section>
 
   <section class="section">
     <h2 class="section-title">🚀 ExamPrepHub Features</h2>
     <p class="section-subtitle">परीक्षा की तैयारी के लिए जरूरी सुविधाएँ</p>
     <div class="grid grid-4">
-      <div class="card"><div class="exam-icon">📝</div><h3>Free Mock Tests</h3><p>अलग-अलग परीक्षाओं के Free Mock Tests।</p></div>
-      <div class="card"><div class="exam-icon">📚</div><h3>Subject-wise Tests</h3><p>विषय के अनुसार Practice Tests।</p></div>
-      <div class="card"><div class="exam-icon">⏱️</div><h3>Exam Timer</h3><p>Real exam जैसी timed practice।</p></div>
-      <div class="card"><div class="exam-icon">📊</div><h3>Detailed Results</h3><p>Score और सही/गलत answers देखें।</p></div>
+      <a href="/test.html" class="card">
+        <div class="exam-icon">📝</div>
+        <h3>Free Mock Tests</h3>
+        <p>अलग-अलग परीक्षाओं के Free Mock Tests।</p>
+      </a>
+      <a href="/test.html" class="card">
+        <div class="exam-icon">📚</div>
+        <h3>Subject-wise Tests</h3>
+        <p>विषय के अनुसार Practice Tests।</p>
+      </a>
+      <a href="/test.html" class="card">
+        <div class="exam-icon">⏱️</div>
+        <h3>Exam Timer</h3>
+        <p>Real exam जैसी timed practice।</p>
+      </a>
+      <a href="/test.html" class="card">
+        <div class="exam-icon">📊</div>
+        <h3>Detailed Results</h3>
+        <p>Score और सही/गलत answers देखें।</p>
+      </a>
     </div>
   </section>
 
@@ -101,15 +93,14 @@
     <p>
       <a href="/about.html">About Us</a> |
       <a href="/contact.html">Contact Us</a> |
-      <a href="/privacy-policy.html">Privacy Policy</a> |
-      <a href="/disclaimer.html">Disclaimer</a> |
-      <a href="/terms.html">Terms & Conditions</a>
+      <a href="/privacy-policy.html">Privacy Policy</a>
     </p>
     <p>🇮🇳 देश प्रेम से बड़ा कोई प्रेम नहीं होता 🇮🇳</p>
   </footer>
 
   <script src="/js/common.js"></script>
   <script>
+    // Admin button check
     async function checkAdmin() {
       try {
         const r = await fetch("/api/auth/me", { credentials: "include" });
@@ -124,29 +115,59 @@
     }
     checkAdmin();
 
-    document.addEventListener("DOMContentLoaded", function () {
-      const exams = [
-        "SSC CGL","SSC CHSL","SSC MTS","SSC GD","SSC CPO","SSC JE",
-        "SSC Stenographer","SSC Selection Post","SSC JHT","SSC Delhi Police","SSC SI",
-        "RRB NTPC","RRB Group D","RRB ALP","RRB Technician","RRB JE",
-        "Army Agniveer GD","Army GD","Navy Agniveer","Air Force Agniveer",
-        "BSF","CRPF","CISF","ITBP","SSB","Assam Rifles","Territorial Army",
-        "UPSSSC PET","UPSSSC Lekhpal","UPSSSC VDO",
-        "UP Police Constable","UP Police SI","UP Teacher Exams","CTET","TET Exams"
-      ];
-      document.querySelectorAll("a, .card, .exam-card, .mini-card").forEach(function (el) {
-        const text = el.textContent.trim();
-        const match = exams.find(e => text.includes(e));
-        if (!match) return;
-        if (el.tagName.toLowerCase() === "a") {
-          el.href = "/exam-test.html?exam=" + encodeURIComponent(match);
-        } else {
-          el.style.cursor = "pointer";
-          el.addEventListener("click", function () {
-            window.location.href = "/exam-test.html?exam=" + encodeURIComponent(match);
-          });
-        }
-      });
+    // Exams data
+    const examsData = [
+      { id: "ssc", name: "SSC Exams", icon: "📚", desc: "CGL, CHSL, MTS, GD, CPO, JE और अन्य" },
+      { id: "railway", name: "Railway Exams", icon: "🚆", desc: "RRB NTPC, Group D, ALP, Technician आदि" },
+      { id: "defence", name: "Defence Exams", icon: "🪖", desc: "Army, Navy, Air Force, Agniveer आदि" },
+      { id: "police", name: "Police Exams", icon: "👮", desc: "SSC GD, UP Police, Constable, SI आदि" },
+      { id: "upsssc", name: "UPSSSC Exams", icon: "🏛️", desc: "PET, Lekhpal, VDO और अन्य परीक्षाएँ" },
+      { id: "banking", name: "Banking Exams", icon: "🏦", desc: "IBPS, SBI, RBI और अन्य Banking Exams" },
+      { id: "teaching", name: "Teaching Exams", icon: "👨‍🏫", desc: "CTET, UPTET, TET और Teaching Exams" },
+      { id: "other", name: "Other Exams", icon: "🎓", desc: "State और अन्य Competitive Examinations" }
+    ];
+
+    // Subjects data
+    const subjectsData = [
+      { id: "gk", name: "General Knowledge", icon: "🌍" },
+      { id: "gs", name: "General Studies", icon: "🧠" },
+      { id: "polity", name: "Indian Polity", icon: "🏛️" },
+      { id: "history", name: "History", icon: "📜" },
+      { id: "geography", name: "Geography", icon: "🌏" },
+      { id: "math", name: "Mathematics", icon: "➗" },
+      { id: "reasoning", name: "Reasoning", icon: "🧩" },
+      { id: "english", name: "English", icon: "🔤" },
+      { id: "hindi", name: "Hindi", icon: "🪔" },
+      { id: "science", name: "Science", icon: "🔬" },
+      { id: "current", name: "Current Affairs", icon: "📰" },
+      { id: "computer", name: "Computer", icon: "💻" }
+    ];
+
+    // Render Exams
+    const examsGrid = document.getElementById("examsGrid");
+    examsData.forEach(e => {
+      const card = document.createElement("a");
+      card.href = "/test.html?exam=" + encodeURIComponent(e.id);
+      card.className = "card exam-card";
+      card.innerHTML = `
+        <div class="exam-icon">${e.icon}</div>
+        <h3>${e.name}</h3>
+        <p>${e.desc}</p>
+      `;
+      examsGrid.appendChild(card);
+    });
+
+    // Render Subjects
+    const subjectsGrid = document.getElementById("subjectsGrid");
+    subjectsData.forEach(s => {
+      const card = document.createElement("a");
+      card.href = "/test.html?subject=" + encodeURIComponent(s.id);
+      card.className = "card";
+      card.innerHTML = `
+        <div class="exam-icon">${s.icon}</div>
+        <h3>${s.name}</h3>
+      `;
+      subjectsGrid.appendChild(card);
     });
   </script>
 </body>

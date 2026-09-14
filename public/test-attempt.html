@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Test Attempt - ExamPrepHub</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+  body { background: #0f172a; color: #e2e8f0; min-height: 100vh; }
+  
+  header { background: #1e293b; padding: 16px 24px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.3); position: sticky; top: 0; z-index: 100; }
+  header h1 { font-size: 18px; color: #fbbf24; }
+  .timer { background: #334155; color: #fbbf24; padding: 8px 16px; border-radius: 8px; font-weight: 700; font-size: 18px; }
+  .timer.warning { background: #dc2626; color: white; animation: pulse 1s infinite; }
+  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
+  
+  .container { max-width: 900px; margin: 0 auto; padding: 24px; }
+  
+  .progress-bar { width: 100%; height: 6px; background: #334155; border-radius: 3px; margin-bottom: 20px; overflow: hidden; }
+  .progress-fill { height: 100%; background: #fbbf24; transition: width 0.3s; }
+  
+  .question-box { background: #1e293b; border: 1px solid #334155; border-radius: 12px; padding: 30px; margin-bottom: 20px; }
+  .q-number { color: #fbbf24; font-weight: 700; margin-bottom: 12px; font-size: 14px; }
+  .q-text-hi { font-size: 18px; line-height: 1.5; margin-bottom: 8px; color: #f1f5f9; }
+  .q-text-en { font-size: 15px; line-height: 1.5; margin-bottom: 24px; color: #94a3b8; font-style: italic; }
+  
+  .options { display: flex; flex-direction: column; gap: 12px; }
+  .option { display: flex; align-items: flex-start; gap: 12px; padding: 16px; background: #0f172a; border: 2px solid #334155; border-radius: 10px; cursor: pointer; transition: all 0.2s; }
+  .option:hover { border-color: #fbbf24; background: #1e293b; }
+  .option.selected { border-color: #fbbf24; background: #1e293b; }
+  .option.correct { border-color: #10b981; background: #064e3b; }
+  .option.wrong { border-color: #dc2626; background: #7f1d1d; }
+  .option-label { width: 30px; height: 30px; border-radius: 50%; background: #334155; display: flex; align-items: center; justify-content: center; font-weight: 700; flex-shrink: 0; color: #fbbf24; }
+  .option.selected .option-label { background: #fbbf24; color: #0f172a; }
+  .option.correct .option-label { background: #10b981; color: white; }
+  .option.wrong .option-label { background: #dc2626; color: white; }
+  .option-text { flex: 1; }
+  .option-text .en { font-size: 13px; color: #94a3b8; margin-top: 4px; font-style: italic; }
+  
+  .explanation { background: #0f172a; border-left: 4px solid #fbbf24; padding: 16px; border-radius: 8px; margin-top: 20px; display: none; }
+  .explanation.show { display: block; }
+  .explanation h4 { color: #fbbf24; margin-bottom: 8px; font-size: 14px; }
+  .explanation p { color: #cbd5e1; font-size: 14px; line-height: 1.6; margin-bottom: 8px; }
+  .key-points { list-style: none; margin-top: 10px; }
+  .key-points li { color: #cbd5e1; font-size: 13px; padding: 4px 0 4px 20px; position: relative; }
+  .key-points li::before { content: '•'; position: absolute; left: 8px; color: #fbbf24; }
+  
+  .nav-buttons { display: flex; justify-content: space-between; gap: 12px; margin-top: 20px; flex-wrap: wrap; }
+  .btn { padding: 14px 32px; border: none; border-radius: 8px; font-size: 15px; font-weight: 700; cursor: pointer; transition: all 0.2s; }
+  .btn-primary { background: #fbbf24; color: #0f172a; }
+  .btn-primary:hover { background: #f59e0b; }
+  .btn-secondary { background: #334155; color: #e2e8f0; }
+  .btn-secondary:hover { background: #475569; }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  
+  .result-box { background: #1e293b; border: 1px solid #334155; border-radius: 12px; padding: 40px; text-align: center; }
+  .result-box h2 { color: #fbbf24; font-size: 32px; margin-bottom: 20px; }
+  .score { font-size: 60px; font-weight: 700; margin: 20px 0; }
+  .stats { display: flex; justify-content: center; gap: 40px; margin: 30px 0; flex-wrap: wrap; }
+  .stat { text-align: center; min-width: 80px; }
+  .stat .num { font-size: 28px; font-weight: 700; }
+  .stat .label { color: #94a3b8; font-size: 13px; margin-top: 4px; }
+  .stat.correct .num { color: #10b981; }
+  .stat.wrong .num { color: #dc2626; }
+  .stat.skipped .num { color: #94a3b8; }
+  
+  .loading { text-align: center; padding: 60px; color: #94a3b8; font-size: 16px; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1 id="testTitle">📝 Test</h1>
+  <div class="timer" id="timer">⏱️ 00:00</div>
+</header>
+
+<div class="container">
+  <div id="testContent">
+    <div class="loading">⏳ Test load हो रहा है...</div>
+  </div>
+</div>
+
+<script>
+let test = null;
+let currentQ = 0;
+let answers = [];
+let timeLeft = 0;
+let timerInterval = null;
+
+function generateTestsFromQuestions(questions) {
+  const grouped = {};
+  questions.forEach(q => {
+    const subjId = q.subject_id ? (q.subject_id._id || q.subject_id) : 'general';
+    const subjName = q.subject_id ? (q.subject_id.name || 'General') : 'General';
+    const chapId = q.chapter_id ? (q.chapter_id._id || q.chapter_id) : 'general';
+    const chapName = q.chapter_id ? (q.chapter_id.chapter_name || 'General') : 'General';
+    const key = subjId + '_' + chapId;
+    if (!grouped[key]) {
+      grouped[key] = {
+        id: key,
+        title: chapName + ' Test',
+        title_hi: chapName + ' टेस्ट',
+        subject: subjId,
+        subject_name: subjName,
+        chapter: chapName,
+        chapter_id: chapId,
+        duration: 15,
+        total_questions: 0,
+        questions: []
+      };
+    }
+    grouped[key].questions.push({
+      question_hi: q.question_hi,
+      question_en: q.question_en,
+      options: q.options || [],
+      options_en: q.options_en || [],
+      answer: q.answer,
+      explanation_hi: q.explanation_hi,
+      explanation_en: q.explanation_en,
+      key_points: q.key_points || []
+    });
+    grouped[key].total_questions = grouped[key].questions.length;
+  });
+  return Object.values(grouped);
+}
+
+async function loadTest() {
+  const params = new URLSearchParams(window.location.search);
+  const testId = params.get('id');
+
+  if (!testId) {
+    document.getElementById('testContent').innerHTML = '<div class="loading">❌ Test ID missing</div>';
+    return;
+  }
+
+  // पहले sessionStorage से try करें
+  const stored = sessionStorage.getItem('currentTest');
+  if (stored) {
+    try {
+      test = JSON.parse(stored);
+    } catch (e) {}
+  }
+
+  // अगर नहीं मिला, API से generate करें
+  if (!test || test.id !== testId) {
+    try {
+      const res = await fetch('/api/questions');
+      const data = await res.json();
+      const questions = data.data || [];
+      const generated = generateTestsFromQuestions(questions);
+      test = generated.find(t => t.id === testId);
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  if (!test) {
+    document.getElementById('testContent').innerHTML = '<div class="loading">❌ Test नहीं मिला</div>';
+    return;
+  }
+
+  document.getElementById('testTitle').textContent = '📝 ' + (test.title_hi || test.title);
+  timeLeft = (test.duration || 15) * 60;
+  answers = new Array(test.questions.length).fill(null);
+
+  startTimer();
+  renderQuestion();
+}
+
+function startTimer() {
+  updateTimerDisplay();
+  timerInterval = setInterval(() => {
+    timeLeft--;
+    updateTimerDisplay();
+    if (timeLeft <= 60) {
+      document.getElementById('timer').classList.add('warning');
+    }
+    if (timeLeft <= 0) {
+      clearInterval(timerInterval);
+      submitTest();
+    }
+  }, 1000);
+}
+
+function updateTimerDisplay() {
+  const min = Math.floor(timeLeft / 60);
+  const sec = timeLeft % 60;
+  document.getElementById('timer').textContent = 
+    '⏱️ ' + String(min).padStart(2, '0') + ':' + String(sec).padStart(2, '0');
+}
+
+function renderQuestion() {
+  const q = test.questions[currentQ];
+  const total = test.questions.length;
+  const progress = ((currentQ + 1) / total) * 100;
+  const selected = answers[currentQ];
+  
+  document.getElementById('testContent').innerHTML = `
+    <div class="progress-bar">
+      <div class="progress-fill" style="width: ${progress}%"></div>
+    </div>
+    
+    <div class="question-box">
+      <div class="q-number">प्रश्न ${currentQ + 1} / ${total}</div>
+      <div class="q-text-hi">${q.question_hi || '-'}</div>
+      <div class="q-text-en">${q.question_en || ''}</div>
+      
+      <div class="options">
+        ${(q.options || []).map((opt, i) => {
+          const label = String.fromCharCode(65 + i);
+          const optEn = (q.options_en && q.options_en[i]) || '';
+          const isSelected = selected === label;
+          return `
+            <div class="option ${isSelected ? 'selected' : ''}" onclick="selectOption('${label}')">
+              <div class="option-label">${label}</div>
+              <div class="option-text">
+                <div>${opt}</div>
+                ${optEn ? '<div class="en">' + optEn + '</div>' : ''}
+              </div>
+            </div>
+          `;
+        }).join('')}
+      </div>
+    </div>
+    
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="prevQuestion()" ${currentQ === 0 ? 'disabled' : ''}>← पिछला</button>
+      ${currentQ === total - 1 
+        ? '<button class="btn btn-primary" onclick="submitTest()">✅ Submit Test</button>'
+        : '<button class="btn btn-primary" onclick="nextQuestion()">अगला →</button>'
+      }
+    </div>
+  `;
+}
+
+function selectOption(label) {
+  answers[currentQ] = label;
+  renderQuestion();
+}
+
+function nextQuestion() {
+  if (currentQ < test.questions.length - 1) {
+    currentQ++;
+    renderQuestion();
+  }
+}
+
+function prevQuestion() {
+  if (currentQ > 0) {
+    currentQ--;
+    renderQuestion();
+  }
+}
+
+function submitTest() {
+  if (timerInterval) clearInterval(timerInterval);
+  
+  let correct = 0;
+  let wrong = 0;
+  let skipped = 0;
+  
+  test.questions.forEach((q, i) => {
+    const ans = answers[i];
+    if (!ans) skipped++;
+    else if (ans === q.answer) correct++;
+    else wrong++;
+  });
+  
+  const total = test.questions.length;
+  const percentage = Math.round((correct / total) * 100);
+  const scoreColor = percentage >= 60 ? '#10b981' : percentage >= 40 ? '#fbbf24' : '#dc2626';
+  const message = percentage >= 60 ? '🎉 Excellent!' : percentage >= 40 ? '👍 Good Try!' : '💪 Keep Practicing!';
+  
+  document.getElementById('testContent').innerHTML = `
+    <div class="result-box">
+      <h2>${message}</h2>
+      <div class="score" style="color: ${scoreColor};">${percentage}%</div>
+      <p style="color:#94a3b8;font-size:16px;">आपने ${total} में से ${correct} सही किए</p>
+      
+      <div class="stats">
+        <div class="stat correct">
+          <div class="num">${correct}</div>
+          <div class="label">सही</div>
+        </div>
+        <div class="stat wrong">
+          <div class="num">${wrong}</div>
+          <div class="label">गलत</div>
+        </div>
+        <div class="stat skipped">
+          <div class="num">${skipped}</div>
+          <div class="label">छोड़े</div>
+        </div>
+      </div>
+      
+      <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
+        <button class="btn btn-primary" onclick="reviewAnswers()">📖 उत्तर देखें</button>
+        <button class="btn btn-secondary" onclick="window.location.href='/test.html'">🏠 और Tests</button>
+      </div>
+    </div>
+  `;
+  
+  document.getElementById('timer').style.display = 'none';
+}
+
+function reviewAnswers() {
+  let html = '<h2 style="color:#fbbf24;margin-bottom:20px;">📖 Detailed Solutions</h2>';
+  
+  test.questions.forEach((q, i) => {
+    const userAns = answers[i];
+    const isCorrect = userAns === q.answer;
+    
+    html += `
+      <div class="question-box">
+        <div class="q-number">प्रश्न ${i + 1} ${isCorrect ? '✅' : userAns ? '❌' : '⏭️'}</div>
+        <div class="q-text-hi">${q.question_hi || '-'}</div>
+        <div class="q-text-en">${q.question_en || ''}</div>
+        
+        <div class="options">
+          ${(q.options || []).map((opt, j) => {
+            const label = String.fromCharCode(65 + j);
+            const isAns = label === q.answer;
+            const isUser = label === userAns;
+            let cls = '';
+            if (isAns) cls = 'correct';
+            else if (isUser && !isCorrect) cls = 'wrong';
+            
+            return `
+              <div class="option ${cls}">
+                <div class="option-label">${label}</div>
+                <div class="option-text">${opt}</div>
+              </div>
+            `;
+          }).join('')}
+        </div>
+        
+        <div class="explanation show">
+          <h4>📌 व्याख्या (Explanation)</h4>
+          <p>${q.explanation_hi || 'N/A'}</p>
+          ${q.explanation_en ? '<p style="font-style:italic;color:#94a3b8;">' + q.explanation_en + '</p>' : ''}
+          ${q.key_points && q.key_points.length ? `
+            <h4 style="margin-top:12px;">🔑 मुख्य बिंदु (Key Points)</h4>
+            <ul class="key-points">
+              ${q.key_points.map(k => '<li>' + k + '</li>').join('')}
+            </ul>
+          ` : ''}
+        </div>
+      </div>
+    `;
+  });
+  
+  html += '<div style="text-align:center;margin-top:30px;margin-bottom:30px;">';
+  html += '<button class="btn btn-primary" onclick="window.location.href=\'/test.html\'">🏠 और Tests देखें</button>';
+  html += '</div>';
+  
+  document.getElementById('testContent').innerHTML = html;
+  window.scrollTo(0, 0);
+}
+
+loadTest();
+</script>
+</body>
+</html>
