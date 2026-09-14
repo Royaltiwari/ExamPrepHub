@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Class - ExamPrepHub</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+  <header class="header">
+    <div class="header-inner">
+      <a href="/home-class.html" class="logo">🏆 ExamPrepHub</a>
+      <div class="header-actions">
+        <a href="/home-class.html" class="btn-header">← Back</a>
+        <button class="btn-header" id="logoutBtn">Logout</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="layout-full" style="padding: 25px 20px; max-width: 1300px; margin: auto;">
+
+    <div id="loadingBox" class="loading-box">Loading class...</div>
+
+    <div id="contentBox" style="display: none;">
+
+      <!-- VIDEO PLAYER -->
+      <div class="card" style="padding: 0; overflow: hidden; margin-bottom: 20px;">
+        <div id="videoHeader" style="padding: 12px 18px; background: var(--bg-alt); display: flex; justify-content: space-between; align-items: center;">
+          <span id="statusBadge" class="badge badge-blue">Recorded</span>
+          <span class="text-muted" style="font-size: 13px;" id="viewsCount">0 views</span>
+        </div>
+        <div style="position: relative; padding-bottom: 56.25%; background: black;">
+          <iframe id="videoFrame" style="position:absolute; top:0; left:0; width:100%; height:100%; border:0;" allowfullscreen></iframe>
+        </div>
+      </div>
+
+      <!-- CLASS INFO -->
+      <div class="card" style="margin-bottom: 20px;">
+        <h1 id="classTitle" style="font-size: 22px; margin-bottom: 8px;"></h1>
+        <p class="text-muted" id="classMeta" style="font-size: 14px; margin-bottom: 12px;"></p>
+        <p id="classDesc" class="text-muted" style="line-height: 1.6;"></p>
+
+        <div id="pdfBtnBox" style="margin-top: 15px; display: none;">
+          <a id="pdfBtn" href="#" target="_blank" class="btn btn-red">
+            📄 Download PDF
+          </a>
+        </div>
+      </div>
+
+      <!-- CHAT -->
+      <div class="card">
+        <div class="card-heading">
+          <div class="heading-icon">💬</div>
+          <h2>Live Chat</h2>
+        </div>
+
+        <div id="chatBox" style="max-height: 400px; overflow-y: auto; margin-bottom: 15px; padding: 10px; background: var(--bg-alt); border-radius: 12px;">
+          <div class="empty-text">Loading chat...</div>
+        </div>
+
+        <div style="display: flex; gap: 10px;">
+          <input type="text" id="chatInput" class="form-input" placeholder="Type a message..." maxlength="500" />
+          <button class="btn btn-blue" id="sendBtn">Send</button>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+  <script src="/js/common.js"></script>
+  <script>
+    const classId = getQueryParam("id");
+    let currentUser = null;
+    let chatTimer = null;
+
+    // ==========================================
+    // LOAD CLASS
+    // ==========================================
+    async function loadClass() {
+      if (!classId) {
+        document.getElementById("loadingBox").innerHTML = '<div class="error">Class ID nahi mila</div>';
+        return;
+      }
+
+      try {
+        const r = await fetch("/api/classes/" + classId);
+        const data = await r.json();
+
+        if (!data.success) throw new Error(data.message);
+
+        const c = data.data;
+
+        // Video
+        const videoUrl = c.status === "live" ? c.liveUrl : c.recordedUrl;
+        const vid = getYouTubeId(videoUrl || "");
+
+        if (vid) {
+          document.getElementById("videoFrame").src = `https://www.youtube.com/embed/${vid}?autoplay=0`;
+        } else {
+          document.getElementById("videoFrame").outerHTML =
+            '<div style="position:absolute; top:0; left:0; width:100%; height:100%; display:flex; align-items:center; justify-content:center; color: white;">No video available</div>';
+        }
+
+        // Info
+        document.getElementById("classTitle").textContent = c.title;
+        document.getElementById("classMeta").textContent =
+          `${c.category} • ${c.examName} • ${c.subject} ${c.topic ? "• " + c.topic : ""} ${c.teacher ? "• " + c.teacher : ""}`;
+        document.getElementById("classDesc").textContent = c.description || "";
+
+        // Status badge
+        const badge = document.getElementById("statusBadge");
+        const statusColors = { scheduled: "badge-yellow", live: "badge-red", recorded: "badge-green" };
+        badge.className = "badge " + (statusColors[c.status] || "badge-blue");
+        badge.textContent = c.status.toUpperCase();
+
+        // Views
+        document.getElementById("viewsCount").textContent = (c.views || 0) + " views";
+
+        // PDF
+        if (c.supportingPdf) {
+          document.getElementById("pdfBtnBox").style.display = "block";
+          document.getElementById("pdfBtn").href = c.supportingPdf;
+        }
+
+        document.getElementById("loadingBox").style.display = "none";
+        document.getElementById("contentBox").style.display = "block";
+
+        // Start chat polling
+        loadChat();
+        chatTimer = setInterval(loadChat, 5000);
+
+      } catch (e) {
+        document.getElementById("loadingBox").innerHTML = '<div class="error">Class load nahi ho payi: ' + e.message + '</div>';
+      }
+    }
+
+    // ==========================================
+    // CHAT
+    // ==========================================
+    async function loadChat() {
+      const box = document.getElementById("chatBox");
+      try {
+        const r = await fetch(`/api/chat/${classId}`, { credentials: "include" });
+        const data = await r.json();
+        const messages = data.data || [];
+
+        if (!messages.length) {
+          box.innerHTML = '<div class="empty-text">Koi message nahi. Pehla message bhejo!</div>';
+          return;
+        }
+
+        box.innerHTML = messages.map(m => {
+          const isMe = currentUser && String(m.userId) === String(currentUser._id);
+          return `
+            <div style="padding: 8px 12px; margin-bottom: 6px; background: ${isMe ? "var(--primary-light)" : "var(--card-bg)"}; border-radius: 8px;">
+              <div style="font-weight: 700; font-size: 12px; color: ${isMe ? "var(--primary)" : "var(--text)"};">
+                ${escapeHtml(m.userName)} ${isMe ? "(You)" : ""}
+              </div>
+              <div style="font-size: 14px; margin-top: 3px; color: var(--text);">
+                ${escapeHtml(m.message)}
+              </div>
+              <div style="font-size: 10px; color: var(--muted); margin-top: 3px;">
+                ${new Date(m.createdAt).toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" })}
+              </div>
+            </div>
+          `;
+        }).join("");
+
+        box.scrollTop = box.scrollHeight;
+      } catch (e) {
+        console.error("Chat error:", e);
+      }
+    }
+
+    async function sendMessage() {
+      const input = document.getElementById("chatInput");
+      const msg = input.value.trim();
+      if (!msg) return;
+
+      input.disabled = true;
+      try {
+        const r = await fetch(`/api/chat/${classId}`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({ message: msg })
+        });
+        const data = await r.json();
+        if (data.success) {
+          input.value = "";
+          loadChat();
+        } else {
+          showAlert(data.message || "Failed", "error");
+        }
+      } catch (e) {
+        showAlert("Message send nahi hua", "error");
+      } finally {
+        input.disabled = false;
+        input.focus();
+      }
+    }
+
+    document.getElementById("sendBtn").addEventListener("click", sendMessage);
+    document.getElementById("chatInput").addEventListener("keypress", (e) => {
+      if (e.key === "Enter") sendMessage();
+    });
+
+    // ==========================================
+    // INIT
+    // ==========================================
+    (async function() {
+      currentUser = await requireLogin();
+      if (!currentUser) return;
+      loadClass();
+    })();
+  </script>
+
+</body>
+</html>

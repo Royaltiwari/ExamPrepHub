@@ -146,99 +146,92 @@
       font-weight: 700;
     }
 
-    /* 4 TABS */
-    .class-tabs {
-      display: flex;
-      gap: 6px;
-      margin-bottom: 14px;
-      overflow-x: auto;
-      scrollbar-width: none;
-      padding-bottom: 4px;
-    }
-    .class-tabs::-webkit-scrollbar { display: none; }
-    .class-tab {
-      padding: 8px 16px;
+    /* ✅ LIVE CARD - FIXED THUMBNAIL */
+    .live-card {
       background: var(--card-bg);
       border: 1px solid var(--border);
-      color: var(--muted);
-      font-size: 12px;
-      font-weight: 700;
-      border-radius: 20px;
-      cursor: pointer;
-      white-space: nowrap;
-      transition: all 0.2s;
+      border-radius: 14px;
+      overflow: hidden;
+      margin-bottom: 20px;
     }
-    .class-tab:hover { border-color: var(--primary); color: var(--text); }
-    .class-tab.active {
-      background: #fbbf24;
-      color: #0f172a;
-      border-color: #fbbf24;
-    }
-
-    /* CLASS ITEM */
-    .class-item {
-      background: var(--card-bg);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 12px;
+    .live-header {
+      background: linear-gradient(90deg, #dc2626, #b91c1c);
+      padding: 8px 14px;
       display: flex;
       align-items: center;
-      gap: 12px;
-      margin-bottom: 10px;
-      cursor: pointer;
-      transition: all 0.2s;
+      gap: 8px;
+      color: white;
+      font-weight: 900;
+      font-size: 12px;
+      letter-spacing: 1px;
     }
-    .class-item:hover { border-color: var(--primary); transform: translateY(-2px); }
-    .class-item-thumb {
-      width: 70px;
-      height: 50px;
-      border-radius: 8px;
-      background: var(--bg-alt);
+    .live-dot {
+      width: 8px; height: 8px;
+      background: white; border-radius: 50%;
+      animation: pulse 1.5s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+    .live-body {
+      padding: 14px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    /* ✅ THUMBNAIL FIX — object-fit: cover */
+    .live-thumb {
+      width: 90px;
+      height: 70px;
+      background: #1e1b4b;
+      border-radius: 10px;
+      flex-shrink: 0;
       background-size: cover;
       background-position: center;
       background-repeat: no-repeat;
-      flex-shrink: 0;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 22px;
+      font-size: 28px;
       overflow: hidden;
+      border: 1px solid var(--border);
     }
-    .class-item-info { flex: 1; min-width: 0; }
-    .class-item-info h4 {
-      font-size: 13px;
+    .live-thumb img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center;
+      display: block;
+      border-radius: 10px;
+    }
+
+    .live-info { flex: 1; min-width: 0; }
+    .live-info h3 {
+      font-size: 15px;
       margin-bottom: 4px;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
     }
-    .class-item-info p {
-      font-size: 11px;
+    .live-info p {
+      font-size: 12px;
       color: var(--muted);
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
     }
-    .class-item-badge {
-      padding: 4px 10px;
-      border-radius: 12px;
-      font-size: 10px;
+    .join-btn {
+      background: var(--gradient-red);
+      color: white;
+      padding: 8px 14px;
+      border-radius: 8px;
       font-weight: 800;
-      flex-shrink: 0;
+      font-size: 12px;
+      text-decoration: none;
       white-space: nowrap;
-    }
-    .badge-live { background: #dc2626; color: white; }
-    .badge-recorded { background: #10b981; color: white; }
-    .badge-scheduled { background: #f59e0b; color: white; }
-
-    .empty-msg {
-      text-align: center;
-      padding: 30px 20px;
-      color: var(--muted);
-      font-size: 13px;
-      background: var(--card-bg);
-      border: 1px dashed var(--border);
-      border-radius: 12px;
+      flex-shrink: 0;
     }
 
     /* CONTINUE LEARNING */
@@ -339,13 +332,15 @@
     .quick-card .ico { font-size: 26px; margin-bottom: 6px; }
     .quick-card .ttl { font-size: 12px; font-weight: 700; }
 
-    /* RECENT CLASSES GRID */
+    /* CONTINUE SECTION GRID */
     .grid-2 {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
       gap: 14px;
       margin-bottom: 20px;
     }
+
+    /* ✅ COURSE CARDS - FIXED THUMBNAIL */
     .course-card {
       background: var(--card-bg);
       border: 1px solid var(--border);
@@ -370,6 +365,13 @@
       justify-content: center;
       font-size: 36px;
       overflow: hidden;
+    }
+    .course-thumb img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center;
+      display: block;
     }
     .course-body { padding: 12px; }
     .course-body h4 {
@@ -434,8 +436,6 @@
       .stats-row { grid-template-columns: repeat(2, 1fr); }
       .quick-grid { grid-template-columns: repeat(3, 1fr); }
       .welcome h1 { font-size: 18px; }
-      .class-item-thumb { width: 60px; height: 45px; }
-      .class-item-info h4 { font-size: 12px; }
     }
   </style>
 </head>
@@ -457,7 +457,7 @@
   <!-- LAYOUT -->
   <div class="layout">
 
-    <!-- SIDEBAR -->
+    <!-- SIDEBAR (Desktop) -->
     <aside class="sidebar">
       <h3>Menu</h3>
       <a href="/dashboard.html" class="side-link active"><span class="icon">🏠</span> Dashboard</a>
@@ -491,25 +491,33 @@
         <div class="change">Change ▼</div>
       </div>
 
-      <!-- CLASSES SECTION WITH 4 TABS -->
-      <div class="sec-head">
-        <h2>🎥 Classes</h2>
-        <a href="/home-class.html">See All →</a>
-      </div>
+      <!-- LIVE CLASS -->
+   <!-- LIVE CLASS SECTION WITH 4 TABS -->
+<div class="sec-head">
+  <h2>🎥 Classes</h2>
+  <a href="/home-class.html">See All →</a>
+</div>
 
-      <div class="class-tabs">
-        <button class="class-tab active" onclick="switchClassTab('live', this)">🔴 Live</button>
-        <button class="class-tab" onclick="switchClassTab('recorded', this)">▶ Recorded</button>
-        <button class="class-tab" onclick="switchClassTab('scheduled', this)">📅 Upcoming</button>
-        <button class="class-tab" onclick="switchClassTab('all', this)">📚 All</button>
-      </div>
+<!-- 4 SMALL TABS -->
+<div class="class-tabs" style="display:flex;gap:6px;margin-bottom:12px;overflow-x:auto;scrollbar-width:none;">
+  <button class="class-tab active" onclick="switchClassTab('live')">🔴 Live</button>
+  <button class="class-tab" onclick="switchClassTab('recorded')">▶ Recorded</button>
+  <button class="class-tab" onclick="switchClassTab('scheduled')">📅 Upcoming</button>
+  <button class="class-tab" onclick="switchClassTab('all')">📚 All</button>
+</div>
 
-      <div id="classListBox">
-        <div class="empty-msg">⏳ Loading classes...</div>
+<div id="classListBox"></div>
+      <div class="sec-head"><h2>🔴 Live Now</h2></div>
+      <div id="liveBox">
+        <div class="live-card">
+          <div class="live-body" style="justify-content:center; color: var(--muted); font-size: 13px;">
+            Loading live classes...
+          </div>
+        </div>
       </div>
 
       <!-- CONTINUE LEARNING -->
-      <div class="sec-head" style="margin-top:25px;">
+      <div class="sec-head">
         <h2>📚 Continue Learning</h2>
         <a href="/home-class.html">See All →</a>
       </div>
@@ -566,11 +574,6 @@
   <script>
     let currentUser = null;
 
-    function escapeHtml(str) {
-      if (!str) return "";
-      return String(str).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
-    }
-
     async function loadUser() {
       try {
         const r = await fetch("/api/auth/me", { credentials: "include" });
@@ -605,58 +608,38 @@
       return map[exam] || "🎯";
     }
 
-    // ============= 4-TAB CLASSES =============
-    let currentClassTab = "live";
-
-    async function loadClassesByTab(tab) {
-      currentClassTab = tab;
-      const box = document.getElementById("classListBox");
-      box.innerHTML = '<div class="empty-msg">⏳ Loading classes...</div>';
-
+    async function loadLive() {
+      const box = document.getElementById("liveBox");
       try {
-        const r = await fetch("/api/classes");
+        const r = await fetch("/api/classes?status=live", { credentials: "include" });
         const data = await r.json();
-        let classes = data.data || [];
+        const live = data.data || [];
 
-        if (tab === "live") classes = classes.filter(c => c.status === "live");
-        else if (tab === "recorded") classes = classes.filter(c => c.status === "recorded");
-        else if (tab === "scheduled") classes = classes.filter(c => c.status === "scheduled");
-        // "all" → सभी
-
-        if (!classes.length) {
-          const msg = tab === "live" ? "🔴 Abhi koi live class nahi chal rahi" :
-                      tab === "recorded" ? "▶ Koi recorded class nahi hai" :
-                      tab === "scheduled" ? "📅 Koi upcoming class nahi hai" :
-                      "📚 Koi class nahi hai";
-          box.innerHTML = '<div class="empty-msg">' + msg + '</div>';
+        if (!live.length) {
+          box.innerHTML = '<div class="live-card"><div class="live-body" style="justify-content:center; color: var(--muted); font-size: 13px;">📴 Abhi koi live class nahi chal rahi</div></div>';
           return;
         }
 
-        box.innerHTML = classes.map(c => {
-          const thumbStyle = c.thumbnail ? 'background-image: url(\'' + escapeHtml(c.thumbnail) + '\');' : '';
-          const badgeClass = c.status === "live" ? "badge-live" : c.status === "scheduled" ? "badge-scheduled" : "badge-recorded";
-          const badgeText = c.status === "live" ? "🔴 LIVE" : c.status === "scheduled" ? "📅" : "▶";
-          return '<div class="class-item" onclick="location.href=\'/class-detail.html?id=' + c._id + '\'">' +
-            '<div class="class-item-thumb" style="' + thumbStyle + '">' + (!c.thumbnail ? "📹" : "") + '</div>' +
-            '<div class="class-item-info">' +
-              '<h4>' + escapeHtml(c.title || "Class") + '</h4>' +
-              '<p>' + escapeHtml(c.teacher || "") + ' • ' + escapeHtml(c.subject || "") + '</p>' +
+        const c = live[0];
+        const thumbStyle = c.thumbnail ? 'background-image: url(\'' + escapeHtml(c.thumbnail) + '\');' : '';
+        const thumbContent = c.thumbnail ? '' : '📺';
+
+        box.innerHTML = '<div class="live-card">' +
+          '<div class="live-header"><span class="live-dot"></span> LIVE NOW</div>' +
+          '<div class="live-body">' +
+            '<div class="live-thumb" style="' + thumbStyle + '">' + thumbContent + '</div>' +
+            '<div class="live-info">' +
+              '<h3>' + escapeHtml(c.title || "Live Class") + '</h3>' +
+              '<p>' + escapeHtml(c.subject || "") + ' • ' + escapeHtml(c.teacher || "") + '</p>' +
             '</div>' +
-            '<span class="class-item-badge ' + badgeClass + '">' + badgeText + '</span>' +
-          '</div>';
-        }).join("");
+            '<a href="/class-detail.html?id=' + c._id + '" class="join-btn">JOIN →</a>' +
+          '</div>' +
+        '</div>';
       } catch (e) {
-        box.innerHTML = '<div class="empty-msg">❌ Load failed: ' + e.message + '</div>';
+        box.innerHTML = '<div class="live-card"><div class="live-body" style="justify-content:center; color: var(--muted); font-size: 13px;">📴 No live classes</div></div>';
       }
     }
 
-    function switchClassTab(tab, btn) {
-      document.querySelectorAll(".class-tab").forEach(t => t.classList.remove("active"));
-      if (btn) btn.classList.add("active");
-      loadClassesByTab(tab);
-    }
-
-    // ============= CONTINUE LEARNING =============
     async function loadContinue() {
       const box = document.getElementById("continueBox");
       try {
@@ -668,7 +651,7 @@
         const test = data.data.test;
 
         if (!cls && !test) {
-          box.innerHTML = '<div class="continue-card"><div style="color: var(--muted); font-size: 13px; padding: 8px;">📚 Abhi tak kuch nahi padha.</div></div>';
+          box.innerHTML = '<div class="continue-card"><div style="color: var(--muted); font-size: 13px; padding: 8px;">📚 Abhi tak kuch nahi padha. Classes dekhna shuru karo!</div></div>';
           return;
         }
 
@@ -688,7 +671,6 @@
       }
     }
 
-    // ============= STATS =============
     async function loadStats() {
       try {
         const r = await fetch("/api/progress/stats", { credentials: "include" });
@@ -701,7 +683,6 @@
       } catch (e) { console.error("Stats error:", e); }
     }
 
-    // ============= RECENT CLASSES =============
     async function loadRecentClasses() {
       const grid = document.getElementById("recentClasses");
       try {
@@ -716,8 +697,9 @@
 
         grid.innerHTML = classes.map(c => {
           const thumbStyle = c.thumbnail ? 'background-image: url(\'' + escapeHtml(c.thumbnail) + '\');' : '';
+          const thumbContent = c.thumbnail ? '' : '📹';
           return '<div class="course-card" onclick="location.href=\'/class-detail.html?id=' + c._id + '\'">' +
-            '<div class="course-thumb" style="' + thumbStyle + '">' + (!c.thumbnail ? "📹" : "") + '</div>' +
+            '<div class="course-thumb" style="' + thumbStyle + '">' + thumbContent + '</div>' +
             '<div class="course-body">' +
               '<h4>' + escapeHtml(c.title || "Class") + '</h4>' +
               '<p>' + escapeHtml(c.subject || "") + ' • ' + escapeHtml(c.teacher || "") + '</p>' +
@@ -729,7 +711,6 @@
       }
     }
 
-    // ============= NOTIFICATIONS =============
     async function loadNotifCount() {
       try {
         const r = await fetch("/api/notifications/my", { credentials: "include" });
@@ -746,12 +727,11 @@
       location.href = "/notifications.html";
     });
 
-    // ============= INIT =============
     async function init() {
       const ok = await loadUser();
       if (!ok) return;
       await Promise.all([
-        loadClassesByTab("live"),
+        loadLive(),
         loadContinue(),
         loadStats(),
         loadRecentClasses(),

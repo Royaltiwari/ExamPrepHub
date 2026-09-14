@@ -1,221 +1,500 @@
-<!DOCTYPE html>
-<html lang="en">
+﻿<!DOCTYPE html>
+<html lang="hi">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Class - ExamPrepHub</title>
-  <link rel="stylesheet" href="/css/style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Class Player - ExamPrepHub</title>
+<link rel="stylesheet" href="/css/style.css">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  body { font-family: 'Segoe UI', Arial, sans-serif; background: #0f172a; color: #e2e8f0; padding-bottom: 80px; overflow-x: hidden; }
+
+  /* HEADER */
+  .player-header {
+    background: linear-gradient(135deg, #1e1b4b, #312e81);
+    padding: 10px 14px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+  }
+  .player-header .left { display: flex; align-items: center; gap: 10px; min-width: 0; flex: 1; }
+  .back-btn { background: rgba(255,255,255,0.15); border: none; width: 36px; height: 36px; border-radius: 10px; color: white; cursor: pointer; font-size: 18px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .back-btn:active { background: rgba(255,255,255,0.3); }
+  .header-info { min-width: 0; flex: 1; }
+  .header-info .batch { font-size: 10px; opacity: 0.75; text-transform: uppercase; letter-spacing: 0.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .header-info .title { font-size: 13px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .header-right { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+  .live-badge-header { background: #dc2626; color: white; padding: 4px 10px; border-radius: 6px; font-size: 10px; font-weight: 800; display: flex; align-items: center; gap: 5px; }
+  .live-dot { width: 6px; height: 6px; background: white; border-radius: 50%; animation: pulse 1.5s infinite; }
+  @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+  /* LAYOUT */
+  .player-layout {
+    display: grid;
+    grid-template-columns: 1fr 320px;
+    gap: 16px;
+    max-width: 1500px;
+    margin: 0 auto;
+    padding: 14px;
+  }
+  .main-col { min-width: 0; }
+  .sidebar-col { position: sticky; top: 70px; height: fit-content; }
+
+  /* VIDEO */
+  .video-frame {
+    background: #000;
+    border-radius: 12px;
+    overflow: hidden;
+    aspect-ratio: 16 / 9;
+    width: 100%;
+    position: relative;
+  }
+  .video-frame iframe { width: 100%; height: 100%; border: none; display: block; }
+  .video-placeholder { width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #94a3b8; gap: 8px; background: linear-gradient(135deg, #0f172a, #1e293b); text-align: center; padding: 20px; }
+  .video-placeholder .emoji { font-size: 48px; }
+  .video-placeholder p { font-size: 13px; }
+  .video-placeholder .small { font-size: 11px; color: #64748b; }
+
+  /* MOBILE FULLSCREEN */
+  .video-frame.fullscreen {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    z-index: 9999;
+    border-radius: 0;
+    aspect-ratio: auto;
+  }
+
+  /* VIDEO META */
+  .video-meta { background: #1e293b; border: 1px solid #334155; border-radius: 12px; padding: 14px; margin-top: 14px; }
+  .video-meta h1 { font-size: 17px; font-weight: 900; margin-bottom: 6px; line-height: 1.3; }
+  .video-meta .subtitle { color: #94a3b8; font-size: 13px; margin-bottom: 10px; }
+  .video-meta .meta-row { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+  .meta-tag { background: #0f172a; border: 1px solid #334155; padding: 3px 10px; border-radius: 20px; font-size: 11px; color: #cbd5e1; }
+  .video-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+  .action-btn { padding: 9px 16px; border-radius: 8px; font-weight: 700; font-size: 12px; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; text-decoration: none; }
+  .btn-follow { background: #334155; color: #e2e8f0; }
+  .btn-follow.following { background: #10b981; color: white; }
+
+  /* PDF & NOTES */
+  .description-box { background: #1e293b; border: 1px solid #334155; border-radius: 12px; padding: 14px; margin-top: 12px; }
+  .description-box h3 { font-size: 13px; color: #fbbf24; margin-bottom: 8px; }
+  .description-box p { font-size: 13px; line-height: 1.7; color: #cbd5e1; white-space: pre-wrap; }
+
+  /* MATERIAL CARDS */
+  .material-card { background: #1e293b; border: 1px solid #334155; border-radius: 12px; padding: 14px; margin-bottom: 10px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+  .material-icon { width: 44px; height: 44px; background: #7c2d12; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0; }
+  .material-info { flex: 1; min-width: 0; }
+  .material-info h4 { font-size: 13px; margin-bottom: 3px; }
+  .material-info p { font-size: 11px; color: #94a3b8; word-break: break-all; }
+  .material-actions { display: flex; gap: 6px; flex-shrink: 0; }
+  .material-actions a { padding: 8px 14px; border-radius: 8px; font-size: 12px; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 4px; }
+  .btn-view-pdf { background: #2563eb; color: white; }
+  .btn-download { background: #10b981; color: white; }
+
+  /* TABS */
+  .tabs { display: flex; gap: 4px; background: #1e293b; border: 1px solid #334155; border-radius: 12px; padding: 6px; margin-top: 14px; overflow-x: auto; scrollbar-width: none; }
+  .tabs::-webkit-scrollbar { display: none; }
+  .tab { padding: 10px 16px; background: transparent; border: none; color: #94a3b8; font-weight: 700; font-size: 12px; cursor: pointer; border-radius: 8px; white-space: nowrap; }
+  .tab.active { background: #fbbf24; color: #0f172a; }
+  .tab-content { display: none; margin-top: 14px; }
+  .tab-content.active { display: block; }
+
+  /* LIVE CHAT (SCROLL) */
+  .chat-box {
+    background: #1e293b;
+    border: 1px solid #334155;
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    height: 400px;
+    overflow: hidden;
+  }
+  .chat-header {
+    padding: 10px 14px;
+    border-bottom: 1px solid #334155;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #0f172a;
+  }
+  .chat-header h4 { font-size: 13px; color: #fbbf24; }
+  .chat-header .count { font-size: 11px; color: #94a3b8; }
+  .chat-messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    scroll-behavior: smooth;
+  }
+  .chat-messages::-webkit-scrollbar { width: 6px; }
+  .chat-messages::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
+  .chat-msg { display: flex; gap: 8px; }
+  .chat-msg-avatar { width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, #2563eb, #7c3aed); display: flex; align-items: center; justify-content: center; color: white; font-weight: 800; font-size: 12px; flex-shrink: 0; }
+  .chat-msg-body { flex: 1; min-width: 0; }
+  .chat-msg-body .name { font-size: 11px; font-weight: 700; color: #fbbf24; margin-bottom: 2px; }
+  .chat-msg-body .text { font-size: 13px; line-height: 1.5; color: #cbd5e1; word-break: break-word; }
+  .chat-msg-body .time { font-size: 10px; color: #64748b; margin-top: 2px; }
+  .chat-input {
+    padding: 10px;
+    border-top: 1px solid #334155;
+    display: flex;
+    gap: 8px;
+    background: #0f172a;
+  }
+  .chat-input input {
+    flex: 1;
+    padding: 10px 14px;
+    border-radius: 20px;
+    border: 1px solid #334155;
+    background: #1e293b;
+    color: #e2e8f0;
+    font-size: 13px;
+    outline: none;
+  }
+  .chat-input input:focus { border-color: #fbbf24; }
+  .chat-input button {
+    background: #fbbf24;
+    border: none;
+    color: #0f172a;
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    font-weight: 800;
+    font-size: 16px;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+
+  /* SIDEBAR */
+  .sidebar-box { background: #1e293b; border: 1px solid #334155; border-radius: 12px; padding: 14px; margin-bottom: 12px; }
+  .sidebar-box h3 { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: #fbbf24; margin-bottom: 10px; }
+  .playlist-item { display: flex; align-items: center; gap: 10px; padding: 9px 8px; border-radius: 8px; text-decoration: none; color: #e2e8f0; font-size: 12px; }
+  .playlist-item:hover { background: #0f172a; }
+  .playlist-item .status-icon { width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; flex-shrink: 0; }
+  .playlist-item .playing { background: #fbbf24; color: #0f172a; }
+  .playlist-item .pending { background: #334155; color: #94a3b8; }
+  .playlist-item.active { background: #1e3a8a; }
+  .playlist-item .item-title { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+  .related-card { display: flex; gap: 10px; padding: 9px 0; border-bottom: 1px solid #1e293b; text-decoration: none; color: #e2e8f0; }
+  .related-card:last-child { border-bottom: none; }
+  .related-thumb { width: 90px; height: 54px; background: #0f172a; border-radius: 8px; background-size: cover; background-position: center; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+  .related-info { flex: 1; min-width: 0; }
+  .related-info h5 { font-size: 12px; margin-bottom: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .related-info p { font-size: 10px; color: #94a3b8; }
+
+  /* MOBILE */
+  @media (max-width: 900px) {
+    .player-layout { grid-template-columns: 1fr; padding: 10px; gap: 10px; }
+    .sidebar-col { position: static; }
+    .video-meta h1 { font-size: 15px; }
+    .chat-box { height: 350px; }
+    .material-actions { width: 100%; }
+    .material-actions a { flex: 1; justify-content: center; }
+  }
+
+  @media (max-width: 500px) {
+    .player-header { padding: 8px 10px; }
+    .header-info .title { font-size: 12px; }
+    .video-meta h1 { font-size: 14px; }
+    .meta-tag { font-size: 10px; padding: 2px 8px; }
+    .tab { padding: 8px 12px; font-size: 11px; }
+    .chat-box { height: 300px; }
+  }
+</style>
 </head>
 <body>
 
-  <header class="header">
-    <div class="header-inner">
-      <a href="/home-class.html" class="logo">🏆 ExamPrepHub</a>
-      <div class="header-actions">
-        <a href="/home-class.html" class="btn-header">← Back</a>
-        <button class="btn-header" id="logoutBtn">Logout</button>
+<div class="player-header">
+  <div class="left">
+    <button class="back-btn" onclick="history.back()">←</button>
+    <div class="header-info">
+      <div class="batch" id="headerBatch">Loading...</div>
+      <div class="title" id="headerTitle">Class</div>
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="live-badge-header" id="liveBadge" style="display:none;">
+      <span class="live-dot"></span> LIVE
+    </div>
+    <button class="back-btn" onclick="toggleFullscreen()" title="Fullscreen">⛶</button>
+  </div>
+</div>
+
+<div class="player-layout">
+  <div class="main-col">
+    <div class="video-frame" id="videoFrame">
+      <div class="video-placeholder">
+        <div class="emoji">🎥</div>
+        <p>Loading video...</p>
       </div>
     </div>
-  </header>
 
-  <div class="layout-full" style="padding: 25px 20px; max-width: 1300px; margin: auto;">
-
-    <div id="loadingBox" class="loading-box">Loading class...</div>
-
-    <div id="contentBox" style="display: none;">
-
-      <!-- VIDEO PLAYER -->
-      <div class="card" style="padding: 0; overflow: hidden; margin-bottom: 20px;">
-        <div id="videoHeader" style="padding: 12px 18px; background: var(--bg-alt); display: flex; justify-content: space-between; align-items: center;">
-          <span id="statusBadge" class="badge badge-blue">Recorded</span>
-          <span class="text-muted" style="font-size: 13px;" id="viewsCount">0 views</span>
-        </div>
-        <div style="position: relative; padding-bottom: 56.25%; background: black;">
-          <iframe id="videoFrame" style="position:absolute; top:0; left:0; width:100%; height:100%; border:0;" allowfullscreen></iframe>
-        </div>
+    <div class="video-meta">
+      <h1 id="classTitle">Loading...</h1>
+      <div class="subtitle" id="classSubtitle"></div>
+      <div class="meta-row" id="metaRow"></div>
+      <div class="video-actions">
+        <button class="action-btn btn-follow" id="followBtn" onclick="toggleFollow()">🔔 Follow</button>
       </div>
-
-      <!-- CLASS INFO -->
-      <div class="card" style="margin-bottom: 20px;">
-        <h1 id="classTitle" style="font-size: 22px; margin-bottom: 8px;"></h1>
-        <p class="text-muted" id="classMeta" style="font-size: 14px; margin-bottom: 12px;"></p>
-        <p id="classDesc" class="text-muted" style="line-height: 1.6;"></p>
-
-        <div id="pdfBtnBox" style="margin-top: 15px; display: none;">
-          <a id="pdfBtn" href="#" target="_blank" class="btn btn-red">
-            📄 Download PDF
-          </a>
-        </div>
-      </div>
-
-      <!-- CHAT -->
-      <div class="card">
-        <div class="card-heading">
-          <div class="heading-icon">💬</div>
-          <h2>Live Chat</h2>
-        </div>
-
-        <div id="chatBox" style="max-height: 400px; overflow-y: auto; margin-bottom: 15px; padding: 10px; background: var(--bg-alt); border-radius: 12px;">
-          <div class="empty-text">Loading chat...</div>
-        </div>
-
-        <div style="display: flex; gap: 10px;">
-          <input type="text" id="chatInput" class="form-input" placeholder="Type a message..." maxlength="500" />
-          <button class="btn btn-blue" id="sendBtn">Send</button>
-        </div>
-      </div>
-
     </div>
 
+    <div class="description-box">
+      <h3>📝 About this Class</h3>
+      <p id="classDescription">Loading...</p>
+    </div>
+
+    <div class="tabs">
+      <button class="tab active" onclick="switchTab(event, 'tabMaterial')">📚 Material</button>
+      <button class="tab" onclick="switchTab(event, 'tabChat')">💬 Live Chat</button>
+      <button class="tab" onclick="switchTab(event, 'tabNotes')">📝 Notes</button>
+    </div>
+
+    <div class="tab-content active" id="tabMaterial">
+      <div id="materialList"></div>
+    </div>
+
+    <div class="tab-content" id="tabChat">
+      <div class="chat-box">
+        <div class="chat-header">
+          <h4>💬 Live Chat</h4>
+          <span class="count" id="chatCount">0</span>
+        </div>
+        <div class="chat-messages" id="chatMessages"></div>
+        <div class="chat-input">
+          <input type="text" id="chatInput" placeholder="Message likhein..." onkeypress="if(event.key==='Enter')postComment()">
+          <button onclick="postComment()">➤</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="tab-content" id="tabNotes">
+      <div class="description-box">
+        <h3>📝 Class Notes</h3>
+        <p id="classNotes">Notes will appear here.</p>
+      </div>
+    </div>
   </div>
 
-  <script src="/js/common.js"></script>
-  <script>
-    const classId = getQueryParam("id");
-    let currentUser = null;
-    let chatTimer = null;
+  <div class="sidebar-col">
+    <div class="sidebar-box">
+      <h3>📚 Class List</h3>
+      <div id="playlistBox"></div>
+    </div>
+    <div class="sidebar-box">
+      <h3>▶ Related Classes</h3>
+      <div id="relatedBox"></div>
+    </div>
+  </div>
+</div>
 
-    // ==========================================
-    // LOAD CLASS
-    // ==========================================
-    async function loadClass() {
-      if (!classId) {
-        document.getElementById("loadingBox").innerHTML = '<div class="error">Class ID nahi mila</div>';
-        return;
-      }
+<script>
+let classData = null;
+let isFollowing = false;
+let chatInterval = null;
+let lastMsgCount = 0;
 
-      try {
-        const r = await fetch("/api/classes/" + classId);
-        const data = await r.json();
+function getQueryParam(name) { return new URLSearchParams(window.location.search).get(name); }
 
-        if (!data.success) throw new Error(data.message);
+function escapeHtml(str) {
+  if (!str) return "";
+  return String(str).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+}
 
-        const c = data.data;
+async function loadClass() {
+  const id = getQueryParam("id");
+  if (!id) { document.body.innerHTML = '<div style="padding:40px;text-align:center;">❌ Class ID missing</div>'; return; }
+  try {
+    const r = await fetch("/api/classes/" + id);
+    const data = await r.json();
+    if (!data.success || !data.data) { document.body.innerHTML = '<div style="padding:40px;text-align:center;">❌ Class not found</div>'; return; }
+    classData = data.data;
+    renderClass();
+    loadMaterial();
+    loadComments();
+    loadPlaylist();
+    loadRelated();
+    startChatAutoRefresh();
+  } catch (e) {
+    document.body.innerHTML = '<div style="padding:40px;text-align:center;">❌ Failed to load</div>';
+  }
+}
 
-        // Video
-        const videoUrl = c.status === "live" ? c.liveUrl : c.recordedUrl;
-        const vid = getYouTubeId(videoUrl || "");
+function renderClass() {
+  const c = classData;
+  document.getElementById("headerBatch").textContent = c.examName || "Class";
+  document.getElementById("headerTitle").textContent = c.title || "Class";
+  document.getElementById("classTitle").textContent = c.title || "Class";
+  document.getElementById("classSubtitle").textContent = c.subtitle || c.topic || "";
+  document.getElementById("classDescription").textContent = c.description || "No description.";
+  document.getElementById("classNotes").textContent = c.notes || "Notes will appear here.";
 
-        if (vid) {
-          document.getElementById("videoFrame").src = `https://www.youtube.com/embed/${vid}?autoplay=0`;
-        } else {
-          document.getElementById("videoFrame").outerHTML =
-            '<div style="position:absolute; top:0; left:0; width:100%; height:100%; display:flex; align-items:center; justify-content:center; color: white;">No video available</div>';
-        }
+  const meta = [];
+  if (c.teacher) meta.push('👨‍🏫 ' + c.teacher);
+  if (c.subject) meta.push('📚 ' + c.subject);
+  if (c.duration) meta.push('⏱️ ' + c.duration + ' min');
+  document.getElementById("metaRow").innerHTML = meta.map(m => '<span class="meta-tag">' + escapeHtml(m) + '</span>').join("");
 
-        // Info
-        document.getElementById("classTitle").textContent = c.title;
-        document.getElementById("classMeta").textContent =
-          `${c.category} • ${c.examName} • ${c.subject} ${c.topic ? "• " + c.topic : ""} ${c.teacher ? "• " + c.teacher : ""}`;
-        document.getElementById("classDesc").textContent = c.description || "";
+  if (c.status === "live") document.getElementById("liveBadge").style.display = "flex";
+  renderVideo(c);
+}
 
-        // Status badge
-        const badge = document.getElementById("statusBadge");
-        const statusColors = { scheduled: "badge-yellow", live: "badge-red", recorded: "badge-green" };
-        badge.className = "badge " + (statusColors[c.status] || "badge-blue");
-        badge.textContent = c.status.toUpperCase();
+function renderVideo(c) {
+  const frame = document.getElementById("videoFrame");
+  let videoUrl = c.liveUrl || c.recordedUrl || "";
+  if (videoUrl) {
+    let embedUrl = "";
+    if (videoUrl.includes("youtube.com/watch")) {
+      const vid = new URL(videoUrl).searchParams.get("v");
+      embedUrl = "https://www.youtube.com/embed/" + vid + "?autoplay=1";
+    } else if (videoUrl.includes("youtu.be/")) {
+      const vid = videoUrl.split("youtu.be/")[1].split("?")[0];
+      embedUrl = "https://www.youtube.com/embed/" + vid + "?autoplay=1";
+    } else if (videoUrl.includes("youtube.com/embed/")) {
+      embedUrl = videoUrl;
+    }
+    if (embedUrl) { frame.innerHTML = '<iframe src="' + embedUrl + '" allowfullscreen allow="autoplay"></iframe>'; return; }
+  }
+  frame.innerHTML = '<div class="video-placeholder"><div class="emoji">🎥</div><p>' + (c.status === "live" ? "🔴 LIVE Class" : "▶ Recording available soon") + '</p><p class="small">' + escapeHtml(c.title || "") + '</p></div>';
+}
 
-        // Views
-        document.getElementById("viewsCount").textContent = (c.views || 0) + " views";
+async function loadMaterial() {
+  const box = document.getElementById("materialList");
+  const c = classData;
+  let html = "";
+  if (c.supportingPdf) {
+    html += '<div class="material-card"><div class="material-icon">📄</div><div class="material-info"><h4>Supporting PDF</h4><p>' + escapeHtml(c.title || "Notes") + '.pdf</p></div><div class="material-actions"><a href="' + escapeHtml(c.supportingPdf) + '" target="_blank" class="btn-view-pdf">👁 View</a><a href="' + escapeHtml(c.supportingPdf) + '" download class="btn-download">⬇ Download</a></div></div>';
+  }
+  if (c.notes) {
+    html += '<div class="material-card"><div class="material-icon" style="background:#1e3a8a;">📝</div><div class="material-info"><h4>Class Notes</h4><p>Short notes for this class</p></div><div class="material-actions"><a href="#tabNotes" onclick="switchTab(event, \'tabNotes\')" class="btn-view-pdf">👁 Read</a></div></div>';
+  }
+  if (!html) html = '<div class="material-card"><div class="material-icon">📄</div><div class="material-info"><h4>No material yet</h4><p>Teacher will upload soon.</p></div></div>';
+  box.innerHTML = html;
+}
 
-        // PDF
-        if (c.supportingPdf) {
-          document.getElementById("pdfBtnBox").style.display = "block";
-          document.getElementById("pdfBtn").href = c.supportingPdf;
-        }
+async function loadComments() {
+  const box = document.getElementById("chatMessages");
+  try {
+    const r = await fetch("/api/classes/" + classData._id + "/comments");
+    const data = await r.json();
+    const comments = (data.data || []).reverse();
+    document.getElementById("chatCount").textContent = comments.length + " messages";
 
-        document.getElementById("loadingBox").style.display = "none";
-        document.getElementById("contentBox").style.display = "block";
-
-        // Start chat polling
-        loadChat();
-        chatTimer = setInterval(loadChat, 5000);
-
-      } catch (e) {
-        document.getElementById("loadingBox").innerHTML = '<div class="error">Class load nahi ho payi: ' + e.message + '</div>';
-      }
+    if (!comments.length) {
+      box.innerHTML = '<div style="text-align:center;padding:20px;color:#94a3b8;font-size:12px;">💬 Chat shuru karein</div>';
+      return;
     }
 
-    // ==========================================
-    // CHAT
-    // ==========================================
-    async function loadChat() {
-      const box = document.getElementById("chatBox");
-      try {
-        const r = await fetch(`/api/chat/${classId}`, { credentials: "include" });
-        const data = await r.json();
-        const messages = data.data || [];
+    box.innerHTML = comments.map(c => '<div class="chat-msg"><div class="chat-msg-avatar">' + escapeHtml((c.userName || "U").charAt(0).toUpperCase()) + '</div><div class="chat-msg-body"><div class="name">' + escapeHtml(c.userName || "User") + '</div><div class="text">' + escapeHtml(c.text) + '</div><div class="time">' + new Date(c.createdAt).toLocaleTimeString("en-IN") + '</div></div></div>').join("");
 
-        if (!messages.length) {
-          box.innerHTML = '<div class="empty-text">Koi message nahi. Pehla message bhejo!</div>';
-          return;
-        }
-
-        box.innerHTML = messages.map(m => {
-          const isMe = currentUser && String(m.userId) === String(currentUser._id);
-          return `
-            <div style="padding: 8px 12px; margin-bottom: 6px; background: ${isMe ? "var(--primary-light)" : "var(--card-bg)"}; border-radius: 8px;">
-              <div style="font-weight: 700; font-size: 12px; color: ${isMe ? "var(--primary)" : "var(--text)"};">
-                ${escapeHtml(m.userName)} ${isMe ? "(You)" : ""}
-              </div>
-              <div style="font-size: 14px; margin-top: 3px; color: var(--text);">
-                ${escapeHtml(m.message)}
-              </div>
-              <div style="font-size: 10px; color: var(--muted); margin-top: 3px;">
-                ${new Date(m.createdAt).toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" })}
-              </div>
-            </div>
-          `;
-        }).join("");
-
-        box.scrollTop = box.scrollHeight;
-      } catch (e) {
-        console.error("Chat error:", e);
-      }
+    // Auto-scroll to bottom
+    if (comments.length !== lastMsgCount) {
+      box.scrollTop = box.scrollHeight;
+      lastMsgCount = comments.length;
     }
+  } catch (e) {
+    box.innerHTML = '<div style="text-align:center;padding:20px;color:#94a3b8;font-size:12px;">💬 Login to chat</div>';
+  }
+}
 
-    async function sendMessage() {
-      const input = document.getElementById("chatInput");
-      const msg = input.value.trim();
-      if (!msg) return;
-
-      input.disabled = true;
-      try {
-        const r = await fetch(`/api/chat/${classId}`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          credentials: "include",
-          body: JSON.stringify({ message: msg })
-        });
-        const data = await r.json();
-        if (data.success) {
-          input.value = "";
-          loadChat();
-        } else {
-          showAlert(data.message || "Failed", "error");
-        }
-      } catch (e) {
-        showAlert("Message send nahi hua", "error");
-      } finally {
-        input.disabled = false;
-        input.focus();
-      }
+function startChatAutoRefresh() {
+  if (chatInterval) clearInterval(chatInterval);
+  chatInterval = setInterval(() => {
+    if (document.getElementById("tabChat").classList.contains("active")) {
+      loadComments();
     }
+  }, 5000);
+}
 
-    document.getElementById("sendBtn").addEventListener("click", sendMessage);
-    document.getElementById("chatInput").addEventListener("keypress", (e) => {
-      if (e.key === "Enter") sendMessage();
-    });
+async function postComment() {
+  const input = document.getElementById("chatInput");
+  const text = input.value.trim();
+  if (!text) return;
+  try {
+    const r = await fetch("/api/classes/" + classData._id + "/comments", { method: "POST", headers: { "Content-Type": "application/json" }, credentials: "include", body: JSON.stringify({ text }) });
+    const data = await r.json();
+    if (data.success) { input.value = ""; loadComments(); }
+    else { alert("Failed: " + data.message); }
+  } catch (e) { alert("Error: " + e.message); }
+}
 
-    // ==========================================
-    // INIT
-    // ==========================================
-    (async function() {
-      currentUser = await requireLogin();
-      if (!currentUser) return;
-      loadClass();
-    })();
-  </script>
+async function loadPlaylist() {
+  const box = document.getElementById("playlistBox");
+  try {
+    const r = await fetch("/api/classes?subject=" + encodeURIComponent(classData.subject || ""));
+    const data = await r.json();
+    const list = (data.data || []).slice(0, 10);
+    if (!list.length) { box.innerHTML = '<div style="text-align:center;padding:12px;color:#94a3b8;font-size:11px;">No classes</div>'; return; }
+    box.innerHTML = list.map(c => {
+      const isActive = c._id === classData._id;
+      return '<a href="/class-detail.html?id=' + c._id + '" class="playlist-item ' + (isActive ? "active" : "") + '"><div class="status-icon ' + (isActive ? "playing" : "pending") + '">' + (isActive ? "▶" : "○") + '</div><div class="item-title">' + escapeHtml(c.title || "Class") + '</div></a>';
+    }).join("");
+  } catch (e) { box.innerHTML = '<div style="text-align:center;padding:12px;color:#94a3b8;font-size:11px;">Failed</div>'; }
+}
 
+async function loadRelated() {
+  const box = document.getElementById("relatedBox");
+  try {
+    const r = await fetch("/api/classes");
+    const data = await r.json();
+    const related = (data.data || []).filter(c => c._id !== classData._id).slice(0, 3);
+    if (!related.length) { box.innerHTML = '<div style="text-align:center;padding:12px;color:#94a3b8;font-size:11px;">No related classes</div>'; return; }
+    box.innerHTML = related.map(c => {
+      const thumbStyle = c.thumbnail ? 'background-image: url(\'' + escapeHtml(c.thumbnail) + '\');' : '';
+      return '<a href="/class-detail.html?id=' + c._id + '" class="related-card"><div class="related-thumb" style="' + thumbStyle + '">' + (!c.thumbnail ? "📹" : "") + '</div><div class="related-info"><h5>' + escapeHtml(c.title || "Class") + '</h5><p>' + escapeHtml(c.subject || "") + ' • ' + (c.duration || 0) + ' min</p></div></a>';
+    }).join("");
+  } catch (e) { box.innerHTML = '<div style="text-align:center;padding:12px;color:#94a3b8;font-size:11px;">Failed</div>'; }
+}
+
+function switchTab(e, tabId) {
+  if (e) e.preventDefault();
+  document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+  document.querySelectorAll(".tab-content").forEach(c => c.classList.remove("active"));
+  document.getElementById(tabId).classList.add("active");
+  if (e && e.target) e.target.classList.add("active");
+  if (tabId === "tabChat") { setTimeout(() => { const m = document.getElementById("chatMessages"); m.scrollTop = m.scrollHeight; }, 100); }
+}
+
+function toggleFollow() {
+  const btn = document.getElementById("followBtn");
+  isFollowing = !isFollowing;
+  if (isFollowing) { btn.textContent = "✓ Following"; btn.classList.add("following"); }
+  else { btn.textContent = "🔔 Follow"; btn.classList.remove("following"); }
+}
+
+function toggleFullscreen() {
+  const frame = document.getElementById("videoFrame");
+  const iframe = frame.querySelector("iframe");
+  if (iframe && iframe.requestFullscreen) {
+    iframe.requestFullscreen();
+  } else if (frame.requestFullscreen) {
+    frame.requestFullscreen();
+  } else {
+    frame.classList.toggle("fullscreen");
+  }
+}
+
+// Mobile double-tap fullscreen
+document.addEventListener("DOMContentLoaded", () => {
+  const frame = document.getElementById("videoFrame");
+  let lastTap = 0;
+  frame.addEventListener("touchend", (e) => {
+    const now = Date.now();
+    if (now - lastTap < 300) {
+      e.preventDefault();
+      toggleFullscreen();
+    }
+    lastTap = now;
+  });
+});
+
+loadClass();
+</script>
 </body>
 </html>

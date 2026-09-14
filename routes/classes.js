@@ -4,278 +4,373 @@ const multer = require("multer");
 const path = require("path");
 const fs = require("fs");
 const Class = require("../models/Class");
+const Comment = require("../models/Comment");
+const User = require("../models/User");
 const requireLogin = require("../middleware/auth");
 const requireAdmin = require("../middleware/admin");
 
 // =====================================================
-// MULTER - Thumbnail Upload Setup
+// MULTER SETUP (Thumbnail + PDF upload)
 // =====================================================
-const thumbDir = path.join(__dirname, "..", "public", "uploads", "thumbnails");
-if (!fs.existsSync(thumbDir)) fs.mkdirSync(thumbDir, { recursive: true });
+const uploadDir = path.join(__dirname, "..", "public", "uploads", "classes");
+const thumbDir = path.join(uploadDir, "thumbnails");
+const pdfDir = path.join(uploadDir, "pdfs");
+
+[uploadDir, thumbDir, pdfDir].forEach(dir => {
+  if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir, { recursive: true });
+  }
+});
 
 const storage = multer.diskStorage({
-  destination: (req, file, cb) => cb(null, thumbDir),
+  destination: (req, file, cb) => {
+    if (file.fieldname === "thumbnail") {
+      cb(null, thumbDir);
+    } else if (file.fieldname === "supportingPdf") {
+      cb(null, pdfDir);
+    } else {
+      cb(null, uploadDir);
+    }
+  },
   filename: (req, file, cb) => {
     const unique = Date.now() + "-" + Math.round(Math.random() * 1e9);
-    const ext = path.extname(file.originalname).toLowerCase();
-    cb(null, unique + ext);
+    cb(null, unique + path.extname(file.originalname));
   }
 });
 
 const upload = multer({
-  storage,
-  limits: { fileSize: 2 * 1024 * 1024 },
+  storage: storage,
+  limits: { fileSize: 50 * 1024 * 1024 },
   fileFilter: (req, file, cb) => {
-    const allowed = [".jpg", ".jpeg", ".png", ".webp", ".gif"];
-    const ext = path.extname(file.originalname).toLowerCase();
-    if (allowed.includes(ext)) cb(null, true);
-    else cb(new Error("Sirf image files allowed (jpg, png, webp, gif)"));
+    if (file.fieldname === "thumbnail") {
+      if (file.mimetype.startsWith("image/")) {
+        cb(null, true);
+      } else {
+        cb(new Error("Only image files allowed for thumbnail"));
+      }
+    } else if (file.fieldname === "supportingPdf") {
+      if (file.mimetype === "application/pdf") {
+        cb(null, true);
+      } else {
+        cb(new Error("Only PDF files allowed"));
+      }
+    } else {
+      cb(null, true);
+    }
   }
 });
 
-// =====================================================
-// PUBLIC: GET CATEGORIES
-// =====================================================
-router.get("/categories", async (req, res) => {
-  const categories = [
-    "Class 6", "Class 7", "Class 8", "Class 9",
-    "Class 10", "Class 11", "Class 12", "Competitive"
-  ];
-  res.json({ success: true, data: categories });
-});
+const classUpload = upload.fields([
+  { name: "thumbnail", maxCount: 1 },
+  { name: "supportingPdf", maxCount: 1 }
+]);
 
 // =====================================================
-// PUBLIC: GET EXAMS BY CATEGORY
-// =====================================================
-router.get("/exams/:category", async (req, res) => {
-  try {
-    const exams = await Class.distinct("examName", {
-      category: req.params.category,
-      visible: true
-    });
-    res.json({ success: true, data: exams });
-  } catch (e) {
-    res.status(500).json({ success: false, message: "Failed" });
-  }
-});
-
-// =====================================================
-// PUBLIC: GET SUBJECTS (for filter)
-// =====================================================
-router.get("/subjects/:category/:examName", async (req, res) => {
-  try {
-    const subjects = await Class.distinct("subject", {
-      category: req.params.category,
-      examName: decodeURIComponent(req.params.examName),
-      visible: true
-    });
-    res.json({ success: true, data: subjects });
-  } catch (e) {
-    res.status(500).json({ success: false, message: "Failed" });
-  }
-});
-
-// =====================================================
-// PUBLIC: GET CLASSES
-// Query: ?category=&examName=&subject=&status=
+// GET ALL CLASSES (Public)
 // =====================================================
 router.get("/", async (req, res) => {
   try {
-    const { category, examName, subject, status } = req.query;
     const filter = { visible: true };
 
-    if (category) filter.category = category;
-    if (examName) filter.examName = decodeURIComponent(examName);
-    if (subject) filter.subject = decodeURIComponent(subject);
-    if (status) filter.status = status;
+    if (req.query.status) filter.status = req.query.status;
+    if (req.query.category) filter.category = req.query.category;
+    if (req.query.subject) filter.subject = req.query.subject;
+    if (req.query.examName) filter.examName = req.query.examName;
 
-    const list = await Class.find(filter).sort({ scheduledDate: -1, createdAt: -1 });
+    const list = await Class.find(filter)
+      .sort({ createdAt: -1 })
+      .limit(500);
+
     res.json({ success: true, count: list.length, data: list });
   } catch (e) {
-    console.error("Get classes error:", e);
-    res.status(500).json({ success: false, message: "Failed to fetch" });
-  }
-});
-
-// =====================================================
-// PUBLIC: GET CLASSES GROUPED BY SUBJECT → CHAPTER
-// GET /api/classes/grouped/:examName
-// =====================================================
-router.get("/grouped/:examName", requireLogin, async (req, res) => {
-  try {
-    const examName = decodeURIComponent(req.params.examName);
-
-    const classes = await Class.find({ examName, visible: true })
-      .sort({ scheduledDate: -1, createdAt: -1 });
-
-    const subjects = {};
-
-    classes.forEach(c => {
-      const subj = c.subject || "General";
-      const chap = c.topic || "General";
-
-      if (!subjects[subj]) subjects[subj] = {};
-      if (!subjects[subj][chap]) subjects[subj][chap] = [];
-
-      subjects[subj][chap].push({
-        _id: c._id,
-        title: c.title,
-        status: c.status,
-        thumbnail: c.thumbnail,
-        duration: c.duration,
-        scheduledDate: c.scheduledDate,
-        scheduledTime: c.scheduledTime,
-        isPaid: c.isPaid,
-        price: c.price,
-        teacher: c.teacher,
-        views: c.views
-      });
-    });
-
-    res.json({
-      success: true,
-      examName,
-      count: classes.length,
-      data: subjects
-    });
-  } catch (e) {
-    console.error("Grouped classes error:", e);
-    res.status(500).json({
-      success: false,
-      message: "Failed to fetch grouped classes"
-    });
-  }
-});
-
-// =====================================================
-// PUBLIC: GET ALL SUBJECTS FOR AN EXAM
-// GET /api/classes/subjects-list/:examName
-// =====================================================
-router.get("/subjects-list/:examName", requireLogin, async (req, res) => {
-  try {
-    const examName = decodeURIComponent(req.params.examName);
-
-    const subjects = await Class.distinct("subject", {
-      examName,
-      visible: true
-    });
-
-    res.json({
-      success: true,
-      examName,
-      subjects
-    });
-  } catch (e) {
-    res.status(500).json({
-      success: false,
-      message: "Failed to fetch subjects"
-    });
-  }
-});
-
-// =====================================================
-// PUBLIC: GET SINGLE CLASS
-// =====================================================
-router.get("/:id", async (req, res) => {
-  try {
-    const c = await Class.findByIdAndUpdate(
-      req.params.id,
-      { $inc: { views: 1 } },
-      { new: true }
-    );
-    if (!c) return res.status(404).json({ success: false, message: "Not found" });
-    res.json({ success: true, data: c });
-  } catch (e) {
-    res.status(500).json({ success: false, message: "Failed" });
-  }
-});
-
-// =====================================================
-// ADMIN: UPLOAD THUMBNAIL
-// =====================================================
-router.post(
-  "/upload-thumbnail",
-  requireLogin,
-  requireAdmin,
-  upload.single("thumbnail"),
-  (req, res) => {
-    try {
-      if (!req.file) {
-        return res.status(400).json({
-          success: false,
-          message: "Koi file nahi mili"
-        });
-      }
-
-      const url = `/uploads/thumbnails/${req.file.filename}`;
-
-      res.json({
-        success: true,
-        message: "Uploaded",
-        url,
-        filename: req.file.filename,
-        size: req.file.size
-      });
-    } catch (e) {
-      console.error("Upload error:", e);
-      res.status(500).json({
-        success: false,
-        message: e.message || "Upload failed"
-      });
-    }
-  }
-);
-
-// =====================================================
-// ADMIN: GET ALL (including hidden)
-// =====================================================
-router.get("/admin/all", requireLogin, requireAdmin, async (req, res) => {
-  try {
-    const list = await Class.find().sort({ createdAt: -1 });
-    res.json({ success: true, count: list.length, data: list });
-  } catch (e) {
-    res.status(500).json({ success: false, message: "Failed" });
-  }
-});
-
-// =====================================================
-// ADMIN: CREATE
-// =====================================================
-router.post("/", requireLogin, requireAdmin, async (req, res) => {
-  try {
-    const c = await Class.create({
-      ...req.body,
-      createdBy: req.user._id
-    });
-    res.status(201).json({ success: true, message: "Class created", data: c });
-  } catch (e) {
-    console.error("Create class error:", e);
     res.status(500).json({ success: false, message: e.message });
   }
 });
 
 // =====================================================
-// ADMIN: UPDATE
+// GET ALL CLASSES (Admin — all statuses)
 // =====================================================
-router.put("/:id", requireLogin, requireAdmin, async (req, res) => {
+router.get("/admin/all", requireLogin, requireAdmin, async (req, res) => {
   try {
-    const c = await Class.findByIdAndUpdate(req.params.id, req.body, { new: true });
-    if (!c) return res.status(404).json({ success: false, message: "Not found" });
-    res.json({ success: true, message: "Updated", data: c });
+    const filter = {};
+
+    if (req.query.status) filter.status = req.query.status;
+    if (req.query.category) filter.category = req.query.category;
+
+    const list = await Class.find(filter)
+      .sort({ createdAt: -1 })
+      .limit(1000);
+
+    res.json({ success: true, count: list.length, data: list });
   } catch (e) {
-    res.status(500).json({ success: false, message: "Failed to update" });
+    res.status(500).json({ success: false, message: e.message });
   }
 });
 
 // =====================================================
-// ADMIN: DELETE
+// GET SINGLE CLASS (Public)
+// =====================================================
+router.get("/:id", async (req, res) => {
+  try {
+    const cls = await Class.findById(req.params.id);
+    if (!cls) {
+      return res.status(404).json({ success: false, message: "Class not found" });
+    }
+    res.json({ success: true, data: cls });
+  } catch (e) {
+    res.status(500).json({ success: false, message: e.message });
+  }
+});
+
+// =====================================================
+// CREATE CLASS (Admin)
+// =====================================================
+router.post(
+  "/",
+  requireLogin,
+  requireAdmin,
+  classUpload,
+  async (req, res) => {
+    try {
+      const {
+        title, subtitle, category, examName, subject, topic,
+        teacher, duration, scheduledDate, scheduledTime,
+        videoType, status, liveUrl, recordedUrl, description, notes
+      } = req.body;
+
+      if (!title) {
+        return res.status(400).json({ success: false, message: "Title required" });
+      }
+
+      if (!teacher) {
+        return res.status(400).json({ success: false, message: "Teacher name required" });
+      }
+
+      // Thumbnail
+      let thumbnailPath = "";
+      if (req.files && req.files.thumbnail && req.files.thumbnail[0]) {
+        thumbnailPath = "/uploads/classes/thumbnails/" + req.files.thumbnail[0].filename;
+      }
+
+      // Supporting PDF
+      let pdfPath = "";
+      if (req.files && req.files.supportingPdf && req.files.supportingPdf[0]) {
+        pdfPath = "/uploads/classes/pdfs/" + req.files.supportingPdf[0].filename;
+      }
+
+      const newClass = await Class.create({
+        title: title.trim(),
+        subtitle: subtitle || "",
+        category: category || "Competitive",
+        examName: examName || "",
+        subject: subject || "",
+        topic: topic || "",
+        teacher: teacher.trim(),
+        duration: parseInt(duration) || 60,
+        scheduledDate: scheduledDate ? new Date(scheduledDate) : null,
+        scheduledTime: scheduledTime || "",
+        videoType: videoType || "recorded",
+        status: status || "recorded",
+        liveUrl: liveUrl || "",
+        recordedUrl: recordedUrl || "",
+        thumbnail: thumbnailPath,
+        supportingPdf: pdfPath,
+        description: description || "",
+        notes: notes || "",
+        visible: true,
+        createdBy: req.session.userId
+      });
+
+      res.json({
+        success: true,
+        message: "Class created successfully",
+        data: newClass
+      });
+    } catch (e) {
+      console.error("Create class error:", e);
+      res.status(500).json({ success: false, message: e.message });
+    }
+  }
+);
+
+// =====================================================
+// UPDATE CLASS (Admin)
+// =====================================================
+router.put(
+  "/:id",
+  requireLogin,
+  requireAdmin,
+  classUpload,
+  async (req, res) => {
+    try {
+      const cls = await Class.findById(req.params.id);
+      if (!cls) {
+        return res.status(404).json({ success: false, message: "Class not found" });
+      }
+
+      const {
+        title, subtitle, category, examName, subject, topic,
+        teacher, duration, scheduledDate, scheduledTime,
+        videoType, status, liveUrl, recordedUrl, description, notes
+      } = req.body;
+
+      if (title) cls.title = title.trim();
+      if (subtitle !== undefined) cls.subtitle = subtitle;
+      if (category) cls.category = category;
+      if (examName) cls.examName = examName;
+      if (subject) cls.subject = subject;
+      if (topic) cls.topic = topic;
+      if (teacher) cls.teacher = teacher.trim();
+      if (duration) cls.duration = parseInt(duration);
+      if (scheduledDate) cls.scheduledDate = new Date(scheduledDate);
+      if (scheduledTime !== undefined) cls.scheduledTime = scheduledTime;
+      if (videoType) cls.videoType = videoType;
+      if (status) cls.status = status;
+      if (liveUrl !== undefined) cls.liveUrl = liveUrl;
+      if (recordedUrl !== undefined) cls.recordedUrl = recordedUrl;
+      if (description !== undefined) cls.description = description;
+      if (notes !== undefined) cls.notes = notes;
+
+      // Update thumbnail if new uploaded
+      if (req.files && req.files.thumbnail && req.files.thumbnail[0]) {
+        // Delete old thumbnail
+        if (cls.thumbnail) {
+          const oldPath = path.join(__dirname, "..", "public", cls.thumbnail);
+          if (fs.existsSync(oldPath)) {
+            try { fs.unlinkSync(oldPath); } catch (err) {}
+          }
+        }
+        cls.thumbnail = "/uploads/classes/thumbnails/" + req.files.thumbnail[0].filename;
+      }
+
+      // Update PDF if new uploaded
+      if (req.files && req.files.supportingPdf && req.files.supportingPdf[0]) {
+        if (cls.supportingPdf) {
+          const oldPath = path.join(__dirname, "..", "public", cls.supportingPdf);
+          if (fs.existsSync(oldPath)) {
+            try { fs.unlinkSync(oldPath); } catch (err) {}
+          }
+        }
+        cls.supportingPdf = "/uploads/classes/pdfs/" + req.files.supportingPdf[0].filename;
+      }
+
+      await cls.save();
+
+      res.json({
+        success: true,
+        message: "Class updated successfully",
+        data: cls
+      });
+    } catch (e) {
+      console.error("Update class error:", e);
+      res.status(500).json({ success: false, message: e.message });
+    }
+  }
+);
+
+// =====================================================
+// DELETE CLASS (Admin)
 // =====================================================
 router.delete("/:id", requireLogin, requireAdmin, async (req, res) => {
   try {
+    const cls = await Class.findById(req.params.id);
+    if (!cls) {
+      return res.status(404).json({ success: false, message: "Class not found" });
+    }
+
+    // Delete thumbnail file
+    if (cls.thumbnail) {
+      const thumbPath = path.join(__dirname, "..", "public", cls.thumbnail);
+      if (fs.existsSync(thumbPath)) {
+        try { fs.unlinkSync(thumbPath); } catch (err) {}
+      }
+    }
+
+    // Delete PDF file
+    if (cls.supportingPdf) {
+      const pdfPath = path.join(__dirname, "..", "public", cls.supportingPdf);
+      if (fs.existsSync(pdfPath)) {
+        try { fs.unlinkSync(pdfPath); } catch (err) {}
+      }
+    }
+
+    // Delete comments related to this class
+    await Comment.deleteMany({ classId: req.params.id });
+
     await Class.findByIdAndDelete(req.params.id);
-    res.json({ success: true, message: "Deleted" });
+
+    res.json({ success: true, message: "Class deleted successfully" });
   } catch (e) {
-    res.status(500).json({ success: false, message: "Failed to delete" });
+    res.status(500).json({ success: false, message: e.message });
+  }
+});
+
+// =====================================================
+// GET COMMENTS (Public)
+// =====================================================
+router.get("/:id/comments", async (req, res) => {
+  try {
+    const comments = await Comment.find({ classId: req.params.id })
+      .sort({ createdAt: -1 })
+      .limit(100);
+    res.json({ success: true, count: comments.length, data: comments });
+  } catch (e) {
+    res.status(500).json({ success: false, message: e.message });
+  }
+});
+
+// =====================================================
+// POST COMMENT (Logged in users)
+// =====================================================
+router.post("/:id/comments", requireLogin, async (req, res) => {
+  try {
+    const { text, isQuestion } = req.body;
+
+    if (!text || text.trim().length === 0) {
+      return res.status(400).json({ success: false, message: "Comment text required" });
+    }
+
+    const user = await User.findById(req.session.userId).select("name");
+    if (!user) {
+      return res.status(401).json({ success: false, message: "User not found" });
+    }
+
+    const comment = await Comment.create({
+      classId: req.params.id,
+      userId: req.session.userId,
+      userName: user.name || "User",
+      text: text.trim(),
+      isQuestion: !!isQuestion
+    });
+
+    res.json({ success: true, data: comment });
+  } catch (e) {
+    res.status(500).json({ success: false, message: e.message });
+  }
+});
+
+// =====================================================
+// DELETE COMMENT (Admin or own comment)
+// =====================================================
+router.delete("/:classId/comments/:commentId", requireLogin, async (req, res) => {
+  try {
+    const comment = await Comment.findById(req.params.commentId);
+    if (!comment) {
+      return res.status(404).json({ success: false, message: "Comment not found" });
+    }
+
+    const user = await User.findById(req.session.userId).select("role");
+    const isAdmin = user && user.role === "admin";
+    const isOwner = String(comment.userId) === String(req.session.userId);
+
+    if (!isAdmin && !isOwner) {
+      return res.status(403).json({ success: false, message: "Not authorized" });
+    }
+
+    await Comment.findByIdAndDelete(req.params.commentId);
+    res.json({ success: true, message: "Comment deleted" });
+  } catch (e) {
+    res.status(500).json({ success: false, message: e.message });
   }
 });
 

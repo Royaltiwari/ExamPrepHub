@@ -20,7 +20,7 @@ require("./models/Chapter");
 require("./models/Question");
 require("./models/Test");
 require("./models/Batch");
-
+require("./models/Comment");
 // =====================================================
 // ROUTES IMPORTS
 // =====================================================
