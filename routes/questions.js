@@ -1,4 +1,4 @@
-const express = require("express");
+﻿const express = require("express");
 const router = express.Router();
 const multer = require("multer");
 const pdfParse = require("pdf-parse");
@@ -235,14 +235,14 @@ function parseQuestionsFromText(text) {
 
     // Extract answer (A/B/C/D)
     let answer = "";
-    const ansMatch = block.match(/(?:Answer|Ans|उत्तर)\s*:?\s*([A-D])/i);
+    const ansMatch = block.match(/(?:Answer|Ans|à¤‰à¤¤à¥à¤¤à¤°)\s*:?\s*([A-D])/i);
     if (ansMatch) answer = ansMatch[1].toUpperCase();
 
     // Extract explanation
     let explanation_hi = "";
     let explanation_en = "";
     const expMatch = block.match(
-      /(?:Explanation|व्याख्या|विस्तृत व्याख्या)\s*:?\s*([\s\S]*?)(?=\n\s*(?:Key|मुख्य|Q\.?\s*\d|\d+\.\s|$))/i
+      /(?:Explanation|à¤µà¥à¤¯à¤¾à¤–à¥à¤¯à¤¾|à¤µà¤¿à¤¸à¥à¤¤à¥ƒà¤¤ à¤µà¥à¤¯à¤¾à¤–à¥à¤¯à¤¾)\s*:?\s*([\s\S]*?)(?=\n\s*(?:Key|à¤®à¥à¤–à¥à¤¯|Q\.?\s*\d|\d+\.\s|$))/i
     );
     if (expMatch) {
       const expText = expMatch[1].trim().replace(/\n/g, " ");
@@ -259,12 +259,12 @@ function parseQuestionsFromText(text) {
     // Extract key points
     const key_points = [];
     const kpMatch = block.match(
-      /(?:Key Points|मुख्य बिंदु)\s*:?\s*([\s\S]*?)(?=\n\s*(?:Q\.?\s*\d|\d+\.\s|$))/i
+      /(?:Key Points|à¤®à¥à¤–à¥à¤¯ à¤¬à¤¿à¤‚à¤¦à¥)\s*:?\s*([\s\S]*?)(?=\n\s*(?:Q\.?\s*\d|\d+\.\s|$))/i
     );
     if (kpMatch) {
       const kpText = kpMatch[1].trim();
       kpText.split("\n").forEach((l) => {
-        const cleaned = l.replace(/^[-•*]\s*/, "").trim();
+        const cleaned = l.replace(/^[-â€¢*]\s*/, "").trim();
         if (cleaned) key_points.push(cleaned);
       });
     }
@@ -346,6 +346,40 @@ router.delete("/duplicates/remove", requireLogin, requireAdmin, async (req, res)
     });
   } catch (e) {
     res.status(500).json({ success: false, message: e.message });
+  }
+});
+
+
+// ==========================================
+// GET /api/questions/admin/test/:testId
+// Ek specific test ke saare questions laao
+// ==========================================
+router.get("/admin/test/:testId", requireLogin, requireAdmin, async (req, res) => {
+  try {
+    const { testId } = req.params;
+    
+    // Dono tarike se questions dhoondein:
+    // 1. Question.testId field se
+    // 2. Test.question_ids array se
+    const Test = require("../models/Test");
+    const test = await Test.findById(testId);
+    
+    let questions = [];
+    
+    if (test && test.question_ids && test.question_ids.length > 0) {
+      // Test ke question_ids se laao
+      questions = await Question.find({ _id: { $in: test.question_ids } })
+        .sort({ questionNumber: 1, createdAt: 1 });
+    } else {
+      // Fallback: Question.testId se laao
+      questions = await Question.find({ testId: testId })
+        .sort({ questionNumber: 1, createdAt: 1 });
+    }
+    
+    res.json({ success: true, questions, count: questions.length });
+  } catch (err) {
+    console.error("Error loading test questions:", err);
+    res.status(500).json({ success: false, message: err.message });
   }
 });
 
