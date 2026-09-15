@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="hi">
 <head>
   <meta charset="UTF-8">
@@ -46,6 +46,8 @@
     .tag { background: #eff6ff; color: #1d4ed8; padding: 6px 9px; border-radius: 7px; font-size: 12px; font-weight: 700; }
     .visible { background: #dcfce7; color: #166534; }
     .hidden { background: #fee2e2; color: #991b1b; }
+    .free { background: #dcfce7; color: #166534; }
+    .paid { background: #fef3c7; color: #92400e; }
     .description { margin-top: 12px; color: #64748b; }
     .empty { text-align: center; color: #64748b; padding: 30px; }
     .note { background: #eff6ff; border: 1px solid #dbeafe; color: #1e40af; padding: 12px; border-radius: 9px; margin-bottom: 20px; font-size: 13px; }
@@ -67,22 +69,22 @@
 
 <header>
   <div class="header-inner">
-    <div class="logo">ðŸ† ExamPrepHub</div>
-    <div class="admin-badge">ðŸ‘‘ ADMIN PANEL</div>
+    <div class="logo">🏆 ExamPrepHub</div>
+    <div class="admin-badge">👑 ADMIN PANEL</div>
   </div>
 </header>
 
 <main>
 
   <div id="loading">
-    ðŸ”„ Checking admin access...
+    🔄 Checking admin access...
   </div>
 
   <div id="pageContent">
 
     <section class="page-title">
-      <h1>ðŸ“ Test Management</h1>
-      <p>à¤¯à¤¹à¤¾à¤ à¤¸à¥‡ Test à¤¬à¤¨à¤¾à¤à¤‚ à¤”à¤° manage à¤•à¤°à¥‡à¤‚à¥¤</p>
+      <h1>📝 Test Management</h1>
+      <p>यहाँ से Test बनाएं और manage करें।</p>
     </section>
 
     <div id="successMessage" class="message success"></div>
@@ -91,10 +93,10 @@
     <!-- CREATE TEST -->
     <section class="card">
 
-      <h2 id="formTitle">âž• Create New Test</h2>
+      <h2 id="formTitle">➕ Create New Test</h2>
 
       <div class="note">
-        ðŸ’¡ Subject à¤”à¤° Chapter Questions à¤œà¥‹à¤¡à¤¼à¤¤à¥‡ à¤¸à¤®à¤¯ à¤¨à¤¿à¤°à¥à¤§à¤¾à¤°à¤¿à¤¤ à¤•à¤¿à¤ à¤œà¤¾à¤à¤‚à¤—à¥‡à¥¤
+        💡 Subject और Chapter Questions जोड़ते समय निर्धारित किए जाएंगे।
       </div>
 
       <form id="testForm">
@@ -143,9 +145,9 @@
           <div>
             <label>Language *</label>
             <select id="language" required>
-              <option value="Bilingual">ðŸ‡®ðŸ‡³ Hindi + ðŸ‡¬ðŸ‡§ English</option>
-              <option value="Hindi">ðŸ‡®ðŸ‡³ Hindi</option>
-              <option value="English">ðŸ‡¬ðŸ‡§ English</option>
+              <option value="Bilingual">🇮🇳 Hindi + 🇬🇧 English</option>
+              <option value="Hindi">🇮🇳 Hindi</option>
+              <option value="English">🇬🇧 English</option>
             </select>
           </div>
 
@@ -154,20 +156,40 @@
             <input id="duration" type="number" value="30" min="1" max="300" required>
           </div>
 
-          
+          <!-- TEST TYPE - FREE / PAID -->
+          <div class="full">
+            <label>Test Type *</label>
+            <div class="type-toggle">
+              <label>
+                <input type="radio" name="testType" value="free" checked>
+                🆓 Free (सबके लिए)
+              </label>
+              <label>
+                <input type="radio" name="testType" value="paid">
+                💰 Paid (Unlock करना पड़ेगा)
+              </label>
+            </div>
+          </div>
 
-          
+          <!-- PRICE - only if paid -->
+          <div class="full" id="priceField" style="display: none;">
+            <label>Price (₹) *</label>
+            <input id="price" type="number" value="10" min="1" max="10000">
+            <div style="font-size: 12px; color: #64748b; margin-top: 4px;">
+              जैसे: ₹5, ₹10, ₹50, ₹100
+            </div>
+          </div>
 
           <div class="full">
             <label>Description</label>
-            <textarea id="description" placeholder="à¤‡à¤¸ Test à¤•à¥‡ à¤¬à¤¾à¤°à¥‡ à¤®à¥‡à¤‚ à¤œà¤¾à¤¨à¤•à¤¾à¤°à¥€ à¤²à¤¿à¤–à¥‡à¤‚..."></textarea>
+            <textarea id="description" placeholder="इस Test के बारे में जानकारी लिखें..."></textarea>
           </div>
 
           <div class="full">
             <label>Test Visibility</label>
             <div class="visibility">
               <input type="checkbox" id="visible">
-              <span>ðŸ‘ï¸ Visible â€” Students à¤•à¥‹ Test à¤¦à¤¿à¤–à¤¾à¤ˆ à¤¦à¥‡à¤—à¤¾</span>
+              <span>👁️ Visible — Students को Test दिखाई देगा</span>
             </div>
           </div>
 
@@ -176,7 +198,7 @@
         <div class="actions">
 
           <button type="submit" id="saveButton" class="btn blue">
-            âž• Create Test
+            ➕ Create Test
           </button>
 
           <button type="button" id="cancelButton" class="btn gray" style="display:none;">
@@ -192,9 +214,9 @@
 
     <!-- TEST LIST -->
     <section class="card">
-      <h2>ðŸ“š All Tests</h2>
+      <h2>📚 All Tests</h2>
       <div id="testList">
-        <div class="empty">ðŸ”„ Tests loading...</div>
+        <div class="empty">🔄 Tests loading...</div>
       </div>
     </section>
 
@@ -226,7 +248,7 @@ async function apiRequest(url, options = {}) {
     data = JSON.parse(text);
   } catch (error) {
     console.error("Non JSON API response:", text);
-    throw new Error(`Server à¤¨à¥‡ JSON response à¤¨à¤¹à¥€à¤‚ à¤¦à¤¿à¤¯à¤¾. HTTP ${response.status}`);
+    throw new Error(`Server ने JSON response नहीं दिया. HTTP ${response.status}`);
   }
 
   if (!response.ok) {
@@ -249,8 +271,8 @@ async function checkAdmin() {
     if (!user || user.role !== "admin") {
       document.getElementById("loading").innerHTML = `
         <div class="error" style="display:block;">
-          âŒ Access Denied<br><br>
-          à¤•à¥‡à¤µà¤² Admin à¤‡à¤¸ page à¤•à¥‹ access à¤•à¤° à¤¸à¤•à¤¤à¤¾ à¤¹à¥ˆà¥¤<br><br>
+          ❌ Access Denied<br><br>
+          केवल Admin इस page को access कर सकता है।<br><br>
           <a href="/login.html" class="btn blue">Login</a>
         </div>
       `;
@@ -264,7 +286,7 @@ async function checkAdmin() {
   } catch (error) {
     document.getElementById("loading").innerHTML = `
       <div class="error" style="display:block;">
-        âŒ ${escapeHtml(error.message)}<br><br>
+        ❌ ${escapeHtml(error.message)}<br><br>
         <a href="/login.html" class="btn blue">Login</a>
       </div>
     `;
@@ -279,7 +301,13 @@ async function checkAdmin() {
 
 document.querySelectorAll('input[name="testType"]').forEach(radio => {
   radio.addEventListener("change", function () {
-    
+    const priceField = document.getElementById("priceField");
+    if (this.value === "paid") {
+      priceField.style.display = "block";
+    } else {
+      priceField.style.display = "none";
+    }
+  });
 });
 
 
@@ -289,7 +317,7 @@ document.querySelectorAll('input[name="testType"]').forEach(radio => {
 
 async function loadTests() {
   const list = document.getElementById("testList");
-  list.innerHTML = `<div class="empty">ðŸ”„ Tests loading...</div>`;
+  list.innerHTML = `<div class="empty">🔄 Tests loading...</div>`;
 
   try {
     const data = await apiRequest("/api/admin/tests");
@@ -298,8 +326,8 @@ async function loadTests() {
   } catch (error) {
     list.innerHTML = `
       <div class="empty" style="color:#dc2626;">
-        âŒ ${escapeHtml(error.message)}<br><br>
-        <button class="btn blue" onclick="loadTests()">ðŸ”„ Retry</button>
+        ❌ ${escapeHtml(error.message)}<br><br>
+        <button class="btn blue" onclick="loadTests()">🔄 Retry</button>
       </div>
     `;
     showError(error.message);
@@ -317,11 +345,29 @@ document.getElementById("testForm").addEventListener("submit", async function (e
   const saveButton = document.getElementById("saveButton");
 
   const testType = document.querySelector('input[name="testType"]:checked').value;
-  ;
+  const isPaid = testType === "paid";
+  const price = isPaid ? Number(document.getElementById("price").value) : 0;
+
+  if (isPaid && (!price || price < 1)) {
+    showError("Paid test के लिए price डालना ज़रूरी है");
+    return;
+  }
+
+  const payload = {
+    name: document.getElementById("name").value.trim(),
+    exam: document.getElementById("exam").value,
+    batch: document.getElementById("batch").value.trim(),
+    language: document.getElementById("language").value,
+    duration: Number(document.getElementById("duration").value),
+    description: document.getElementById("description").value.trim(),
+    visible: document.getElementById("visible").checked,
+    isPaid: isPaid,
+    price: price
+  };
 
   try {
     saveButton.disabled = true;
-    saveButton.textContent = editingTestId ? "â³ Updating..." : "â³ Creating...";
+    saveButton.textContent = editingTestId ? "⏳ Updating..." : "⏳ Creating...";
 
     let url = "/api/admin/tests";
     let method = "POST";
@@ -339,8 +385,8 @@ document.getElementById("testForm").addEventListener("submit", async function (e
 
     showSuccess(
       editingTestId
-        ? "âœ… Test successfully updated!"
-        : "âœ… Test successfully created!"
+        ? "✅ Test successfully updated!"
+        : "✅ Test successfully created!"
     );
 
     resetForm();
@@ -352,7 +398,7 @@ document.getElementById("testForm").addEventListener("submit", async function (e
 
   } finally {
     saveButton.disabled = false;
-    saveButton.textContent = editingTestId ? "Update Test" : "âž• Create Test";
+    saveButton.textContent = editingTestId ? "Update Test" : "➕ Create Test";
   }
 });
 
@@ -365,40 +411,42 @@ function renderTests() {
   const list = document.getElementById("testList");
 
   if (!tests.length) {
-    list.innerHTML = `<div class="empty">à¤…à¤­à¥€ à¤•à¥‹à¤ˆ Test à¤¨à¤¹à¥€à¤‚ à¤¬à¤¨à¤¾à¤¯à¤¾ à¤—à¤¯à¤¾à¥¤</div>`;
+    list.innerHTML = `<div class="empty">अभी कोई Test नहीं बनाया गया।</div>`;
     return;
   }
 
   list.innerHTML = tests.map(test => `
     <div class="test-item">
-      <h3>ðŸ“ ${escapeHtml(test.name || "Untitled")}</h3>
+      <h3>📝 ${escapeHtml(test.name || "Untitled")}</h3>
 
       <div class="test-info">
 
         <span class="tag">
-          ðŸŽ¯ ${escapeHtml(test.exam || "-")}
+          🎯 ${escapeHtml(test.exam || "-")}
         </span>
 
         <span class="tag">
-          ðŸ“¦ ${escapeHtml(test.batch || "-")}
+          📦 ${escapeHtml(test.batch || "-")}
         </span>
 
         <span class="tag">
-          ðŸŒ ${escapeHtml(test.language || "Bilingual")}
+          🌐 ${escapeHtml(test.language || "Bilingual")}
         </span>
 
         <span class="tag">
-          â±ï¸ ${test.duration || 0} Minutes
+          ⏱️ ${test.duration || 0} Minutes
         </span>
 
         <span class="tag">
-          â“ ${test.totalQuestions || 0} Questions
+          ❓ ${test.totalQuestions || 0} Questions
         </span>
 
-        
+        <span class="tag ${test.isPaid ? "paid" : "free"}">
+          ${test.isPaid ? `💰 Paid ₹${test.price || 0}` : "🆓 Free"}
+        </span>
 
         <span class="tag ${test.visible ? "visible" : "hidden"}">
-          ${test.visible ? "ðŸ‘ï¸ Visible" : "ðŸš« Non-visible"}
+          ${test.visible ? "👁️ Visible" : "🚫 Non-visible"}
         </span>
 
       </div>
@@ -406,9 +454,9 @@ function renderTests() {
       ${test.description ? `<div class="description">${escapeHtml(test.description)}</div>` : ""}
 
       <div class="test-actions">
-        <button class="btn orange" onclick="editTest('${test._id}')">âœï¸ Edit</button>
-        <button class="btn green" onclick="manageQuestions('${test._id}')">â“ Questions</button>
-        <button class="btn red" onclick="deleteTest('${test._id}')">ðŸ—‘ï¸ Delete</button>
+        <button class="btn orange" onclick="editTest('${test._id}')">✏️ Edit</button>
+        <button class="btn green" onclick="manageQuestions('${test._id}')">❓ Questions</button>
+        <button class="btn red" onclick="deleteTest('${test._id}')">🗑️ Delete</button>
       </div>
     </div>
   `).join("");
@@ -423,7 +471,7 @@ function editTest(id) {
   const test = tests.find(item => item._id === id);
 
   if (!test) {
-    showError("Test à¤¨à¤¹à¥€à¤‚ à¤®à¤¿à¤²à¤¾à¥¤");
+    showError("Test नहीं मिला।");
     return;
   }
 
@@ -443,7 +491,7 @@ function editTest(id) {
   document.getElementById("price").value = test.price || 10;
   document.getElementById("priceField").style.display = isPaid ? "block" : "none";
 
-  document.getElementById("formTitle").textContent = "âœï¸ Edit Test";
+  document.getElementById("formTitle").textContent = "✏️ Edit Test";
   document.getElementById("saveButton").textContent = "Update Test";
   document.getElementById("cancelButton").style.display = "inline-block";
 
@@ -456,11 +504,11 @@ function editTest(id) {
 // =====================================================
 
 async function deleteTest(id) {
-  if (!confirm("âš ï¸ à¤•à¥à¤¯à¤¾ à¤†à¤ª à¤‡à¤¸ Test à¤•à¥‹ Delete à¤•à¤°à¤¨à¤¾ à¤šà¤¾à¤¹à¤¤à¥‡ à¤¹à¥ˆà¤‚?")) return;
+  if (!confirm("⚠️ क्या आप इस Test को Delete करना चाहते हैं?")) return;
 
   try {
     await apiRequest(`/api/admin/tests/${id}`, { method: "DELETE" });
-    showSuccess("âœ… Test successfully deleted!");
+    showSuccess("✅ Test successfully deleted!");
     await loadTests();
   } catch (error) {
     console.error("Delete Error:", error);
@@ -495,8 +543,8 @@ function resetForm() {
   document.getElementById("price").value = 10;
   document.getElementById("priceField").style.display = "none";
 
-  document.getElementById("formTitle").textContent = "âž• Create New Test";
-  document.getElementById("saveButton").textContent = "âž• Create Test";
+  document.getElementById("formTitle").textContent = "➕ Create New Test";
+  document.getElementById("saveButton").textContent = "➕ Create Test";
   document.getElementById("cancelButton").style.display = "none";
 }
 
@@ -516,7 +564,7 @@ function showSuccess(message) {
 
 function showError(message) {
   const box = document.getElementById("errorMessage");
-  box.textContent = "âŒ " + message;
+  box.textContent = "❌ " + message;
   box.style.display = "block";
   document.getElementById("successMessage").style.display = "none";
 }
@@ -552,4 +600,3 @@ startPage();
 
 </body>
 </html>
-

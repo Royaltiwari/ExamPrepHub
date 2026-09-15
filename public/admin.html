@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="hi">
 <head>
   <title>Admin Panel - ExamPrepHub</title>
@@ -37,17 +37,17 @@
 <body>
 
 <div class="header">
-  <h1>ðŸ‘‘ ExamPrepHub Admin Panel</h1>
+  <h1>👑 ExamPrepHub Admin Panel</h1>
   <nav>
-    <a href="/">ðŸ  Home</a>
-    <a href="#" onclick="logout()">ðŸšª Logout</a>
+    <a href="/">🏠 Home</a>
+    <a href="#" onclick="logout()">🚪 Logout</a>
   </nav>
 </div>
 
 <div class="container">
   <div class="welcome">
-    <h2 id="welcomeMsg">â³ Loading...</h2>
-    <p>à¤¯à¤¹à¤¾à¤ à¤¸à¥‡ à¤…à¤ªà¤¨à¥‡ ExamPrepHub à¤•à¥‹ manage à¤•à¤°à¥‡à¤‚</p>
+    <h2 id="welcomeMsg">⏳ Loading...</h2>
+    <p>यहाँ से अपने ExamPrepHub को manage करें</p>
   </div>
   
   <div class="stats-grid" id="statsGrid">
@@ -57,43 +57,43 @@
     <div class="stat-card"><div class="num">-</div><div class="label">Questions</div></div>
   </div>
   
-  <h2 style="color:#1e3a8a; margin-bottom:16px;">ðŸŽ¯ Quick Actions</h2>
+  <h2 style="color:#1e3a8a; margin-bottom:16px;">🎯 Quick Actions</h2>
   
   <div class="actions-grid">
     <a href="/admin/upload-questions.html" class="action-card">
-      <div class="icon">ðŸ“„</div>
+      <div class="icon">📄</div>
       <h3>Upload Questions</h3>
-      <p>PDF/Word à¤¸à¥‡ questions bulk upload à¤•à¤°à¥‡à¤‚</p>
+      <p>PDF/Word से questions bulk upload करें</p>
     </a>
     
     <a href="/test.html" class="action-card">
-      <div class="icon">ðŸ“</div>
+      <div class="icon">📝</div>
       <h3>Manage Tests</h3>
-      <p>Tests à¤¬à¤¨à¤¾à¤à¤ à¤”à¤° manage à¤•à¤°à¥‡à¤‚</p>
+      <p>Tests बनाएँ और manage करें</p>
     </a>
     
     <a href="/api/exams" target="_blank" class="action-card">
-      <div class="icon">ðŸ“š</div>
+      <div class="icon">📚</div>
       <h3>View Exams</h3>
-      <p>à¤¸à¤­à¥€ exams à¤•à¥€ list à¤¦à¥‡à¤–à¥‡à¤‚ (API)</p>
+      <p>सभी exams की list देखें (API)</p>
     </a>
     
     <a href="/api/subjects" target="_blank" class="action-card">
-      <div class="icon">ðŸ“–</div>
+      <div class="icon">📖</div>
       <h3>View Subjects</h3>
-      <p>à¤¸à¤­à¥€ subjects à¤•à¥€ list à¤¦à¥‡à¤–à¥‡à¤‚ (API)</p>
+      <p>सभी subjects की list देखें (API)</p>
     </a>
     
     <a href="/api/chapters" target="_blank" class="action-card">
-      <div class="icon">ðŸ“‘</div>
+      <div class="icon">📑</div>
       <h3>View Chapters</h3>
-      <p>à¤¸à¤­à¥€ chapters à¤•à¥€ list à¤¦à¥‡à¤–à¥‡à¤‚ (API)</p>
+      <p>सभी chapters की list देखें (API)</p>
     </a>
     
     <a href="/api/questions" target="_blank" class="action-card">
-      <div class="icon">â“</div>
+      <div class="icon">❓</div>
       <h3>View Questions</h3>
-      <p>à¤¸à¤­à¥€ questions à¤•à¥€ list à¤¦à¥‡à¤–à¥‡à¤‚ (API)</p>
+      <p>सभी questions की list देखें (API)</p>
     </a>
   </div>
 </div>
@@ -106,15 +106,15 @@ async function checkAuth() {
     const user = data.user || data;
     
     if (!user || user.role !== "admin") {
-      alert("âŒ à¤†à¤ª admin à¤¨à¤¹à¥€à¤‚ à¤¹à¥ˆà¤‚à¥¤ à¤ªà¤¹à¤²à¥‡ login à¤•à¤°à¥‡à¤‚à¥¤");
+      alert("❌ आप admin नहीं हैं। पहले login करें।");
       window.location.href = "/login.html";
       return;
     }
     
-    document.getElementById("welcomeMsg").textContent = "ðŸ‘‹ Welcome, " + (user.name || "Admin");
+    document.getElementById("welcomeMsg").textContent = "👋 Welcome, " + (user.name || "Admin");
     loadStats();
   } catch (e) {
-    alert("âŒ Authentication failed");
+    alert("❌ Authentication failed");
     window.location.href = "/login.html";
   }
 }
@@ -155,5 +155,3 @@ checkAuth();
 </script>
 </body>
 </html>
-
-

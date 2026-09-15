@@ -383,4 +383,135 @@ router.get("/admin/test/:testId", requireLogin, requireAdmin, async (req, res) =
   }
 });
 
+
+// =====================================================
+// BULK IMPORT - JSON (Frontend se ready questions)
+// =====================================================
+router.post(
+  "/bulk/import-json",
+  requireLogin,
+  requireAdmin,
+  async (req, res) => {
+    try {
+      const { testId, language, subject, chapter, questions } = req.body;
+      
+      if (!questions || !Array.isArray(questions) || questions.length === 0) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "No questions provided" 
+        });
+      }
+      
+      // Questions ko normalize karein
+      const questionsToInsert = questions.map((q, i) => ({
+        question_hi: q.question_hi || q.questionHindi || q.questionText || "",
+        question_en: q.question_en || q.questionEnglish || "",
+        options: q.options || q.optionsHindi || [],
+        options_en: q.options_en || q.optionsEnglish || [],
+        answer: q.answer || q.correctAnswer || "A",
+        correctAnswer: q.correctAnswer || 0,
+        explanation_hi: q.explanation_hi || q.explanationHindi || "",
+        explanation_en: q.explanation_en || q.explanationEnglish || "",
+        subject: q.subject || subject || "General",
+        chapter: q.chapter || chapter || "General",
+        questionNumber: q.questionNumber || (i + 1),
+        language: language || "bilingual",
+        testId: testId || null,
+        tests: testId ? [testId] : [],
+        visible: true
+      }));
+      
+      const inserted = await Question.insertMany(questionsToInsert);
+      
+      // Agar testId diya hai, toh Test model mein question_ids update karein
+      if (testId) {
+        const Test = require("../models/Test");
+        const test = await Test.findById(testId);
+        if (test) {
+          const existingIds = test.question_ids || [];
+          const newIds = inserted.map(q => q._id);
+          test.question_ids = [...new Set([...existingIds, ...newIds])];
+          test.total_questions = test.question_ids.length;
+          await test.save();
+        }
+      }
+      
+      res.json({
+        success: true,
+        message: inserted.length + " questions imported successfully",
+        imported: inserted.length,
+        count: inserted.length,
+        data: inserted
+      });
+    } catch (e) {
+      console.error("Bulk import error:", e);
+      res.status(500).json({ success: false, message: e.message });
+    }
+  }
+);
+
+
+// =====================================================
+// BULK IMPORT - JSON
+// =====================================================
+router.post(
+  "/bulk/import-json",
+  requireLogin,
+  requireAdmin,
+  async (req, res) => {
+    try {
+      const { testId, language, subject, chapter, questions } = req.body;
+      
+      if (!questions || !Array.isArray(questions) || questions.length === 0) {
+        return res.status(400).json({ success: false, message: "No questions provided" });
+      }
+      
+      const questionsToInsert = questions.map((q, i) => ({
+        question_hi: q.question_hi || q.questionHindi || q.questionText || "",
+        question_en: q.question_en || q.questionEnglish || "",
+        options: q.options || q.optionsHindi || [],
+        options_en: q.options_en || q.optionsEnglish || [],
+        answer: q.answer || q.correctAnswer || "A",
+        correctAnswer: q.correctAnswer || 0,
+        explanation_hi: q.explanation_hi || q.explanationHindi || "",
+        explanation_en: q.explanation_en || q.explanationEnglish || "",
+        subject: q.subject || subject || "General",
+        chapter: q.chapter || chapter || "General",
+        questionNumber: q.questionNumber || (i + 1),
+        language: language || "bilingual",
+        testId: testId || null,
+        tests: testId ? [testId] : [],
+        visible: true
+      }));
+      
+      const inserted = await Question.insertMany(questionsToInsert);
+      
+      if (testId) {
+        const Test = require("../models/Test");
+        const test = await Test.findById(testId);
+        if (test) {
+          const existingIds = test.question_ids || [];
+          const newIds = inserted.map(q => q._id);
+          test.question_ids = [...new Set([...existingIds, ...newIds])];
+          test.total_questions = test.question_ids.length;
+          await test.save();
+        }
+      }
+      
+      res.json({
+        success: true,
+        message: inserted.length + " questions imported successfully",
+        imported: inserted.length,
+        count: inserted.length,
+        data: inserted
+      });
+    } catch (e) {
+      console.error("Bulk import error:", e);
+      res.status(500).json({ success: false, message: e.message });
+    }
+  }
+);
+
 module.exports = router;
+
+

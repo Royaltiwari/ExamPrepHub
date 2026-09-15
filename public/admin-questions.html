@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="hi">
 <head>
   <meta charset="UTF-8">
@@ -719,7 +719,7 @@
       showBulkMsg("⏳ Parsing...", "info");
 
       try {
-        const r = await fetch("/api/questions/bulk/preview", {
+        const r = await fetch("/api/questions/preview", {
           method: "POST", credentials: "include", body: fd
         });
         const data = await r.json();
@@ -849,7 +849,7 @@
       console.log("📤 SENDING TO BACKEND:", JSON.stringify(normalized, null, 2));
 
       try {
-        const r = await fetch("/api/questions/bulk/import", {
+        const r = await fetch("/api/questions/bulk/import-json", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           credentials: "include",
@@ -945,8 +945,8 @@
         } catch (e) {
           console.error("Tests load error:", e);
         }
+        return;
       }
-
 if (!testId) {
         document.getElementById("qList").innerHTML = '<div class="empty-box">❌ Test ID nahi mila.</div>';
         return;
@@ -958,4 +958,3 @@ if (!testId) {
 
 </body>
 </html>
-
