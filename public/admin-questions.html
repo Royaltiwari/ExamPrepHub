@@ -246,6 +246,13 @@
         Total: <strong id="qCount" style="color: var(--primary);">0</strong> questions
       </div>
     </div>
+    <!-- TEST SELECTOR DROPDOWN -->
+    <div id="testSelectorBox" style="display: none; background: #1e293b; padding: 16px; border-radius: 10px; margin-bottom: 20px; border: 1px solid #334155;">
+      <label style="display: block; color: #94a3b8; font-size: 13px; margin-bottom: 8px;">📋 Test चुनें:</label>
+      <select id="testSelector" style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #334155; background: #0f172a; color: #e2e8f0; font-size: 14px; outline: none;">
+        <option value="">-- Loading tests... --</option>
+      </select>
+    </div>
 
     <div class="action-bar">
       <button class="btn btn-green" id="addBtn">➕ Add Question</button>
@@ -913,7 +920,34 @@
       const user = await requireLogin();
       if (!user) return;
       if (user.role !== "admin") { location.href = "/dashboard.html"; return; }
+      
+      // ==========================================
+      // TEST SELECTOR (agar testId nahi hai)
+      // ==========================================
       if (!testId) {
+        document.getElementById("testSelectorBox").style.display = "block";
+        document.getElementById("qList").innerHTML = '<div class="empty-box">👆 ऊपर से Test चुनें</div>';
+        
+        try {
+          const r = await fetch("/api/admin/tests", { credentials: "include" });
+          const data = await r.json();
+          const sel = document.getElementById("testSelector");
+          sel.innerHTML = '<option value="">-- Test चुनें --</option>' +
+            (data.tests || []).map(t => 
+              '<option value="' + t._id + '">' + escapeHtml(t.name || t.test_name || "Untitled") + '</option>'
+            ).join("");
+          
+          sel.addEventListener("change", function() {
+            if (this.value) {
+              window.location.href = "/admin-questions.html?test=" + this.value;
+            }
+          });
+        } catch (e) {
+          console.error("Tests load error:", e);
+        }
+      }
+
+if (!testId) {
         document.getElementById("qList").innerHTML = '<div class="empty-box">❌ Test ID nahi mila.</div>';
         return;
       }
@@ -924,3 +958,4 @@
 
 </body>
 </html>
+
