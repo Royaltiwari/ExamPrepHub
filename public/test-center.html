@@ -160,7 +160,7 @@
             ? '<a href="/result.html?test=' + t._id + '" class="btn-start" style="background: var(--gradient-green);">📊 View Result</a>'
             : (t.isPaid
                 ? '<a href="/payment.html?type=test&id=' + t._id + '&title=' + encodeURIComponent(t.name || "") + '&price=' + (t.price || 0) + '" class="btn-unlock">🔒 Unlock ₹' + (t.price || 0) + '</a>'
-                : '<a href="/test-instructions.html?id=' + t._id + '" class="btn-start">▶ Start Test</a>'
+                : '<a href="/test-attempt.html?id=' + t._id + '" class="btn-start">▶ Start Test</a>'
               )
           ) +
         '</div>' +
@@ -185,3 +185,5 @@
 </script>
 </body>
 </html>
+
+
