@@ -720,7 +720,6 @@ footer{
       <div class="header-actions">
         <a href="/index.html" class="btn-header">🏠 Home</a>
         <a href="/test.html" class="btn-header">📝 Tests</a>
-<a href="/guruai.html" class="btn-header">🤖 GuruAI</a>
         <a href="/login.html" class="btn-header">Login</a>
         <a href="/register.html" class="btn-header">Register</a>
         <a href="/admin.html" id="adminBtn" class="btn-header" style="display:none;">👑 Admin Panel</a>
@@ -980,5 +979,4 @@ footer{
   </script>
 </body>
 </html>
-
 

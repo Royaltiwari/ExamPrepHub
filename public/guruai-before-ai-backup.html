@@ -1,0 +1,214 @@
+﻿<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ExamPrepHub Assistant - GuruAI</title>
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+
+body{
+    font-family:Arial,sans-serif;
+    background:#050505;
+    color:#fff;
+    min-height:100vh;
+}
+
+.header{
+    height:64px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:0 24px;
+    background:#0b0b0b;
+    border-bottom:1px solid #252525;
+}
+
+.logo{
+    font-size:20px;
+    font-weight:bold;
+}
+
+.logo span{
+    color:#00d4ff;
+}
+
+.home-btn{
+    color:white;
+    text-decoration:none;
+    border:1px solid #333;
+    padding:9px 16px;
+    border-radius:8px;
+}
+
+.container{
+    max-width:1000px;
+    margin:auto;
+    padding:25px 15px;
+}
+
+.welcome{
+    text-align:center;
+    padding:35px 10px 25px;
+}
+
+.robot{
+    font-size:55px;
+}
+
+.welcome h1{
+    margin-top:10px;
+    font-size:32px;
+}
+
+.welcome p{
+    margin-top:10px;
+    color:#aaa;
+}
+
+.chat{
+    min-height:400px;
+    background:#0d0d0d;
+    border:1px solid #242424;
+    border-radius:18px;
+    padding:22px;
+}
+
+.message{
+    display:flex;
+    gap:12px;
+    line-height:1.7;
+}
+
+.avatar{
+    width:40px;
+    height:40px;
+    border-radius:50%;
+    background:#181818;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    flex-shrink:0;
+}
+
+.input-box{
+    margin-top:15px;
+    display:flex;
+    gap:10px;
+    background:#0d0d0d;
+    border:1px solid #292929;
+    border-radius:15px;
+    padding:10px;
+}
+
+textarea{
+    flex:1;
+    min-height:50px;
+    resize:none;
+    border:0;
+    outline:none;
+    background:transparent;
+    color:white;
+    padding:10px;
+    font-size:16px;
+}
+
+.send{
+    border:0;
+    background:#00a8cc;
+    color:white;
+    padding:0 22px;
+    border-radius:10px;
+    cursor:pointer;
+    font-size:20px;
+}
+
+.features{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:12px;
+    margin-top:20px;
+}
+
+.feature{
+    background:#0d0d0d;
+    border:1px solid #242424;
+    padding:17px;
+    text-align:center;
+    border-radius:12px;
+    color:#ccc;
+}
+
+@media(max-width:700px){
+    .header{padding:0 12px}
+    .welcome h1{font-size:25px}
+    .features{grid-template-columns:repeat(2,1fr)}
+}
+</style>
+</head>
+
+<body>
+
+<header class="header">
+    <div class="logo">🏆 ExamPrepHub <span>Assistant</span></div>
+    <a href="/index.html" class="home-btn">🏠 Home</a>
+</header>
+
+<div class="container">
+
+    <section class="welcome">
+        <div class="robot">🤖</div>
+        <h1>ExamPrepHub Assistant — GuruAI</h1>
+        <p>Ask anything. Learn anything. Prepare smarter.</p>
+    </section>
+
+    <section class="chat">
+
+        <div class="message">
+            <div class="avatar">🤖</div>
+
+            <div>
+                <strong>GuruAI</strong>
+                <br>
+                नमस्ते! 👋 मैं <b>ExamPrepHub Assistant — GuruAI</b> हूँ।
+                <br>
+                आप अपने exam, questions, notes और study से संबंधित सवाल पूछ सकते हैं।
+            </div>
+        </div>
+
+    </section>
+
+    <div class="input-box">
+        <textarea
+            id="userInput"
+            placeholder="GuruAI से कुछ पूछें..."></textarea>
+
+        <button class="send" onclick="sendMessage()">➤</button>
+    </div>
+
+    <div class="features">
+        <div class="feature">💬 AI Chat</div>
+        <div class="feature">📄 PDF / DOCX</div>
+        <div class="feature">🖼️ Image</div>
+        <div class="feature">🎬 Cartoon Video</div>
+    </div>
+
+</div>
+
+<script>
+function sendMessage(){
+
+    const input=document.getElementById("userInput");
+    const text=input.value.trim();
+
+    if(!text) return;
+
+    alert("GuruAI का AI backend अगले चरण में connect किया जाएगा।");
+
+    input.value="";
+}
+</script>
+
+</body>
+</html>

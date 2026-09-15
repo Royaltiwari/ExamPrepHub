@@ -11,129 +11,293 @@
       box-sizing: border-box;
       margin: 0;
       padding: 0;
-      font-family: Arial, sans-serif;
+      font-family: 'Segoe UI', Arial, sans-serif;
     }
 
+    html, body {
+      height: 100%;
+      overflow-x: hidden;
+    }
+
+    /* =====================================================
+       DARK BACKGROUND
+       ===================================================== */
     body {
       min-height: 100vh;
       display: flex;
       justify-content: center;
       align-items: center;
-      background: linear-gradient(135deg, #eef2ff, #dbeafe);
+      background: #050505;
       padding: 20px;
+      color: #ffffff;
+      position: relative;
     }
 
+    body::before {
+      content: "";
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw; height: 100vh;
+      background:
+        radial-gradient(circle at 20% 20%, rgba(37, 99, 235, 0.15), transparent 50%),
+        radial-gradient(circle at 80% 80%, rgba(124, 58, 237, 0.15), transparent 50%),
+        radial-gradient(circle at 50% 50%, rgba(251, 191, 36, 0.08), transparent 60%);
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    /* =====================================================
+       REGISTER CARD
+       ===================================================== */
     .register-container {
+      position: relative;
+      z-index: 10;
       width: 100%;
-      max-width: 440px;
-      background: #fff;
-      padding: 35px 30px;
-      border-radius: 18px;
-      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.12);
+      max-width: 460px;
+      background: rgba(15, 23, 42, 0.95);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      padding: 34px 32px;
+      border-radius: 20px;
+      border: 2px solid #fbbf24;
+      box-shadow:
+        0 20px 60px rgba(0, 0, 0, 0.9),
+        0 0 60px rgba(251, 191, 36, 0.2),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
     }
 
     .logo {
       text-align: center;
-      font-size: 30px;
-      font-weight: 800;
-      color: #2563eb;
-      margin-bottom: 8px;
+      font-size: 28px;
+      font-weight: 900;
+      background: linear-gradient(135deg, #60a5fa, #a78bfa, #fbbf24);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 6px;
+      letter-spacing: 0.5px;
     }
 
     .subtitle {
       text-align: center;
-      color: #64748b;
-      margin-bottom: 25px;
-      font-size: 14px;
+      color: #cbd5e1;
+      margin-bottom: 24px;
+      font-size: 13.5px;
+      font-weight: 500;
     }
 
+    /* =====================================================
+       FORM
+       ===================================================== */
     .form-group {
-      margin-bottom: 16px;
+      margin-bottom: 15px;
     }
 
     label {
       display: block;
-      margin-bottom: 7px;
-      font-size: 14px;
-      font-weight: 600;
-      color: #334155;
+      margin-bottom: 6px;
+      font-size: 13px;
+      font-weight: 700;
+      color: #f1f5f9;
+      text-shadow: 0 1px 4px rgba(0, 0, 0, 0.8);
+    }
+
+    .input-wrap {
+      position: relative;
+    }
+
+    .input-wrap .icon {
+      position: absolute;
+      left: 13px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 15px;
+      opacity: 0.85;
+      pointer-events: none;
     }
 
     input {
       width: 100%;
-      padding: 13px 14px;
-      border: 1px solid #cbd5e1;
+      padding: 13px 14px 13px 42px;
+      border: 2px solid rgba(255, 255, 255, 0.15);
       border-radius: 10px;
       outline: none;
-      font-size: 15px;
+      font-size: 14px;
+      background: rgba(2, 6, 23, 0.8);
+      color: #ffffff;
+      font-weight: 500;
+      transition: all 0.25s ease;
+    }
+
+    /* Extra right padding for password fields with SHOW button */
+    input.has-toggle {
+      padding-right: 74px;
+    }
+
+    input::placeholder {
+      color: #94a3b8;
+      font-weight: 400;
     }
 
     input:focus {
-      border-color: #2563eb;
-      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+      border-color: #fbbf24;
+      box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.2);
+      background: rgba(2, 6, 23, 0.95);
     }
 
+    /* Password match border colors */
+    input.mismatch {
+      border-color: #dc2626;
+      box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.2);
+    }
+
+    input.match {
+      border-color: #10b981;
+      box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2);
+    }
+
+    /* SHOW / HIDE button */
+    .show-btn {
+      position: absolute;
+      right: 8px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: #2563eb;
+      color: #ffffff;
+      border: none;
+      padding: 7px 12px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 800;
+      cursor: pointer;
+      letter-spacing: 0.5px;
+      transition: all 0.2s ease;
+    }
+
+    .show-btn:hover {
+      background: #1d4ed8;
+      transform: translateY(-50%) scale(1.05);
+    }
+
+    /* Password hint */
+    .pwd-hint {
+      display: none;
+      font-size: 11.5px;
+      margin-top: 5px;
+      font-weight: 600;
+    }
+
+    .pwd-hint.error {
+      color: #fca5a5;
+      display: block;
+    }
+
+    .pwd-hint.success {
+      color: #6ee7b7;
+      display: block;
+    }
+
+    /* =====================================================
+       REGISTER BUTTON
+       ===================================================== */
     .register-btn {
       width: 100%;
       padding: 14px;
       border: none;
       border-radius: 10px;
-      background: #2563eb;
-      color: white;
-      font-size: 16px;
-      font-weight: 700;
+      background: linear-gradient(135deg, #10b981, #059669);
+      color: #ffffff;
+      font-size: 15px;
+      font-weight: 800;
       cursor: pointer;
-      margin-top: 5px;
+      margin-top: 6px;
+      letter-spacing: 0.5px;
+      box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+      transition: all 0.3s ease;
     }
 
     .register-btn:hover {
-      background: #1d4ed8;
+      transform: translateY(-2px);
+      box-shadow: 0 10px 30px rgba(16, 185, 129, 0.55);
+    }
+
+    .register-btn:active {
+      transform: translateY(0);
     }
 
     .register-btn:disabled {
       opacity: 0.7;
       cursor: not-allowed;
+      transform: none;
     }
 
+    /* =====================================================
+       MESSAGE
+       ===================================================== */
     #message {
       display: none;
-      padding: 11px;
+      padding: 11px 14px;
       margin-bottom: 16px;
-      border-radius: 8px;
+      border-radius: 10px;
       text-align: center;
-      font-size: 14px;
+      font-size: 13px;
+      font-weight: 700;
     }
 
+    /* =====================================================
+       LINKS
+       ===================================================== */
     .login-link {
       text-align: center;
-      margin-top: 20px;
-      color: #64748b;
-      font-size: 14px;
+      margin-top: 18px;
+      color: #cbd5e1;
+      font-size: 13.5px;
     }
 
-    .login-link a,
-    .home-link {
-      color: #2563eb;
+    .login-link a {
+      color: #60a5fa;
       text-decoration: none;
       font-weight: 700;
+      transition: color 0.2s;
+    }
+
+    .login-link a:hover {
+      color: #93c5fd;
+      text-decoration: underline;
     }
 
     .home-link {
       display: block;
       text-align: center;
-      margin-top: 15px;
-      color: #475569;
-      font-size: 14px;
+      margin-top: 12px;
+      color: #cbd5e1;
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+
+    .home-link:hover {
+      color: #fbbf24;
+    }
+
+    /* =====================================================
+       RESPONSIVE
+       ===================================================== */
+    @media (max-height: 800px) {
+      .register-container { padding: 26px 26px; }
+      .logo { font-size: 24px; }
+      .subtitle { font-size: 12.5px; margin-bottom: 18px; }
+      .form-group { margin-bottom: 12px; }
+      input { padding: 11px 14px 11px 40px; font-size: 13.5px; }
+      input.has-toggle { padding-right: 72px; }
+      .register-btn { padding: 12px; font-size: 14px; }
     }
 
     @media (max-width: 480px) {
-      .register-container {
-        padding: 28px 20px;
-      }
-
-      .logo {
-        font-size: 26px;
-      }
+      .register-container { padding: 28px 20px; max-width: 100%; }
+      .logo { font-size: 24px; }
+      .show-btn { padding: 6px 10px; font-size: 10px; }
     }
   </style>
 </head>
@@ -152,51 +316,98 @@
 
     <form id="registerForm">
 
+      <!-- Full Name -->
       <div class="form-group">
-        <label for="name">Full Name</label>
-
-        <input
-          type="text"
-          id="name"
-          placeholder="Enter your full name"
-          required
-        >
+        <label for="name">👤 Full Name</label>
+        <div class="input-wrap">
+          <span class="icon">👤</span>
+          <input
+            type="text"
+            id="name"
+            placeholder="Enter your full name"
+            required
+          >
+        </div>
       </div>
 
+      <!-- Email -->
       <div class="form-group">
-        <label for="email">Email Address</label>
-
-        <input
-          type="email"
-          id="email"
-          placeholder="Enter your email"
-          required
-        >
+        <label for="email">📧 Email Address</label>
+        <div class="input-wrap">
+          <span class="icon">✉️</span>
+          <input
+            type="email"
+            id="email"
+            placeholder="Enter your email"
+            required
+          >
+        </div>
       </div>
 
+      <!-- Mobile -->
       <div class="form-group">
-        <label for="mobile">Mobile Number</label>
-
-        <input
-          type="tel"
-          id="mobile"
-          placeholder="Enter mobile number"
-          maxlength="10"
-        >
+        <label for="mobile">📱 Mobile Number</label>
+        <div class="input-wrap">
+          <span class="icon">📱</span>
+          <input
+            type="tel"
+            id="mobile"
+            placeholder="Enter mobile number"
+            maxlength="10"
+            pattern="[0-9]{10}"
+            required
+          >
+        </div>
       </div>
 
+      <!-- Password -->
       <div class="form-group">
-        <label for="password">Password</label>
-
-        <input
-          type="password"
-          id="password"
-          placeholder="Create a password"
-          minlength="6"
-          required
-        >
+        <label for="password">🔒 Password</label>
+        <div class="input-wrap">
+          <span class="icon">🔑</span>
+          <input
+            type="password"
+            id="password"
+            class="has-toggle"
+            placeholder="Create a password"
+            minlength="6"
+            required
+            oninput="checkPasswordMatch()"
+          >
+          <button
+            type="button"
+            class="show-btn"
+            onclick="togglePassword('password', 'showBtn1')"
+            id="showBtn1"
+          >SHOW</button>
+        </div>
       </div>
 
+      <!-- Confirm Password -->
+      <div class="form-group">
+        <label for="confirmPassword">🔐 Confirm Password</label>
+        <div class="input-wrap">
+          <span class="icon">🔐</span>
+          <input
+            type="password"
+            id="confirmPassword"
+            class="has-toggle"
+            placeholder="Confirm your password"
+            minlength="6"
+            required
+            oninput="checkPasswordMatch()"
+          >
+          <button
+            type="button"
+            class="show-btn"
+            onclick="togglePassword('confirmPassword', 'showBtn2')"
+            id="showBtn2"
+          >SHOW</button>
+        </div>
+        <div id="pwdHint" class="pwd-hint"></div>
+      </div>
+
+      <!-- Register Button -->
       <button
         type="submit"
         class="register-btn"
@@ -223,19 +434,71 @@
     const registerBtn = document.getElementById("registerBtn");
     const message = document.getElementById("message");
 
+    /* =====================================================
+       SHOW MESSAGE
+       ===================================================== */
     function showMessage(text, success = false) {
       message.textContent = text;
       message.style.display = "block";
 
       if (success) {
-        message.style.background = "#dcfce7";
-        message.style.color = "#166534";
+        message.style.background = "rgba(16, 185, 129, 0.25)";
+        message.style.color = "#6ee7b7";
+        message.style.border = "1px solid rgba(16, 185, 129, 0.5)";
       } else {
-        message.style.background = "#fee2e2";
-        message.style.color = "#991b1b";
+        message.style.background = "rgba(220, 38, 38, 0.25)";
+        message.style.color = "#fca5a5";
+        message.style.border = "1px solid rgba(220, 38, 38, 0.5)";
       }
     }
 
+    /* =====================================================
+       TOGGLE PASSWORD
+       ===================================================== */
+    function togglePassword(inputId, btnId) {
+      const pwd = document.getElementById(inputId);
+      const btn = document.getElementById(btnId);
+
+      if (pwd.type === "password") {
+        pwd.type = "text";
+        btn.textContent = "HIDE";
+      } else {
+        pwd.type = "password";
+        btn.textContent = "SHOW";
+      }
+    }
+
+    /* =====================================================
+       LIVE PASSWORD MATCH CHECK
+       ===================================================== */
+    function checkPasswordMatch() {
+      const pwd = document.getElementById("password");
+      const confirm = document.getElementById("confirmPassword");
+      const hint = document.getElementById("pwdHint");
+
+      if (!confirm.value) {
+        hint.className = "pwd-hint";
+        hint.textContent = "";
+        confirm.classList.remove("mismatch", "match");
+        return;
+      }
+
+      if (pwd.value === confirm.value) {
+        hint.className = "pwd-hint success";
+        hint.textContent = "✅ Passwords match";
+        confirm.classList.remove("mismatch");
+        confirm.classList.add("match");
+      } else {
+        hint.className = "pwd-hint error";
+        hint.textContent = "❌ Passwords do not match";
+        confirm.classList.remove("match");
+        confirm.classList.add("mismatch");
+      }
+    }
+
+    /* =====================================================
+       REGISTER FORM SUBMIT
+       ===================================================== */
     registerForm.addEventListener("submit", async function (event) {
       event.preventDefault();
 
@@ -243,9 +506,26 @@
       const email = document.getElementById("email").value.trim();
       const mobile = document.getElementById("mobile").value.trim();
       const password = document.getElementById("password").value;
+      const confirmPassword = document.getElementById("confirmPassword").value;
+
+      /* Validations */
+      if (!name || !email || !mobile || !password || !confirmPassword) {
+        showMessage("Please fill all fields");
+        return;
+      }
+
+      if (mobile.length !== 10 || !/^[0-9]+$/.test(mobile)) {
+        showMessage("Please enter a valid 10-digit mobile number");
+        return;
+      }
 
       if (password.length < 6) {
         showMessage("Password कम से कम 6 characters का होना चाहिए।");
+        return;
+      }
+
+      if (password !== confirmPassword) {
+        showMessage("Passwords do not match");
         return;
       }
 
@@ -271,6 +551,8 @@
 
         if (!response.ok || !data.success) {
           showMessage(data.message || "Registration failed");
+          registerBtn.disabled = false;
+          registerBtn.textContent = "Create Account";
           return;
         }
 
@@ -281,16 +563,11 @@
 
         setTimeout(() => {
           window.location.href = "/dashboard.html";
-        }, 800);
+        }, 900);
 
       } catch (error) {
         console.error("Register Error:", error);
-
-        showMessage(
-          "Server से connection नहीं हो पाया।"
-        );
-
-      } finally {
+        showMessage("Server से connection नहीं हो पाया।");
         registerBtn.disabled = false;
         registerBtn.textContent = "Create Account";
       }

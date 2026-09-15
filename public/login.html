@@ -14,274 +14,29 @@
       font-family: 'Segoe UI', Arial, sans-serif;
     }
 
+    /* =====================================================
+       CLEAN DARK BACKGROUND
+       ===================================================== */
     body {
-      background: linear-gradient(180deg, #87ceeb 0%, #b0e0e6 30%, #90ee90 60%, #228b22 100%);
-      position: relative;
+      background: #050505;
       min-height: 100vh;
       display: flex;
       flex-direction: column;
+      color: #ffffff;
     }
 
-    /* =====================================================
-       SCENE CONTAINER
-       ===================================================== */
-    .scene {
+    /* Subtle gradient overlay */
+    body::before {
+      content: "";
       position: fixed;
       top: 0; left: 0;
-      width: 100vw;
-      height: 100vh;
+      width: 100vw; height: 100vh;
+      background:
+        radial-gradient(circle at 20% 20%, rgba(37, 99, 235, 0.15), transparent 50%),
+        radial-gradient(circle at 80% 80%, rgba(124, 58, 237, 0.15), transparent 50%),
+        radial-gradient(circle at 50% 50%, rgba(251, 191, 36, 0.08), transparent 60%);
       z-index: 0;
-      overflow: hidden;
       pointer-events: none;
-    }
-
-    /* =====================================================
-       SKY — DAY/NIGHT CYCLE (40s)
-       ===================================================== */
-    .sky-layer {
-      position: absolute;
-      top: 0; left: 0;
-      width: 100%;
-      height: 70%;
-      background: linear-gradient(180deg, #87ceeb 0%, #b0e0e6 100%);
-      animation: skyCycle 40s infinite linear;
-      transition: background 2s ease;
-    }
-
-    @keyframes skyCycle {
-      0%   { background: linear-gradient(180deg, #1a1a3e 0%, #2d2d5a 100%); }
-      20%  { background: linear-gradient(180deg, #ff6b6b 0%, #ffa07a 100%); }
-      40%  { background: linear-gradient(180deg, #87ceeb 0%, #b0e0e6 100%); }
-      60%  { background: linear-gradient(180deg, #4a90e2 0%, #87ceeb 100%); }
-      80%  { background: linear-gradient(180deg, #ff7043 0%, #ff8a65 100%); }
-      100% { background: linear-gradient(180deg, #1a1a3e 0%, #2d2d5a 100%); }
-    }
-
-    /* SUN */
-    .sun {
-      position: absolute;
-      top: 12%;
-      right: 12%;
-      width: 70px;
-      height: 70px;
-      background: radial-gradient(circle, #fffbe6 0%, #ffd700 40%, #ff8c00 80%, #ff4500 100%);
-      border-radius: 50%;
-      box-shadow: 0 0 60px #ffd700, 0 0 120px #ff8c00;
-      animation: sunGlow 4s ease-in-out infinite;
-    }
-
-    @keyframes sunGlow {
-      0%, 100% { transform: scale(1); }
-      50% { transform: scale(1.08); }
-    }
-
-    /* CLOUDS */
-    .cloud {
-      position: absolute;
-      background: white;
-      border-radius: 50px;
-      opacity: 0.85;
-      filter: blur(1px);
-    }
-    .cloud::before, .cloud::after {
-      content: "";
-      position: absolute;
-      background: white;
-      border-radius: 50%;
-    }
-
-    .cloud-1 { width: 100px; height: 30px; top: 10%; left: -150px; animation: cloudMove 40s linear infinite; }
-    .cloud-1::before { width: 50px; height: 50px; top: -20px; left: 15px; }
-    .cloud-1::after { width: 60px; height: 60px; top: -25px; left: 45px; }
-
-    .cloud-2 { width: 120px; height: 35px; top: 20%; left: -200px; animation: cloudMove 55s linear infinite; animation-delay: -15s; }
-    .cloud-2::before { width: 60px; height: 60px; top: -25px; left: 20px; }
-    .cloud-2::after { width: 70px; height: 70px; top: -30px; left: 55px; }
-
-    .cloud-3 { width: 90px; height: 25px; top: 5%; left: -180px; animation: cloudMove 48s linear infinite; animation-delay: -30s; }
-    .cloud-3::before { width: 45px; height: 45px; top: -18px; left: 12px; }
-    .cloud-3::after { width: 55px; height: 55px; top: -22px; left: 40px; }
-
-    @keyframes cloudMove {
-      0% { transform: translateX(0); }
-      100% { transform: translateX(calc(100vw + 200px)); }
-    }
-
-    /* MOUNTAINS */
-    .mountain-back {
-      position: absolute;
-      bottom: 40%; left: 0;
-      width: 100%; height: 40%;
-      background: linear-gradient(180deg, #4a5568 0%, #2d3748 100%);
-      clip-path: polygon(0% 100%, 0% 60%, 10% 40%, 20% 55%, 30% 30%, 40% 50%, 50% 25%, 60% 45%, 70% 35%, 80% 55%, 90% 40%, 100% 60%, 100% 100%);
-      opacity: 0.6;
-      z-index: 1;
-    }
-    .mountain-mid {
-      position: absolute;
-      bottom: 35%; left: 0;
-      width: 100%; height: 40%;
-      background: linear-gradient(180deg, #5a6b7f 0%, #3d4d5f 100%);
-      clip-path: polygon(0% 100%, 0% 70%, 15% 50%, 25% 65%, 35% 40%, 45% 60%, 55% 35%, 65% 55%, 75% 45%, 85% 60%, 95% 50%, 100% 65%, 100% 100%);
-      z-index: 2;
-    }
-    .mountain-front {
-      position: absolute;
-      bottom: 30%; left: 0;
-      width: 100%; height: 35%;
-      background: linear-gradient(180deg, #6b7d94 0%, #4a5568 100%);
-      clip-path: polygon(0% 100%, 0% 80%, 20% 60%, 40% 75%, 60% 55%, 80% 70%, 100% 60%, 100% 100%);
-      z-index: 3;
-    }
-
-    /* FOREST */
-    .forest {
-      position: absolute;
-      bottom: 28%; left: 0;
-      width: 100%; height: 15%;
-      z-index: 4;
-      display: flex;
-      justify-content: space-around;
-      align-items: flex-end;
-    }
-    .tree {
-      position: relative;
-      width: 30px; height: 70px;
-      animation: treeSway 4s ease-in-out infinite;
-      transform-origin: bottom center;
-    }
-    .tree::before {
-      content: "";
-      position: absolute;
-      bottom: 0; left: 50%;
-      transform: translateX(-50%);
-      width: 6px; height: 20px;
-      background: #5d4037;
-    }
-    .tree::after {
-      content: "";
-      position: absolute;
-      bottom: 15px; left: 50%;
-      transform: translateX(-50%);
-      width: 0; height: 0;
-      border-left: 15px solid transparent;
-      border-right: 15px solid transparent;
-      border-bottom: 40px solid #2d5016;
-    }
-    .tree-1 { animation-delay: 0s; }
-    .tree-2 { animation-delay: 0.3s; transform: scale(1.2); }
-    .tree-3 { animation-delay: 0.6s; transform: scale(0.9); }
-    .tree-4 { animation-delay: 0.9s; transform: scale(1.1); }
-    .tree-5 { animation-delay: 1.2s; }
-    .tree-6 { animation-delay: 1.5s; transform: scale(1.3); }
-    .tree-7 { animation-delay: 1.8s; transform: scale(0.95); }
-    .tree-8 { animation-delay: 2.1s; transform: scale(1.15); }
-
-    @keyframes treeSway {
-      0%, 100% { transform: rotate(-2deg); }
-      50% { transform: rotate(2deg); }
-    }
-
-    /* RIVER */
-    .river {
-      position: absolute;
-      bottom: 0; left: 0;
-      width: 100%; height: 30%;
-      background: linear-gradient(180deg, #4fc3f7 0%, #29b6f6 30%, #0288d1 70%, #01579b 100%);
-      z-index: 5;
-      overflow: hidden;
-    }
-    .river::before {
-      content: "";
-      position: absolute;
-      top: 0; left: 0;
-      width: 200%; height: 100%;
-      background: repeating-linear-gradient(
-        90deg,
-        transparent 0%,
-        rgba(255,255,255,0.3) 2%,
-        transparent 4%,
-        transparent 10%,
-        rgba(255,255,255,0.2) 12%,
-        transparent 14%
-      );
-      animation: riverFlow 8s linear infinite;
-    }
-    @keyframes riverFlow {
-      0% { transform: translateX(0); }
-      100% { transform: translateX(-50%); }
-    }
-
-    .ripple {
-      position: absolute;
-      top: 20%;
-      width: 30px; height: 6px;
-      background: rgba(255,255,255,0.5);
-      border-radius: 50%;
-      animation: rippleMove 4s linear infinite;
-    }
-    .ripple-1 { left: 5%; animation-delay: 0s; }
-    .ripple-2 { left: 25%; animation-delay: 1s; }
-    .ripple-3 { left: 45%; animation-delay: 2s; }
-    .ripple-4 { left: 65%; animation-delay: 3s; }
-    .ripple-5 { left: 85%; animation-delay: 4s; }
-    @keyframes rippleMove {
-      0% { transform: translateX(0) scale(0.5); opacity: 0; }
-      50% { opacity: 1; }
-      100% { transform: translateX(100px) scale(1.2); opacity: 0; }
-    }
-
-    /* FISH */
-    .fish {
-      position: absolute;
-      bottom: 15%;
-      font-size: 20px;
-      animation: fishSwim 15s linear infinite;
-      opacity: 0.9;
-    }
-    .fish-1 { animation-delay: 0s; }
-    .fish-2 { animation-delay: 5s; bottom: 8%; font-size: 16px; }
-    .fish-3 { animation-delay: 10s; bottom: 20%; font-size: 14px; }
-    @keyframes fishSwim {
-      0% { left: -50px; }
-      100% { left: 105%; }
-    }
-
-    /* BIRDS */
-    .bird {
-      position: absolute;
-      font-size: 18px;
-      color: #333;
-      animation: birdFly 20s linear infinite;
-      top: 30%;
-    }
-    .bird-1 { animation-delay: 0s; top: 25%; }
-    .bird-2 { animation-delay: 3s; top: 30%; font-size: 14px; }
-    .bird-3 { animation-delay: 6s; top: 22%; font-size: 16px; }
-    @keyframes birdFly {
-      0% { left: -50px; transform: translateY(0); }
-      50% { transform: translateY(-20px); }
-      100% { left: 105%; transform: translateY(0); }
-    }
-
-    /* LEAVES */
-    .leaf {
-      position: absolute;
-      font-size: 18px;
-      animation: leafFall 10s linear infinite;
-      top: -50px;
-      opacity: 0.8;
-    }
-    .leaf-1 { left: 10%; animation-delay: 0s; }
-    .leaf-2 { left: 30%; animation-delay: 2s; font-size: 14px; }
-    .leaf-3 { left: 50%; animation-delay: 4s; }
-    .leaf-4 { left: 70%; animation-delay: 6s; font-size: 16px; }
-    .leaf-5 { left: 90%; animation-delay: 8s; }
-    @keyframes leafFall {
-      0% { transform: translateY(0) rotate(0deg); opacity: 0; }
-      10% { opacity: 0.8; }
-      90% { opacity: 0.8; }
-      100% { transform: translateY(100vh) rotate(360deg); opacity: 0; }
     }
 
     /* =====================================================
@@ -291,37 +46,48 @@
       position: relative;
       z-index: 10;
       background: linear-gradient(135deg, #1e1b4b, #312e81);
-      padding: 12px 22px;
+      padding: 14px 22px;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
+      border-bottom: 2px solid rgba(251, 191, 36, 0.3);
     }
+
     .login-header .logo {
-      color: white;
-      font-size: 17px;
+      color: #fbbf24;
+      font-size: 18px;
       font-weight: 900;
       text-decoration: none;
-      text-shadow: 0 2px 8px rgba(0,0,0,0.5);
+      text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
+      display: flex;
+      align-items: center;
+      gap: 6px;
     }
+
     .login-header .header-actions {
       display: flex;
       gap: 10px;
     }
+
     .login-header .btn-header {
-      color: white;
-      background: rgba(255,255,255,0.15);
-      padding: 7px 14px;
+      color: #0f172a;
+      background: #ffffff;
+      padding: 8px 16px;
       border-radius: 8px;
       text-decoration: none;
-      font-weight: 600;
-      font-size: 12.5px;
-      transition: all 0.2s;
-      border: 1px solid rgba(255,255,255,0.2);
+      font-weight: 700;
+      font-size: 13px;
+      transition: all 0.25s ease;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
     }
+
     .login-header .btn-header:hover {
-      background: rgba(255,255,255,0.25);
-      transform: translateY(-1px);
+      background: #fbbf24;
+      color: #000000;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 14px rgba(0, 0, 0, 0.5);
     }
 
     /* =====================================================
@@ -334,92 +100,75 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 24px 20px;
+      padding: 30px 20px;
     }
 
     /* =====================================================
-       LOGIN CARD — COMPACT FOR LANDSCAPE
+       LOGIN CARD
        ===================================================== */
     .login-card {
-      background: rgba(15, 23, 42, 0.85);
+      background: rgba(15, 23, 42, 0.95);
       backdrop-filter: blur(20px);
       -webkit-backdrop-filter: blur(20px);
-      border: 2px solid rgba(251, 191, 36, 0.3);
+      border: 2px solid #fbbf24;
       border-radius: 20px;
-      padding: 32px 30px;
+      padding: 34px 32px;
       width: 100%;
-      max-width: 420px;
+      max-width: 430px;
       box-shadow:
-        0 20px 60px rgba(0, 0, 0, 0.5),
-        0 0 100px rgba(251, 191, 36, 0.1),
-        inset 0 1px 0 rgba(255,255,255,0.1);
+        0 20px 60px rgba(0, 0, 0, 0.9),
+        0 0 60px rgba(251, 191, 36, 0.2),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
       position: relative;
-      animation: cardFloat 6s ease-in-out infinite;
-    }
-
-    @keyframes cardFloat {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-6px); }
-    }
-
-    .login-card::before {
-      content: "";
-      position: absolute;
-      top: -2px; left: -2px; right: -2px; bottom: -2px;
-      background: linear-gradient(45deg, #fbbf24, #f59e0b, #dc2626, #7c3aed, #2563eb, #fbbf24);
-      border-radius: 20px;
-      z-index: -1;
-      filter: blur(12px);
-      opacity: 0.5;
-      animation: borderGlow 5s linear infinite;
-    }
-
-    @keyframes borderGlow {
-      0% { filter: blur(12px) hue-rotate(0deg); }
-      100% { filter: blur(12px) hue-rotate(360deg); }
     }
 
     .trophy-icon {
       text-align: center;
-      font-size: 52px;
-      margin-bottom: 6px;
+      font-size: 54px;
+      margin-bottom: 8px;
+      filter: drop-shadow(0 0 20px rgba(251, 191, 36, 0.7));
       animation: trophyBounce 3s ease-in-out infinite;
-      filter: drop-shadow(0 0 16px rgba(251, 191, 36, 0.6));
     }
 
     @keyframes trophyBounce {
       0%, 100% { transform: translateY(0) rotate(-3deg); }
-      50% { transform: translateY(-8px) rotate(3deg); }
+      50% { transform: translateY(-6px) rotate(3deg); }
     }
 
     .login-title {
       text-align: center;
-      font-size: 26px;
+      font-size: 28px;
       font-weight: 900;
       background: linear-gradient(135deg, #60a5fa, #a78bfa, #fbbf24);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
-      margin-bottom: 4px;
+      margin-bottom: 6px;
+      letter-spacing: 0.5px;
     }
 
     .login-subtitle {
       text-align: center;
-      color: #94a3b8;
-      font-size: 13px;
-      margin-bottom: 22px;
+      color: #cbd5e1;
+      font-size: 13.5px;
+      margin-bottom: 24px;
+      font-weight: 500;
     }
 
+    /* =====================================================
+       FORM
+       ===================================================== */
     .form-group {
-      margin-bottom: 14px;
+      margin-bottom: 16px;
     }
 
     .form-group label {
       display: block;
-      color: #cbd5e1;
-      font-size: 12.5px;
-      font-weight: 600;
-      margin-bottom: 5px;
+      color: #f1f5f9;
+      font-size: 13px;
+      font-weight: 700;
+      margin-bottom: 6px;
+      text-shadow: 0 1px 4px rgba(0, 0, 0, 0.8);
     }
 
     .input-wrap {
@@ -432,61 +181,67 @@
       top: 50%;
       transform: translateY(-50%);
       font-size: 15px;
-      opacity: 0.7;
+      opacity: 0.85;
+      pointer-events: none;
     }
 
     .form-group input {
       width: 100%;
-      padding: 12px 14px 12px 40px;
+      padding: 13px 14px 13px 42px;
       border-radius: 10px;
-      border: 2px solid rgba(255,255,255,0.1);
-      background: rgba(15, 23, 42, 0.8);
-      color: #e2e8f0;
+      border: 2px solid rgba(255, 255, 255, 0.15);
+      background: rgba(2, 6, 23, 0.8);
+      color: #ffffff;
       font-size: 14px;
       outline: none;
-      transition: all 0.3s;
+      transition: all 0.25s ease;
+      font-weight: 500;
     }
 
     .form-group input::placeholder {
-      color: #64748b;
+      color: #94a3b8;
+      font-weight: 400;
     }
 
     .form-group input:focus {
       border-color: #fbbf24;
-      box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.15);
-      background: rgba(15, 23, 42, 0.95);
+      box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.2);
+      background: rgba(2, 6, 23, 0.95);
     }
 
     .show-btn {
       position: absolute;
-      right: 7px;
+      right: 8px;
       top: 50%;
       transform: translateY(-50%);
       background: #2563eb;
       color: white;
       border: none;
-      padding: 6px 11px;
+      padding: 7px 12px;
       border-radius: 6px;
       font-size: 11px;
       font-weight: 800;
       cursor: pointer;
       letter-spacing: 0.5px;
+      transition: all 0.2s ease;
     }
 
     .show-btn:hover {
       background: #1d4ed8;
+      transform: translateY(-50%) scale(1.05);
     }
 
     .forgot-link {
       text-align: right;
-      margin-bottom: 16px;
+      margin-bottom: 18px;
     }
 
     .forgot-link a {
       color: #60a5fa;
       text-decoration: none;
-      font-size: 12.5px;
+      font-size: 13px;
       font-weight: 600;
+      transition: color 0.2s;
     }
 
     .forgot-link a:hover {
@@ -496,33 +251,41 @@
 
     .login-btn {
       width: 100%;
-      padding: 13px;
+      padding: 14px;
       background: linear-gradient(135deg, #2563eb, #7c3aed);
-      color: white;
+      color: #ffffff;
       border: none;
       border-radius: 10px;
       font-size: 15px;
       font-weight: 800;
       cursor: pointer;
-      transition: all 0.3s;
+      transition: all 0.3s ease;
       letter-spacing: 0.5px;
+      box-shadow: 0 6px 20px rgba(37, 99, 235, 0.4);
     }
 
     .login-btn:hover {
       transform: translateY(-2px);
-      box-shadow: 0 10px 30px rgba(124, 58, 237, 0.5);
+      box-shadow: 0 10px 30px rgba(124, 58, 237, 0.55);
     }
 
     .login-btn:active {
       transform: translateY(0);
     }
 
+    .login-btn:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+      transform: none;
+    }
+
     .divider {
       text-align: center;
-      color: #64748b;
+      color: #94a3b8;
       font-size: 12.5px;
-      margin: 18px 0;
+      margin: 20px 0;
       position: relative;
+      font-weight: 500;
     }
 
     .divider::before,
@@ -532,7 +295,7 @@
       top: 50%;
       width: 35%;
       height: 1px;
-      background: rgba(255,255,255,0.1);
+      background: rgba(255, 255, 255, 0.15);
     }
 
     .divider::before { left: 0; }
@@ -541,33 +304,35 @@
     .create-btn {
       display: block;
       width: 100%;
-      padding: 13px;
+      padding: 14px;
       background: transparent;
-      color: #e2e8f0;
-      border: 2px solid rgba(255,255,255,0.15);
+      color: #f1f5f9;
+      border: 2px solid rgba(255, 255, 255, 0.2);
       border-radius: 10px;
       font-size: 14px;
       font-weight: 700;
       text-decoration: none;
       text-align: center;
-      transition: all 0.3s;
+      transition: all 0.25s ease;
     }
 
     .create-btn:hover {
-      background: rgba(255,255,255,0.1);
+      background: rgba(251, 191, 36, 0.1);
       border-color: #fbbf24;
       color: #fbbf24;
     }
 
     .back-home {
       text-align: center;
-      margin-top: 16px;
+      margin-top: 18px;
     }
 
     .back-home a {
-      color: #94a3b8;
+      color: #cbd5e1;
       text-decoration: none;
-      font-size: 12.5px;
+      font-size: 13px;
+      font-weight: 500;
+      transition: color 0.2s;
     }
 
     .back-home a:hover {
@@ -575,150 +340,55 @@
     }
 
     .status-msg {
-      padding: 10px 14px;
+      padding: 11px 14px;
       border-radius: 10px;
-      margin-bottom: 14px;
+      margin-bottom: 16px;
       display: none;
       font-size: 13px;
-      font-weight: 600;
+      font-weight: 700;
       text-align: center;
     }
 
     .status-msg.error {
-      background: rgba(220, 38, 38, 0.2);
+      background: rgba(220, 38, 38, 0.25);
       color: #fca5a5;
-      border: 1px solid rgba(220, 38, 38, 0.4);
+      border: 1px solid rgba(220, 38, 38, 0.5);
       display: block;
     }
 
     .status-msg.success {
-      background: rgba(16, 185, 129, 0.2);
+      background: rgba(16, 185, 129, 0.25);
       color: #6ee7b7;
-      border: 1px solid rgba(16, 185, 129, 0.4);
+      border: 1px solid rgba(16, 185, 129, 0.5);
       display: block;
     }
 
     /* =====================================================
        RESPONSIVE
        ===================================================== */
-
-    /* Landscape Mode — Small Height */
-    @media (max-height: 700px) and (orientation: landscape) {
-      .login-card {
-        padding: 22px 26px;
-        max-width: 380px;
-      }
-      .trophy-icon { font-size: 40px; margin-bottom: 4px; }
-      .login-title { font-size: 22px; }
-      .login-subtitle { font-size: 12px; margin-bottom: 14px; }
-      .form-group { margin-bottom: 10px; }
-      .form-group label { font-size: 11.5px; margin-bottom: 4px; }
-      .form-group input { padding: 10px 12px 10px 38px; font-size: 13px; }
-      .input-wrap .icon { font-size: 14px; left: 12px; }
-      .show-btn { padding: 5px 10px; font-size: 10px; }
-      .forgot-link { margin-bottom: 12px; }
-      .forgot-link a { font-size: 11.5px; }
-      .login-btn { padding: 11px; font-size: 14px; }
-      .divider { margin: 12px 0; font-size: 11.5px; }
-      .create-btn { padding: 11px; font-size: 13px; }
-      .back-home { margin-top: 12px; }
-      .back-home a { font-size: 11.5px; }
-      .sun { width: 50px; height: 50px; top: 10%; right: 8%; }
-      .tree { transform: scale(0.65); }
+    @media (max-height: 700px) {
+      .login-card { padding: 24px 26px; }
+      .trophy-icon { font-size: 42px; margin-bottom: 4px; }
+      .login-title { font-size: 23px; }
+      .login-subtitle { font-size: 12.5px; margin-bottom: 16px; }
+      .form-group { margin-bottom: 12px; }
+      .form-group input { padding: 11px 14px 11px 40px; font-size: 13.5px; }
+      .login-btn { padding: 12px; font-size: 14px; }
+      .create-btn { padding: 12px; font-size: 13.5px; }
+      .divider { margin: 14px 0; }
     }
 
-    /* Mobile Portrait */
     @media (max-width: 600px) {
-      .login-card {
-        padding: 28px 22px;
-        max-width: 100%;
-      }
+      .login-card { padding: 28px 22px; max-width: 100%; }
       .trophy-icon { font-size: 46px; }
-      .login-title { font-size: 24px; }
-      .login-subtitle { font-size: 13px; }
-      .form-group input { padding: 12px 14px 12px 40px; }
-      .login-btn { padding: 13px; font-size: 15px; }
-      .create-btn { padding: 13px; font-size: 14px; }
-      .login-header { padding: 11px 16px; }
+      .login-title { font-size: 25px; }
+      .login-header { padding: 12px 16px; }
       .login-header .logo { font-size: 15px; }
-      .login-header .btn-header { padding: 6px 11px; font-size: 11px; }
-      .sun { width: 50px; height: 50px; top: 10%; right: 10%; }
-      .tree { transform: scale(0.7); }
-    }
-
-    /* Very Small Height */
-    @media (max-height: 550px) {
-      .login-card {
-        padding: 18px 22px;
-        max-width: 360px;
-      }
-      .trophy-icon { font-size: 34px; margin-bottom: 2px; }
-      .login-title { font-size: 20px; }
-      .login-subtitle { font-size: 11px; margin-bottom: 10px; }
-      .form-group { margin-bottom: 8px; }
-      .form-group input { padding: 9px 12px 9px 36px; font-size: 12.5px; }
-      .login-btn { padding: 10px; font-size: 13px; }
-      .divider { margin: 10px 0; }
-      .create-btn { padding: 10px; font-size: 12.5px; }
+      .login-header .btn-header { padding: 7px 12px; font-size: 12px; }
     }
   </style>
 </head>
 <body>
-
-  <!-- =====================================================
-       NATURE SCENE
-       ===================================================== -->
-  <div class="scene">
-    <div class="sky-layer"></div>
-    <div class="sun"></div>
-
-    <!-- CLOUDS -->
-    <div class="cloud cloud-1"></div>
-    <div class="cloud cloud-2"></div>
-    <div class="cloud cloud-3"></div>
-
-    <!-- BIRDS -->
-    <div class="bird bird-1">🐦</div>
-    <div class="bird bird-2">🕊️</div>
-    <div class="bird bird-3">🐦</div>
-
-    <!-- MOUNTAINS -->
-    <div class="mountain-back"></div>
-    <div class="mountain-mid"></div>
-    <div class="mountain-front"></div>
-
-    <!-- FOREST -->
-    <div class="forest">
-      <div class="tree tree-1"></div>
-      <div class="tree tree-2"></div>
-      <div class="tree tree-3"></div>
-      <div class="tree tree-4"></div>
-      <div class="tree tree-5"></div>
-      <div class="tree tree-6"></div>
-      <div class="tree tree-7"></div>
-      <div class="tree tree-8"></div>
-    </div>
-
-    <!-- RIVER -->
-    <div class="river">
-      <div class="ripple ripple-1"></div>
-      <div class="ripple ripple-2"></div>
-      <div class="ripple ripple-3"></div>
-      <div class="ripple ripple-4"></div>
-      <div class="ripple ripple-5"></div>
-
-      <div class="fish fish-1">🐟</div>
-      <div class="fish fish-2">🐠</div>
-      <div class="fish fish-3">🐟</div>
-    </div>
-
-    <!-- LEAVES -->
-    <div class="leaf leaf-1">🍃</div>
-    <div class="leaf leaf-2">🍂</div>
-    <div class="leaf leaf-3">🍃</div>
-    <div class="leaf leaf-4">🍂</div>
-    <div class="leaf leaf-5">🍃</div>
-  </div>
 
   <!-- =====================================================
        HEADER

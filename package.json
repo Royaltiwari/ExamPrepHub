@@ -10,21 +10,28 @@
     "node": ">=18.0.0",
     "npm": ">=9.0.0"
   },
-  "keywords": ["exam", "education", "mock-test"],
+  "keywords": [
+    "exam",
+    "education",
+    "mock-test"
+  ],
   "author": "ExamPrepHub",
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
+    "@google/genai": "^2.22.0",
     "bcryptjs": "^3.0.3",
     "connect-mongo": "^6.0.0",
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",
+    "exceljs": "^4.4.0",
     "express": "^5.2.1",
     "express-session": "^1.19.0",
     "mammoth": "^1.12.3",
     "mongoose": "^9.9.5",
-    "multer": "^2.3.0",
+    "multer": "^2.4.0",
     "nodemailer": "^10.0.9",
+    "openai": "^7.15.0",
     "pdf-parse": "^2.4.5"
   }
 }
